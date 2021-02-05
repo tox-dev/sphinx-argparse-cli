@@ -27,14 +27,14 @@ def test_prog_as_text(app: SphinxTestApp) -> None:
     assert outcome == "magic - CLI interface\n*********************\n\n   magic\n"
 
 
-@pytest.mark.sphinx("text", testroot="title")
+@pytest.mark.sphinx("text", testroot="title-set")
 def test_title_as_text(app: SphinxTestApp) -> None:
     app.build()
     outcome = (Path(app.outdir) / "index.txt").read_text()
     assert outcome == "My own title\n************\n\n   foo\n"
 
 
-@pytest.mark.sphinx("text", testroot="title--empty")
+@pytest.mark.sphinx("text", testroot="title-empty")
 def test_empty_title_as_text(app: SphinxTestApp) -> None:
     app.build()
     outcome = (Path(app.outdir) / "index.txt").read_text()
