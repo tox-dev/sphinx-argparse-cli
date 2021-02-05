@@ -1,0 +1,11 @@
+.idea
+*.egg-info/
+.tox/
+.coverage*
+coverage.xml
+.*_cache
+__pycache__
+**.pyc
+build
+dist
+src/sphinx_argparse_cli/version.py

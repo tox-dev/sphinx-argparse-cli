@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools >= 44", "wheel >= 0.30", "setuptools_scm[toml]>=3.4"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+known_first_party = ["sphinx_argparse_cli"]
+
+[tool.setuptools_scm]
+write_to = "src/sphinx_argparse_cli/version.py"
+write_to_template = """
+\"\"\" Version information \"\"\"
+
+__version__ = "{version}"
+"""
