@@ -99,14 +99,14 @@ class SphinxArgparseCli(SphinxDirective):
     def run(self) -> list[Node]:
         # construct headers
         title_text = f"{self.parser.prog} - CLI interface"
-        section_args = [""]
+        section_args = []
         if "title" in self.options:
             if self.options["title"]:
                 title_text = self.options["title"]
                 section_args.append(title("", Text(title_text)))
         else:
             section_args.append(title("", Text(title_text)))
-        home_section = section(*section_args, ids=[make_id(title_text)], names=[title_text])
+        home_section = section("", *section_args, ids=[make_id(title_text)], names=[title_text])
 
         if self.parser.description:
             desc_paragraph = paragraph("", Text(self.parser.description))
