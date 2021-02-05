@@ -37,8 +37,8 @@ Within the reStructuredText files use the `sphinx_argparse_cli` directive that t
 - a no argument function within that module that once called returns the constructed
   [argparse](https://docs.python.org/3/library/argparse.html) parser
 - (optional) a program name that overwrites the autodiscovered running argument parser
-- (optional) a `:noincludetitle:` argument which, when provided, the
-  `prog - CLI interface` title added by default is not included
+- (optional) a `:title:` argument which, when provided, overwrites the
+  `prog - CLI interface` title added by default and when empty, will not be included
 
 ```rst
 .. sphinx_argparse_cli::
@@ -51,5 +51,5 @@ Within the reStructuredText files use the `sphinx_argparse_cli` directive that t
 .. sphinx_argparse_cli::
   :module: a_project.cli
   :func: build_parser
-  :noincludetitle:
+  :title:
 ```
