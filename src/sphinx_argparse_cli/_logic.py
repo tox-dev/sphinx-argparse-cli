@@ -26,7 +26,7 @@ from docutils.nodes import (
     section,
     title,
 )
-from docutils.parsers.rst.directives import unchanged_required
+from docutils.parsers.rst.directives import unchanged, unchanged_required
 from docutils.parsers.rst.states import RSTState, RSTStateMachine
 from docutils.statemachine import StringList
 from sphinx.util.docutils import SphinxDirective
@@ -41,7 +41,11 @@ def make_id(key: str) -> str:
 class SphinxArgparseCli(SphinxDirective):
     name = "sphinx_argparse_cli"
     has_content = False
-    option_spec = {"module": unchanged_required, "func": unchanged_required}
+    option_spec = {
+        "module": unchanged_required,
+        "func": unchanged_required,
+        "prog": unchanged,
+    }
 
     def __init__(
         self,
@@ -64,6 +68,8 @@ class SphinxArgparseCli(SphinxDirective):
             module_name, attr_name = self.options["module"], self.options["func"]
             parser_creator = getattr(__import__(module_name, fromlist=[attr_name]), attr_name)
             self._parser = parser_creator()
+            if "prog" in self.options:
+                self._parser.prog = self.options["prog"]
             del sys.modules[module_name]  # no longer needed cleanup
         return self._parser
 
