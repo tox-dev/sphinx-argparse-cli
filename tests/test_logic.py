@@ -28,7 +28,7 @@ def test_prog_as_text(app: SphinxTestApp) -> None:
 
 
 @pytest.mark.sphinx("text", testroot="title-set")
-def test_title_as_text(app: SphinxTestApp) -> None:
+def test_set_title_as_text(app: SphinxTestApp) -> None:
     app.build()
     outcome = (Path(app.outdir) / "index.txt").read_text()
     assert outcome == "My own title\n************\n\n   foo\n"
