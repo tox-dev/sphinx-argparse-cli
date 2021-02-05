@@ -15,6 +15,7 @@ from collections import defaultdict, namedtuple
 from typing import Iterator, Set, cast
 
 from docutils.nodes import (
+    Element,
     Node,
     Text,
     bullet_list,
@@ -98,15 +99,11 @@ class SphinxArgparseCli(SphinxDirective):
 
     def run(self) -> list[Node]:
         # construct headers
-        title_text = f"{self.parser.prog} - CLI interface"
-        section_args = []
-        if "title" in self.options:
-            if self.options["title"]:
-                title_text = self.options["title"]
-                section_args.append(title("", Text(title_text)))
+        title_text = self.options.get("title", f"{self.parser.prog} - CLI interface").strip()
+        if title_text.strip() == "":
+            home_section: Element = paragraph()
         else:
-            section_args.append(title("", Text(title_text)))
-        home_section = section("", *section_args, ids=[make_id(title_text)], names=[title_text])
+            home_section = section("", title("", Text(title_text)), ids=[make_id(title_text)], names=[title_text])
 
         if self.parser.description:
             desc_paragraph = paragraph("", Text(self.parser.description))
