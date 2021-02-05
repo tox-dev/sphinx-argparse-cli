@@ -45,6 +45,7 @@ class SphinxArgparseCli(SphinxDirective):
         "module": unchanged_required,
         "func": unchanged_required,
         "prog": unchanged,
+        "noincludetitle": unchanged,
     }
 
     def __init__(
@@ -98,7 +99,11 @@ class SphinxArgparseCli(SphinxDirective):
     def run(self) -> list[Node]:
         # construct headers
         title_text = f"{self.parser.prog} - CLI interface"
-        home_section = section("", title("", Text(title_text)), ids=[make_id(title_text)], names=[title_text])
+        section_args = [""]
+        if "noincludetitle" not in self.options:
+            section_args.append(title("", Text(title_text)))
+        home_section = section(*section_args, ids=[make_id(title_text)], names=[title_text])
+
         if self.parser.description:
             desc_paragraph = paragraph("", Text(self.parser.description))
             home_section += desc_paragraph
