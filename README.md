@@ -31,12 +31,14 @@ extensions = ["sphinx_argparse_cli"]
 
 ## use
 
-Within the reStructuredText files use the `sphinx_argparse_cli` directive that takes two arguments:
+Within the reStructuredText files use the `sphinx_argparse_cli` directive that takes, at least, two arguments:
 
 - the module path to where the parser is defined,
 - a no argument function within that module that once called returns the constructed
   [argparse](https://docs.python.org/3/library/argparse.html) parser
 - (optional) a program name that overwrites the autodiscovered running argument parser
+- (optional) a `:title:` argument which, when provided, overwrites the
+  `<prog> - CLI interface` title added by default and when empty, will not be included
 
 ```rst
 .. sphinx_argparse_cli::
