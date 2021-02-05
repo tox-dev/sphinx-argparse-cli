@@ -13,6 +13,12 @@ known_first_party = ["sphinx_argparse_cli"]
 write_to = "src/sphinx_argparse_cli/version.py"
 write_to_template = """
 \"\"\" Version information \"\"\"
+from __future__ import annotations
 
-__version__ = "{version}"
+__version__: str = "{version}"
 """
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning:docutils",
+]

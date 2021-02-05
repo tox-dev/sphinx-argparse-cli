@@ -10,8 +10,35 @@
 [![Code style:
 black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 
-Render CLI arguments (sub-commands friendly) defined by argparse module.
+Render CLI arguments (sub-commands friendly) defined by the argparse module.
+
+Demo projects:
+
+- [tox](https://tox.readthedocs.io/en/rewrite/cli_interface.html)
 
 ## installation
 
-`pip install sphinx-argparse-cli`
+```bash
+python -m pip install sphinx-argparse-cli
+```
+
+## enable in your `conf.py`
+
+```python
+# just add it to your list of extensions to load within conf.py
+extensions = ["sphinx_argparse_cli"]
+```
+
+## use
+
+Within the reStructuredText files use the `sphinx_argparse_cli` directive that takes two arguments:
+
+- the module path to where the parser is defined,
+- a no argument function within that module that once called returns the constructed
+  [argparse](https://docs.python.org/3/library/argparse.html) parser
+
+```rst
+.. sphinx_argparse_cli::
+  :module: a_project.cli
+  :func: build_parser
+```
