@@ -10,12 +10,8 @@
 [![Code style:
 black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 
-Render CLI arguments (sub-commands friendly) defined by the argparse module.
-
-Demo projects:
-
-- [tox](https://tox.readthedocs.io/en/rewrite/cli_interface.html)
-- [mdpo](https://mdpo.readthedocs.io/en/latest/cli.html#command-line-interfaces)
+Render CLI arguments (sub-commands friendly) defined by the argparse module. For live demo checkout the documentation of
+[tox](https://tox.readthedocs.io/en/rewrite/cli_interface.html) and [mdpo](https://mdpo.readthedocs.io/en/latest/cli.html#command-line-interfaces).
 
 ## installation
 
