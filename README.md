@@ -15,6 +15,7 @@ Render CLI arguments (sub-commands friendly) defined by the argparse module.
 Demo projects:
 
 - [tox](https://tox.readthedocs.io/en/rewrite/cli_interface.html)
+- [mdpo](https://mdpo.readthedocs.io/en/latest/cli.html#command-line-interfaces)
 
 ## installation
 
