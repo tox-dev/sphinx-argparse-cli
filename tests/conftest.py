@@ -17,3 +17,7 @@ def pytest_report_header(config: Config) -> str:  # noqa: U100
 @pytest.fixture(scope="session", name="rootdir")
 def root_dir() -> path:
     return path(__file__).parent.parent.abspath() / "roots"
+
+
+def pytest_configure(config: Config) -> None:
+    config.addinivalue_line("markers", "prepare")

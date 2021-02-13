@@ -12,7 +12,7 @@ from argparse import (
     _SubParsersAction,
 )
 from collections import defaultdict, namedtuple
-from typing import Iterator, Set, cast
+from typing import Iterator, cast
 
 from docutils.nodes import (
     Element,
@@ -27,7 +27,7 @@ from docutils.nodes import (
     section,
     title,
 )
-from docutils.parsers.rst.directives import unchanged, unchanged_required
+from docutils.parsers.rst.directives import positive_int, unchanged, unchanged_required
 from docutils.parsers.rst.states import RSTState, RSTStateMachine
 from docutils.statemachine import StringList
 from sphinx.util.docutils import SphinxDirective
@@ -47,7 +47,7 @@ class SphinxArgparseCli(SphinxDirective):
         "func": unchanged_required,
         "prog": unchanged,
         "title": unchanged,
-        "usage_width": unchanged,
+        "usage_width": positive_int,
     }
 
     def __init__(
@@ -100,6 +100,7 @@ class SphinxArgparseCli(SphinxDirective):
 
     def run(self) -> list[Node]:
         # construct headers
+        self.env.note_reread()  # this document needs to be always updated
         title_text = self.options.get("title", f"{self.parser.prog} - CLI interface").strip()
         if title_text.strip() == "":
             home_section: Element = paragraph()
@@ -162,9 +163,13 @@ class SphinxArgparseCli(SphinxDirective):
             line += ref
         point = list_item("", line, ids=[])
         if action.help:
+            help_text = load_help_text(action.help)
+            temp = paragraph()
+            self.state.nested_parse(StringList(help_text.split("\n")), 0, temp)
             line += Text(" - ")
-            line += Text(action.help)
-        if action.default != SUPPRESS:
+            for content in cast(paragraph, temp.children[0]).children:
+                line += content
+        if action.default != SUPPRESS and not re.match(r".*[ (]default[s]? .*", (action.help or "")):
             line += Text(" (default: ")
             line += literal(text=str(action.default).replace(os.getcwd(), "{cwd}"))
             line += Text(")")
@@ -186,10 +191,22 @@ class SphinxArgparseCli(SphinxDirective):
         return group_section
 
     def _mk_usage(self, parser: ArgumentParser) -> literal_block:
-        parser.formatter_class = lambda prog: HelpFormatter(prog, width=int(self.options.get("usage_width", 100)))
+        parser.formatter_class = lambda prog: HelpFormatter(prog, width=self.options.get("usage_width", 100))
         texts = parser.format_usage()[len("usage: ") :].splitlines()
         texts = [line if at == 0 else f"{' ' * (len(parser.prog) + 1)}{line.lstrip()}" for at, line in enumerate(texts)]
         return literal_block("", Text("\n".join(texts)))
+
+
+SINGLE_QUOTE = re.compile(r"[']+(.+?)[']+")
+DOUBLE_QUOTE = re.compile(r'["]+(.+?)["]+')
+CURLY_BRACES = re.compile(r"[{](.+?)[}]")
+
+
+def load_help_text(help_text: str) -> str:
+    single_quote = SINGLE_QUOTE.sub("``'\\1'``", help_text)
+    double_quote = DOUBLE_QUOTE.sub('``"\\1"``', single_quote)
+    literal_curly_braces = CURLY_BRACES.sub("``{\\1}``", double_quote)
+    return literal_curly_braces
 
 
 __all__ = ("SphinxArgparseCli",)
