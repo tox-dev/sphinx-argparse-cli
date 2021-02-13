@@ -47,6 +47,7 @@ class SphinxArgparseCli(SphinxDirective):
         "func": unchanged_required,
         "prog": unchanged,
         "title": unchanged,
+        "usage_width": unchanged,
     }
 
     def __init__(
@@ -185,7 +186,7 @@ class SphinxArgparseCli(SphinxDirective):
         return group_section
 
     def _mk_usage(self, parser: ArgumentParser) -> literal_block:
-        parser.formatter_class = lambda prog: HelpFormatter(prog, width=100)
+        parser.formatter_class = lambda prog: HelpFormatter(prog, width=int(self.options.get("usage_width", 100)))
         texts = parser.format_usage()[len("usage: ") :].splitlines()
         texts = [line if at == 0 else f"{' ' * (len(parser.prog) + 1)}{line.lstrip()}" for at, line in enumerate(texts)]
         return literal_block("", Text("\n".join(texts)))

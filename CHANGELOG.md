@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.3.0 (2021-02-13)
+
+- Add support for changing the usage width
+
 ## 1.2.0 (2021-02-05)
 
 - Add support for changing (removing) the title via the `title` attribute of the directive.

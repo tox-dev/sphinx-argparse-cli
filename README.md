@@ -11,7 +11,8 @@
 black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 
 Render CLI arguments (sub-commands friendly) defined by the argparse module. For live demo checkout the documentation of
-[tox](https://tox.readthedocs.io/en/rewrite/cli_interface.html) and [mdpo](https://mdpo.readthedocs.io/en/latest/cli.html#command-line-interfaces).
+[tox](https://tox.readthedocs.io/en/rewrite/cli_interface.html) and
+[mdpo](https://mdpo.readthedocs.io/en/latest/cli.html#command-line-interfaces).
 
 ## installation
 
@@ -30,12 +31,15 @@ extensions = ["sphinx_argparse_cli"]
 
 Within the reStructuredText files use the `sphinx_argparse_cli` directive that takes, at least, two arguments:
 
-- the module path to where the parser is defined,
-- a no argument function within that module that once called returns the constructed
-  [argparse](https://docs.python.org/3/library/argparse.html) parser
-- (optional) a program name that overwrites the autodiscovered running argument parser
-- (optional) a `:title:` argument which, when provided, overwrites the `<prog> - CLI interface` title added by default
-  and when empty, will not be included
+| Name        | Description                                                                                                                   |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| module      | the module path to where the parser is defined                                                                                |
+| func        | the module path to where the parser is defined                                                                                |
+| prog        | (optional) the module path to where the parser is defined                                                                     |
+| title       | (optional) when provided, overwrites the `<prog> - CLI interface` title added by default and when empty, will not be included |
+| usage_width | (optional) how large should usage examples be - defaults to 100 character                                                     |
+
+For example:
 
 ```rst
 .. sphinx_argparse_cli::
