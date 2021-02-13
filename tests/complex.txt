@@ -9,11 +9,11 @@ argparse tester
 optional arguments
 ==================
 
-* "-h", "--help" - show this help message and exit
+* **"-h"**, **"--help"** - show this help message and exit
 
-* "--root" - root flag (default: "False")
+* **"--root"** - root flag (default: "False")
 
-* "--no-help" (default: "False")
+* **"--no-help"** (default: "False")
 
 
 Exclusive
@@ -21,9 +21,9 @@ Exclusive
 
 this is an exclusive group
 
-* "--foo" - foo (default: "False")
+* **"--foo"** - foo (default: "False")
 
-* "--bar" - bar (default: "False")
+* **"--bar"** - bar (default: "False")
 
 
 complex first (f)
@@ -37,19 +37,19 @@ a-first-help
 complex first positional arguments
 ----------------------------------
 
-* "one" - first positional argument (default: "None")
+* **"one"** - first positional argument (default: "None")
 
-* "pos_two" - second positional argument (default: "1")
+* **"pos_two"** - second positional argument (default: "1")
 
 
 complex first optional arguments
 --------------------------------
 
-* "-h", "--help" - show this help message and exit
+* **"-h"**, **"--help"** - show this help message and exit
 
-* "--flag" - a parser first flag (default: "False")
+* **"--flag"** - a parser first flag (default: "False")
 
-* "--root" - root flag (default: "False")
+* **"--root"** - root flag (default: "False")
 
 
 complex second
@@ -61,19 +61,19 @@ complex second
 complex second positional arguments
 -----------------------------------
 
-* "one" - first positional argument (default: "None")
+* **"one"** - first positional argument (default: "None")
 
-* "pos_two" - second positional argument (default: "green")
+* **"pos_two"** - second positional argument (default: "green")
 
 
 complex second optional arguments
 ---------------------------------
 
-* "-h", "--help" - show this help message and exit
+* **"-h"**, **"--help"** - show this help message and exit
 
-* "--flag" - a parser second flag (default: "False")
+* **"--flag"** - a parser second flag (default: "False")
 
-* "--root" - root flag (default: "False")
+* **"--root"** - root flag (default: "False")
 
 
 complex third
@@ -85,4 +85,4 @@ complex third
 complex third optional arguments
 --------------------------------
 
-* "-h", "--help" - show this help message and exit
+* **"-h"**, **"--help"** - show this help message and exit

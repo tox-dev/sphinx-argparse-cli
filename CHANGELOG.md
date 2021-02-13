@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.4.0 (2021-02-14)
+
+- Command line arguments are now bold to highlight them even further from the help text
+
 ## 1.3.0 (2021-02-13)
 
 - Add support for changing the usage width via the `usage_width` option on the directive

@@ -25,6 +25,7 @@ from docutils.nodes import (
     paragraph,
     reference,
     section,
+    strong,
     title,
 )
 from docutils.parsers.rst.directives import positive_int, unchanged, unchanged_required
@@ -145,22 +146,15 @@ class SphinxArgparseCli(SphinxDirective):
                     first = False
                 else:
                     line += Text(", ")
-                ref_id = make_id(f"{prefix}-{opt}")
-                ref = reference("", refid=ref_id)
-                line.attributes["ids"].append(ref_id)
-                ref += literal(text=opt)
-                line += ref
+                self._mk_option_name(line, prefix, opt)
         else:
             as_key = (
                 action.dest
                 if action.metavar is None
                 else (action.metavar if isinstance(action.metavar, str) else action.metavar[0])
             )
-            ref_id = make_id(f"{prefix}-{as_key}")
-            ref = reference("", refid=ref_id)
-            line.attributes["ids"].append(ref_id)
-            ref += literal(text=as_key)
-            line += ref
+            self._mk_option_name(line, prefix, as_key)
+
         point = list_item("", line, ids=[])
         if action.help:
             help_text = load_help_text(action.help)
@@ -174,6 +168,16 @@ class SphinxArgparseCli(SphinxDirective):
             line += literal(text=str(action.default).replace(os.getcwd(), "{cwd}"))
             line += Text(")")
         return point
+
+    @staticmethod
+    def _mk_option_name(line: paragraph, prefix: str, opt: str) -> None:
+        ref_id = make_id(f"{prefix}-{opt}")
+        ref = reference("", refid=ref_id)
+        line.attributes["ids"].append(ref_id)
+        st = strong()
+        st += literal(text=opt)
+        ref += st
+        line += ref
 
     def _mk_sub_command(self, aliases: list[str], help_msg: str, parser: ArgumentParser) -> section:
         title_text = f"{parser.prog}"
