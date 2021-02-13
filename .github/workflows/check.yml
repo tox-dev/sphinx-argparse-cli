@@ -52,15 +52,6 @@ jobs:
           PYTEST_ADDOPTS: "-vv --durations=20"
           CI_RUN: "yes"
           DIFF_AGAINST: HEAD
-      - name: rename coverage report file
-        run: |
-          import os; os.rename('.tox/coverage.{}.xml'.format(os.environ['TOXENV']), '.tox/coverage.xml')
-        shell: python
-      - uses: codecov/codecov-action@v1
-        with:
-          file: ./.tox/coverage.xml
-          flags: tests
-          name: ${{ matrix.py }} - ${{ matrix.os }}
 
   check:
     name: check ${{ matrix.tox_env }} - ${{ matrix.os }}

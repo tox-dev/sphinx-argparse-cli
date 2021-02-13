@@ -3,7 +3,8 @@ complex - CLI interface
 
 argparse tester
 
-   complex [-h] [--root] [--no-help] [--foo | --bar] {first,f,second,third} ...
+   complex [-h] [--root] [--no-help] [--outdir out_dir] [--in-dir IN_DIR] [--foo | --bar]
+           {first,f,second,third} ...
 
 
 optional arguments
@@ -14,6 +15,12 @@ optional arguments
 * **"--root"** - root flag (default: "False")
 
 * **"--no-help"** (default: "False")
+
+* **"--outdir"** "OUT_DIR", **"-o"** "OUT_DIR" - output directory
+  (default: "None")
+
+* **"--in-dir"** "IN_DIR", **"-i"** "IN_DIR" - input directory
+  (default: "None")
 
 
 Exclusive

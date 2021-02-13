@@ -7,6 +7,8 @@ def make() -> ArgumentParser:
     parser = ArgumentParser(description="argparse tester", prog="complex")
     parser.add_argument("--root", action="store_true", help="root flag")
     parser.add_argument("--no-help", action="store_true")
+    parser.add_argument("--outdir", "-o", type=str, help="output directory", metavar="out_dir")
+    parser.add_argument("--in-dir", "-i", type=str, help="input directory", dest="in_dir")
 
     group = parser.add_argument_group("Exclusive", description="this is an exclusive group")
     exclusive = group.add_mutually_exclusive_group()

@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## 1.4.0 (2021-02-14)
+## 1.5.0 (2021-02-13)
+
+- Display the metavar (fallback to dest) if the action has more than one argument (this is inline with how usage is
+  displayed).
+
+## 1.4.0 (2021-02-13)
 
 - Command line arguments are now bold to highlight them even further from the help text
 
@@ -12,7 +17,8 @@ All notable changes to this project will be documented in this file.
 - Mark document as always needs update (as the underlying content is coming from outside the sphinx documents)
 - Help messages is now interpreted as reStructuredText
 - Matching curly braces, single and double quotes in help text will be marked as string literals
-- Help messages containing the ``default(s)`` word do not show the default value (as often this indicates the default is already documented in the help text)
+- Help messages containing the `default(s)` word do not show the default value (as often this indicates the default is
+  already documented in the help text)
 
 ## 1.2.0 (2021-02-05)
 

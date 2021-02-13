@@ -139,20 +139,22 @@ class SphinxArgparseCli(SphinxDirective):
 
     def _mk_option_line(self, action: Action, prefix: str) -> list_item:  # noqa
         line = paragraph()
+        as_key = action.dest
+        if action.metavar:
+            as_key = action.metavar if isinstance(action.metavar, str) else action.metavar[0]
         if action.option_strings:
             first = True
+            is_flag = action.nargs == 0
             for opt in action.option_strings:
                 if first:
                     first = False
                 else:
                     line += Text(", ")
                 self._mk_option_name(line, prefix, opt)
+                if not is_flag:
+                    line += Text(" ")
+                    line += literal(text=as_key.upper())
         else:
-            as_key = (
-                action.dest
-                if action.metavar is None
-                else (action.metavar if isinstance(action.metavar, str) else action.metavar[0])
-            )
             self._mk_option_name(line, prefix, as_key)
 
         point = list_item("", line, ids=[])
