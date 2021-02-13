@@ -1,0 +1,88 @@
+complex - CLI interface
+***********************
+
+argparse tester
+
+   complex [-h] [--root] [--no-help] [--foo | --bar] {first,f,second,third} ...
+
+
+optional arguments
+==================
+
+* "-h", "--help" - show this help message and exit
+
+* "--root" - root flag (default: "False")
+
+* "--no-help" (default: "False")
+
+
+Exclusive
+=========
+
+this is an exclusive group
+
+* "--foo" - foo (default: "False")
+
+* "--bar" - bar (default: "False")
+
+
+complex first (f)
+=================
+
+a-first-help
+
+   complex first [-h] [--flag] [--root] one pos_two
+
+
+complex first positional arguments
+----------------------------------
+
+* "one" - first positional argument (default: "None")
+
+* "pos_two" - second positional argument (default: "1")
+
+
+complex first optional arguments
+--------------------------------
+
+* "-h", "--help" - show this help message and exit
+
+* "--flag" - a parser first flag (default: "False")
+
+* "--root" - root flag (default: "False")
+
+
+complex second
+==============
+
+   complex second [-h] [--flag] [--root] one pos_two
+
+
+complex second positional arguments
+-----------------------------------
+
+* "one" - first positional argument (default: "None")
+
+* "pos_two" - second positional argument (default: "green")
+
+
+complex second optional arguments
+---------------------------------
+
+* "-h", "--help" - show this help message and exit
+
+* "--flag" - a parser second flag (default: "False")
+
+* "--root" - root flag (default: "False")
+
+
+complex third
+=============
+
+   complex third [-h]
+
+
+complex third optional arguments
+--------------------------------
+
+* "-h", "--help" - show this help message and exit
