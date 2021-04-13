@@ -12,7 +12,7 @@ black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-squ
 Render CLI arguments (sub-commands friendly) defined by the argparse module. For live demo checkout the documentation of
 [tox](https://tox.readthedocs.io/en/rewrite/cli_interface.html),
 [python-build](https://pypa-build.readthedocs.io/en/latest/#python-m-build) and
-[mdpo](https://mdpo.readthedocs.io/en/latest/cli.html#command-line-interfaces).
+[mdpo](https://mdpo.readthedocs.io/en/master/cli.html#command-line-interfaces).
 
 ## installation
 
