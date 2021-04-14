@@ -34,7 +34,7 @@ Within the reStructuredText files use the `sphinx_argparse_cli` directive that t
 | Name        | Description                                                                                                                   |
 | ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | module      | the module path to where the parser is defined                                                                                |
-| func        | the module path to where the parser is defined                                                                                |
+| func        | the function name of the parser                                                                                               |
 | prog        | (optional) the module path to where the parser is defined                                                                     |
 | title       | (optional) when provided, overwrites the `<prog> - CLI interface` title added by default and when empty, will not be included |
 | usage_width | (optional) how large should usage examples be - defaults to 100 character                                                     |
