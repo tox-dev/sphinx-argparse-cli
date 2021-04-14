@@ -21,7 +21,7 @@ def make() -> ArgumentParser:
     sub_parsers_a.required = False
     sub_parsers_a.default = "first"
 
-    a_parser_first = sub_parsers_a.add_parser("first", aliases=["f"], help="a-first-help")
+    a_parser_first = sub_parsers_a.add_parser("first", aliases=["f"], help="a-first-help", description="a-first-desc")
     a_parser_first.add_argument("--flag", dest="a_par_first_flag", action="store_true", help="a parser first flag")
     a_parser_first.add_argument("--root", action="store_true", help="root flag")
     a_parser_first.add_argument("pos_one", help="first positional argument", metavar="one")

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.5.1 (2021-04-15)
+
+- For sub-commands use the parser description first as description and only then fallback to the help message
+
 ## 1.5.0 (2021-02-13)
 
 - Display the metavar (fallback to dest) if the action has more than one argument (this is inline with how usage is

@@ -36,7 +36,7 @@ this is an exclusive group
 complex first (f)
 =================
 
-a-first-help
+a-first-desc
 
    complex first [-h] [--flag] [--root] one pos_two
 

@@ -186,8 +186,10 @@ class SphinxArgparseCli(SphinxDirective):
         if aliases:
             title_text += f" ({', '.join(aliases)})"
         group_section = section("", title("", Text(title_text)), ids=[make_id(title_text)], names=[title_text])
-        if help_msg:
-            desc_paragraph = paragraph("", Text(help_msg))
+
+        command_desc = (parser.description or help_msg or "").strip()
+        if command_desc:
+            desc_paragraph = paragraph("", Text(command_desc))
             group_section += desc_paragraph
         group_section += self._mk_usage(parser)
         for group in parser._action_groups:  # noqa
