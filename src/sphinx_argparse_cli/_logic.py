@@ -3,14 +3,9 @@ from __future__ import annotations
 import os
 import re
 import sys
-from argparse import (
-    SUPPRESS,
-    Action,
-    ArgumentParser,
-    HelpFormatter,
-    _ArgumentGroup,
-    _SubParsersAction,
-)
+from argparse import _ArgumentGroup  # noqa
+from argparse import _SubParsersAction  # noqa
+from argparse import SUPPRESS, Action, ArgumentParser, HelpFormatter
 from collections import defaultdict, namedtuple
 from typing import Iterator, cast
 
@@ -19,6 +14,7 @@ from docutils.nodes import (
     Node,
     Text,
     bullet_list,
+    fully_normalize_name,
     list_item,
     literal,
     literal_block,
@@ -31,13 +27,19 @@ from docutils.nodes import (
 from docutils.parsers.rst.directives import positive_int, unchanged, unchanged_required
 from docutils.parsers.rst.states import RSTState, RSTStateMachine
 from docutils.statemachine import StringList
+from sphinx.domains.std import StandardDomain
+from sphinx.locale import __
 from sphinx.util.docutils import SphinxDirective
+from sphinx.util.logging import getLogger
 
 TextAsDefault = namedtuple("TextAsDefault", ["text"])
 
 
 def make_id(key: str) -> str:
-    return re.sub(r"-{2,}", "-", re.sub(r"\W", "-", key)).rstrip("-").lower()
+    return "-".join(key.split()).rstrip("-").lower()
+
+
+logger = getLogger(__name__)
 
 
 class SphinxArgparseCli(SphinxDirective):
@@ -65,6 +67,7 @@ class SphinxArgparseCli(SphinxDirective):
     ):
         super().__init__(name, arguments, options, content, lineno, content_offset, block_text, state, state_machine)
         self._parser: ArgumentParser | None = None
+        self._std_domain: StandardDomain = cast(StandardDomain, self.env.get_domain("std"))
 
     @property
     def parser(self) -> ArgumentParser:
@@ -116,7 +119,7 @@ class SphinxArgparseCli(SphinxDirective):
         for group in self.parser._action_groups:  # noqa
             if not group._group_actions or group is self.parser._subparsers:  # noqa
                 continue
-            home_section += self._mk_option_group(group, prefix="")
+            home_section += self._mk_option_group(group, prefix=self.parser.prog.split("/")[-1])
         # construct sub-parser
         for aliases, help_msg, parser in self.load_sub_parsers():
             home_section += self._mk_sub_command(aliases, help_msg, parser)
@@ -130,6 +133,7 @@ class SphinxArgparseCli(SphinxDirective):
         group_section = section("", header, ids=[ref_id], names=[ref_id])
         if group.description:
             group_section += paragraph("", Text(group.description))
+        self._register_ref(ref_id, title_text, group_section)
         opt_group = bullet_list()
         for action in group._group_actions:  # noqa
             point = self._mk_option_line(action, prefix)
@@ -171,21 +175,42 @@ class SphinxArgparseCli(SphinxDirective):
             line += Text(")")
         return point
 
-    @staticmethod
-    def _mk_option_name(line: paragraph, prefix: str, opt: str) -> None:
+    def _mk_option_name(self, line: paragraph, prefix: str, opt: str) -> None:
         ref_id = make_id(f"{prefix}-{opt}")
-        ref = reference("", refid=ref_id)
+        ref_title = f"{prefix} {opt}"
+        ref = reference("", refid=ref_id, reftitle=ref_title)
         line.attributes["ids"].append(ref_id)
         st = strong()
         st += literal(text=opt)
         ref += st
+        self._register_ref(ref_id, ref_title, ref)
         line += ref
+
+    def _register_ref(self, ref_name: str, ref_title: str, node: Element) -> None:
+        doc_name = self.env.docname
+        if self.env.config.sphinx_argparse_cli_prefix_document:
+            name = fully_normalize_name(f"{doc_name}:{ref_name}")
+        else:
+            name = fully_normalize_name(ref_name)
+        if name in self._std_domain.labels:
+            logger.warning(
+                __("duplicate label %s, other instance in %s"),
+                name,
+                self.env.doc2path(self._std_domain.labels[name][0]),
+                location=node,
+                type="sphinx-argparse-cli",
+                subtype=self.env.docname,
+            )
+        self._std_domain.anonlabels[name] = doc_name, ref_name
+        self._std_domain.labels[name] = doc_name, ref_name, ref_title
 
     def _mk_sub_command(self, aliases: list[str], help_msg: str, parser: ArgumentParser) -> section:
         title_text = f"{parser.prog}"
         if aliases:
             title_text += f" ({', '.join(aliases)})"
-        group_section = section("", title("", Text(title_text)), ids=[make_id(title_text)], names=[title_text])
+        ref_id = make_id(title_text)
+        group_section = section("", title("", Text(title_text)), ids=[ref_id], names=[title_text])
+        self._register_ref(ref_id, title_text, group_section)
 
         command_desc = (parser.description or help_msg or "").strip()
         if command_desc:

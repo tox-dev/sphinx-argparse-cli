@@ -11,6 +11,7 @@ def setup(app: Sphinx) -> None:
     from ._logic import SphinxArgparseCli
 
     app.add_directive(SphinxArgparseCli.name, SphinxArgparseCli)
+    app.add_config_value("sphinx_argparse_cli_prefix_document", False, "env")
 
 
 __all__ = ("__version__",)

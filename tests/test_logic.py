@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from io import StringIO
 from pathlib import Path
 from typing import cast
 
@@ -29,7 +30,8 @@ def build_outcome(app: SphinxTestApp, request: SubRequest) -> str:
     ext = ext_mapping[sphinx_marker.kwargs.get("buildername")]
 
     app.build()
-    return (Path(app.outdir) / f"index.{ext}").read_text()
+    text = (Path(app.outdir) / f"index.{ext}").read_text()
+    return text
 
 
 @pytest.mark.sphinx(buildername="html", testroot="basic")
@@ -92,3 +94,33 @@ def test_help_loader(example: str, output: str) -> None:
 
     result = load_help_text(example)
     assert result == output
+
+
+@pytest.mark.sphinx(buildername="html", testroot="ref")
+def test_ref_as_html(build_outcome: str) -> None:
+    ref = (
+        '<p>Flag <a class="reference internal" href="#prog---root"><span class="std std-ref">prog --root</span></a> and'
+        ' positional <a class="reference internal" href="#prog-root"><span class="std std-ref">prog root</span></a>.'
+        "</p>"
+    )
+    assert ref in build_outcome
+
+
+@pytest.mark.sphinx(buildername="html", testroot="ref-prefix-doc")
+def test_ref_prefix_doc(build_outcome: str) -> None:
+    ref = (
+        '<p>Flag <a class="reference internal" href="#prog---root"><span class="std std-ref">prog --root</span></a> and'
+        ' positional <a class="reference internal" href="#prog-root"><span class="std std-ref">prog root</span></a>.'
+        "</p>"
+    )
+    assert ref in build_outcome
+
+
+_REF_WARNING_STRING_IO = StringIO()  # could not find any better way to get the warning
+
+
+@pytest.mark.sphinx(buildername="text", testroot="ref-duplicate-label", warning=_REF_WARNING_STRING_IO)
+def test_ref_duplicate_label(build_outcome: tuple[str, str]) -> None:
+    assert build_outcome
+    warnings = _REF_WARNING_STRING_IO.getvalue()
+    assert "duplicate label prog---help" in warnings

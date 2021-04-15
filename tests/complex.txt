@@ -7,8 +7,8 @@ argparse tester
            {first,f,second,third} ...
 
 
-optional arguments
-==================
+complex optional arguments
+==========================
 
 * **"-h"**, **"--help"** - show this help message and exit
 
@@ -23,8 +23,8 @@ optional arguments
   (default: "None")
 
 
-Exclusive
-=========
+complex Exclusive
+=================
 
 this is an exclusive group
 

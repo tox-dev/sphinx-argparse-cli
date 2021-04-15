@@ -47,3 +47,25 @@ For example:
   :func: build_parser
   :prog: my-cli-program
 ```
+
+### Refer to generated content
+
+The tool will register reference links to all anchors. This means that you can use the sphinx `ref` role to refer to
+both the (sub)command title/groups and every flag/argument. The tool offers a configuration flag
+`sphinx_argparse_cli_prefix_document` (change by setting this variable in `conf.py` - by default `False`). This option
+influences the reference ids generated. If it's false the reference will be the anchor id (the text appearing after the
+`'#` in the URI once you click on it). If it's true the anchor id will be prefixed by the document name (this is useful
+to avoid reference label clash when the same anchors are generated in multiple documents).
+
+For example in case of a `tox` command, and `sphinx_argparse_cli_prefix_document=False` (default):
+
+- to refer to the optional arguments group use `` :ref:`tox-optional-arguments`  ``,
+- to refer to the run subcommand use `` :ref:`tox-run`  ``,
+- to refer to flag `--magic` of the `run` sub-command use `` :ref:`tox-run---magic`  ``.
+
+For example in case of a `tox` command, and `sphinx_argparse_cli_prefix_document=True`, and the current document name
+being `cli`:
+
+- to refer to the optional arguments group use `` :ref:`cli:tox-optional-arguments`  ``,
+- to refer to the run subcommand use `` :ref:`cli:tox-run`  ``,
+- to refer to flag `--magic` of the `run` sub-command use `` :ref:`cli:tox-run---magic`  ``.
