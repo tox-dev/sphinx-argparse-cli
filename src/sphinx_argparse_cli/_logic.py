@@ -7,7 +7,7 @@ from argparse import _ArgumentGroup  # noqa
 from argparse import _SubParsersAction  # noqa
 from argparse import SUPPRESS, Action, ArgumentParser, HelpFormatter
 from collections import defaultdict, namedtuple
-from typing import Iterator, cast
+from typing import Iterator, Optional, cast
 
 from docutils.nodes import (
     Element,
@@ -58,7 +58,7 @@ class SphinxArgparseCli(SphinxDirective):
         self,
         name: str,
         arguments: list[str],
-        options: dict[str, str],
+        options: dict[str, str | None],
         content: StringList,
         lineno: int,
         content_offset: int,
@@ -66,8 +66,7 @@ class SphinxArgparseCli(SphinxDirective):
         state: RSTState,
         state_machine: RSTStateMachine,
     ):
-        if "group_title_prefix" not in options:
-            options["group_title_prefix"] = None
+        options.setdefault("group_title_prefix", None)  # noqa: SC200
         super().__init__(name, arguments, options, content, lineno, content_offset, block_text, state, state_machine)
         self._parser: ArgumentParser | None = None
         self._std_domain: StandardDomain = cast(StandardDomain, self.env.get_domain("std"))
