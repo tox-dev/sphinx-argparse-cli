@@ -51,6 +51,7 @@ class SphinxArgparseCli(SphinxDirective):
         "prog": unchanged,
         "title": unchanged,
         "usage_width": positive_int,
+        "group_title_prefix": unchanged,
     }
 
     def __init__(
@@ -65,6 +66,8 @@ class SphinxArgparseCli(SphinxDirective):
         state: RSTState,
         state_machine: RSTStateMachine,
     ):
+        if "group_title_prefix" not in options:
+            options["group_title_prefix"] = None
         super().__init__(name, arguments, options, content, lineno, content_offset, block_text, state, state_machine)
         self._parser: ArgumentParser | None = None
         self._std_domain: StandardDomain = cast(StandardDomain, self.env.get_domain("std"))
@@ -126,8 +129,13 @@ class SphinxArgparseCli(SphinxDirective):
         return [home_section]
 
     def _mk_option_group(self, group: _ArgumentGroup, prefix: str) -> section:
-        title_text = f"{prefix}{' ' if prefix else ''}{group.title}"
-        ref_id = make_id(title_text)
+        group_title_prefix : str = (
+            prefix if self.options["group_title_prefix"] is None
+            else self.options["group_title_prefix"]
+        )
+        title_text : str = f"{group_title_prefix}{' ' if group_title_prefix else ''}{group.title}"
+        title_ref : str = f"{prefix}{' ' if prefix else ''}{group.title}"
+        ref_id = make_id(title_ref)
         # the text sadly needs to be prefixed, because otherwise the autosectionlabel will conflict
         header = title("", Text(title_text))
         group_section = section("", header, ids=[ref_id], names=[ref_id])
