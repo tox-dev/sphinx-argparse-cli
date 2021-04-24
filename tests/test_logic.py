@@ -128,20 +128,14 @@ def test_ref_duplicate_label(build_outcome: tuple[str, str]) -> None:
 
 @pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-default")
 def test_group_title_prefix_default(build_outcome: str) -> None:
-    assert (
-        '<h2>prog positional arguments<a class="headerlink" href="#prog-positional-arguments"'
-    ) in build_outcome
+    assert ('<h2>prog positional arguments<a class="headerlink" href="#prog-positional-arguments"') in build_outcome
 
 
 @pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-empty")
 def test_group_title_prefix_empty(build_outcome: str) -> None:
-    assert (
-        '<h2>positional arguments<a class="headerlink" href="#prog-positional-arguments"'
-    ) in build_outcome
+    assert ('<h2>positional arguments<a class="headerlink" href="#prog-positional-arguments"') in build_outcome
 
 
 @pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-custom")
 def test_group_title_prefix_custom(build_outcome: str) -> None:
-    assert (
-        '<h2>custom positional arguments<a class="headerlink" href="#prog-positional-arguments"'
-    ) in build_outcome
+    assert ('<h2>custom positional arguments<a class="headerlink" href="#prog-positional-arguments"') in build_outcome

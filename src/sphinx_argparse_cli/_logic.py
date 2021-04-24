@@ -129,12 +129,11 @@ class SphinxArgparseCli(SphinxDirective):
         return [home_section]
 
     def _mk_option_group(self, group: _ArgumentGroup, prefix: str) -> section:
-        group_title_prefix : str = (
-            prefix if self.options["group_title_prefix"] is None
-            else self.options["group_title_prefix"]
+        group_title_prefix: str = (
+            prefix if self.options["group_title_prefix"] is None else self.options["group_title_prefix"]
         )
-        title_text : str = f"{group_title_prefix}{' ' if group_title_prefix else ''}{group.title}"
-        title_ref : str = f"{prefix}{' ' if prefix else ''}{group.title}"
+        title_text: str = f"{group_title_prefix}{' ' if group_title_prefix else ''}{group.title}"
+        title_ref: str = f"{prefix}{' ' if prefix else ''}{group.title}"
         ref_id = make_id(title_ref)
         # the text sadly needs to be prefixed, because otherwise the autosectionlabel will conflict
         header = title("", Text(title_text))
