@@ -7,7 +7,7 @@ from argparse import _ArgumentGroup  # noqa
 from argparse import _SubParsersAction  # noqa
 from argparse import SUPPRESS, Action, ArgumentParser, HelpFormatter
 from collections import defaultdict, namedtuple
-from typing import Iterator, Optional, cast
+from typing import Iterator, cast
 
 from docutils.nodes import (
     Element,
