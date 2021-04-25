@@ -128,10 +128,17 @@ class SphinxArgparseCli(SphinxDirective):
         return [home_section]
 
     def _mk_option_group(self, group: _ArgumentGroup, prefix: str) -> section:
-        group_title_prefix: str = (
-            prefix if self.options["group_title_prefix"] is None else self.options["group_title_prefix"]
-        )
-        title_text: str = f"{group_title_prefix}{' ' if group_title_prefix else ''}{group.title}"
+        title_prefix = self.options["group_title_prefix"]
+        title_text: str = ""
+        if title_prefix is not None:
+            if title_prefix:
+                title_text += f"{title_prefix} "
+            if " " in prefix:
+                title_text += f"{' '.join(prefix.split(' ')[1:])} "
+        else:
+            title_text += f"{prefix} "
+        title_text += group.title
+
         title_ref: str = f"{prefix}{' ' if prefix else ''}{group.title}"
         ref_id = make_id(title_ref)
         # the text sadly needs to be prefixed, because otherwise the autosectionlabel will conflict
@@ -211,12 +218,23 @@ class SphinxArgparseCli(SphinxDirective):
         self._std_domain.labels[name] = doc_name, ref_name, ref_title
 
     def _mk_sub_command(self, aliases: list[str], help_msg: str, parser: ArgumentParser) -> section:
-        title_text = f"{parser.prog}"
+        title_prefix: str = self.options["group_title_prefix"]
+        title_text: str = ""
+        if title_prefix is not None:
+            if title_prefix:
+                title_text += f"{title_prefix} "
+            title_text += " ".join(parser.prog.split(" ")[1:])
+        else:
+            title_text += parser.prog
+
+        title_ref: str = parser.prog
         if aliases:
-            title_text += f" ({', '.join(aliases)})"
-        ref_id = make_id(title_text)
-        group_section = section("", title("", Text(title_text)), ids=[ref_id], names=[title_text])
-        self._register_ref(ref_id, title_text, group_section)
+            aliases_text: str = f" ({', '.join(aliases)})"
+            title_text += aliases_text
+            title_ref += aliases_text
+        ref_id = make_id(title_ref)
+        group_section = section("", title("", Text(title_text)), ids=[ref_id], names=[title_ref])
+        self._register_ref(ref_id, title_ref, group_section)
 
         command_desc = (parser.description or help_msg or "").strip()
         if command_desc:
