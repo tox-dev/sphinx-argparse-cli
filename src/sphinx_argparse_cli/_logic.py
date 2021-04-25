@@ -137,7 +137,8 @@ class SphinxArgparseCli(SphinxDirective):
                 title_text += f"{' '.join(prefix.split(' ')[1:])} "
         else:
             title_text += f"{prefix} "
-        title_text += group.title
+        if group.title:
+            title_text += group.title
 
         title_ref: str = f"{prefix}{' ' if prefix else ''}{group.title}"
         ref_id = make_id(title_ref)
