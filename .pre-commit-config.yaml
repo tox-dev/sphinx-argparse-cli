@@ -10,21 +10,21 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.9.0
+    rev: v2.14.0
     hooks:
       - id: pyupgrade
   - repo: https://github.com/PyCQA/isort
-    rev: 5.7.0
+    rev: 5.8.0
     hooks:
       - id: isort
   - repo: https://github.com/psf/black
-    rev: 20.8b1
+    rev: 21.4b2
     hooks:
       - id: black
         args: [--safe]
         language_version: python3.9
   - repo: https://github.com/asottile/setup-cfg-fmt
-    rev: v1.16.0
+    rev: v1.17.0
     hooks:
       - id: setup-cfg-fmt
   - repo: https://github.com/tox-dev/tox-ini-fmt
@@ -32,7 +32,7 @@ repos:
     hooks:
       - id: tox-ini-fmt
   - repo: https://github.com/PyCQA/flake8
-    rev: "3.8.4"
+    rev: "3.9.1"
     hooks:
       - id: flake8
         additional_dependencies: [
