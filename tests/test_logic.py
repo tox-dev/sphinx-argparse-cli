@@ -154,6 +154,14 @@ def test_group_title_prefix_custom_sub_commands(build_outcome: str) -> None:
     ) in build_outcome
     assert '<h2>complex custom<a class="headerlink" href="#complex-second"' in build_outcome
 
+    assert (
+        '<h3>custom-2 optional arguments<a class="headerlink" href="#complex-first-optional-arguments"'
+    ) in build_outcome
+
+    assert (
+        '<h3>myprog custom-3 optional arguments<a class="headerlink" href="#complex-second-optional-arguments"'
+    ) in build_outcome
+
 
 @pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-empty-subcommands")
 def test_group_title_prefix_empty_sub_commands(build_outcome: str) -> None:
@@ -166,6 +174,10 @@ def test_group_title_prefix_empty_sub_commands(build_outcome: str) -> None:
         '<h3>complex optional arguments<a class="headerlink" href="#complex-first-optional-arguments"'
     ) in build_outcome
     assert '<h2>complex<a class="headerlink" href="#complex-second"' in build_outcome
+
+    assert (
+        '<h3>myprog optional arguments<a class="headerlink" href="#complex-second-optional-arguments"'
+    ) in build_outcome
 
 
 @pytest.mark.sphinx(buildername="html", testroot="group-title-empty-prefixes")
