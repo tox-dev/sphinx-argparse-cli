@@ -143,25 +143,35 @@ def test_group_title_prefix_custom(build_outcome: str) -> None:
 
 @pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-custom-subcommands")
 def test_group_title_prefix_custom_sub_commands(build_outcome: str) -> None:
-    assert '<h2>custom Exclusive<a class="headerlink" href="#complex-exclusive"' in build_outcome
-    assert '<h2>custom first (f)<a class="headerlink" href="#complex-first-(f)"' in build_outcome
+    assert '<h2>complex Exclusive<a class="headerlink" href="#complex-exclusive"' in build_outcome
+
+    assert '<h2>complex custom (f)<a class="headerlink" href="#complex-first-(f)"' in build_outcome
     assert (
-        '<h3>custom first positional arguments<a class="headerlink" href="#complex-first-positional-arguments"'
+        '<h3>complex custom positional arguments<a class="headerlink" href="#complex-first-positional-arguments"'
     ) in build_outcome
     assert (
-        '<h3>custom first optional arguments<a class="headerlink" href="#complex-first-optional-arguments"'
+        '<h3>complex custom optional arguments<a class="headerlink" href="#complex-first-optional-arguments"'
     ) in build_outcome
-    assert '<h2>custom second<a class="headerlink" href="#complex-second"' in build_outcome
+    assert '<h2>complex custom<a class="headerlink" href="#complex-second"' in build_outcome
 
 
 @pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-empty-subcommands")
 def test_group_title_prefix_empty_sub_commands(build_outcome: str) -> None:
+    assert '<h2>complex Exclusive<a class="headerlink" href="#complex-exclusive"' in build_outcome
+    assert '<h2>complex (f)<a class="headerlink" href="#complex-first-(f)"' in build_outcome
+    assert (
+        '<h3>complex positional arguments<a class="headerlink" href="#complex-first-positional-arguments"'
+    ) in build_outcome
+    assert (
+        '<h3>complex optional arguments<a class="headerlink" href="#complex-first-optional-arguments"'
+    ) in build_outcome
+    assert '<h2>complex<a class="headerlink" href="#complex-second"' in build_outcome
+
+
+@pytest.mark.sphinx(buildername="html", testroot="group-title-empty-prefixes")
+def test_group_title_empty_prefixes(build_outcome: str) -> None:
     assert '<h2>Exclusive<a class="headerlink" href="#complex-exclusive"' in build_outcome
-    assert '<h2>first (f)<a class="headerlink" href="#complex-first-(f)"' in build_outcome
-    assert (
-        '<h3>first positional arguments<a class="headerlink" href="#complex-first-positional-arguments"'
-    ) in build_outcome
-    assert (
-        '<h3>first optional arguments<a class="headerlink" href="#complex-first-optional-arguments"'
-    ) in build_outcome
-    assert '<h2>second<a class="headerlink" href="#complex-second"' in build_outcome
+    assert '<h2>(f)<a class="headerlink" href="#complex-first-(f)"' in build_outcome
+    assert ('<h3>positional arguments<a class="headerlink" href="#complex-first-positional-arguments"') in build_outcome
+    assert ('<h3>optional arguments<a class="headerlink" href="#complex-first-optional-arguments"') in build_outcome
+    assert '<h2><a class="headerlink" href="#complex-second"' in build_outcome

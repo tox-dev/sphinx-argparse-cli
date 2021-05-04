@@ -52,6 +52,7 @@ class SphinxArgparseCli(SphinxDirective):
         "title": unchanged,
         "usage_width": positive_int,
         "group_title_prefix": unchanged,
+        "group_sub_title_prefix": unchanged,
     }
 
     def __init__(
@@ -66,7 +67,8 @@ class SphinxArgparseCli(SphinxDirective):
         state: RSTState,
         state_machine: RSTStateMachine,
     ):
-        options.setdefault("group_title_prefix", None)  # noqa: SC200
+        options.setdefault("group_title_prefix", None)
+        options.setdefault("group_sub_title_prefix", None)
         super().__init__(name, arguments, options, content, lineno, content_offset, block_text, state, state_machine)
         self._parser: ArgumentParser | None = None
         self._std_domain: StandardDomain = cast(StandardDomain, self.env.get_domain("std"))
@@ -128,15 +130,31 @@ class SphinxArgparseCli(SphinxDirective):
         return [home_section]
 
     def _mk_option_group(self, group: _ArgumentGroup, prefix: str) -> section:
+        sub_title_prefix: str = self.options["group_sub_title_prefix"]
         title_prefix = self.options["group_title_prefix"]
         title_text: str = ""
+
         if title_prefix is not None:
             if title_prefix:
                 title_text += f"{title_prefix} "
+
             if " " in prefix:
-                title_text += f"{' '.join(prefix.split(' ')[1:])} "
+                if sub_title_prefix is not None:
+                    if sub_title_prefix:
+                        title_text += f"{sub_title_prefix} "
+                else:
+                    title_text += f"{' '.join(prefix.split(' ')[1:])} "
         else:
-            title_text += f"{prefix} "
+            if " " in prefix:
+                if sub_title_prefix is not None:
+                    title_text += f"{prefix.split(' ')[0]} "
+                    if sub_title_prefix:
+                        title_text += f"{sub_title_prefix} "
+                else:
+                    title_text += f"{' '.join(prefix.split(' ')[:2])} "
+            else:
+                title_text += f"{prefix} "
+
         title_text += group.title or ""
 
         title_ref: str = f"{prefix}{' ' if prefix else ''}{group.title}"
@@ -218,20 +236,34 @@ class SphinxArgparseCli(SphinxDirective):
         self._std_domain.labels[name] = doc_name, ref_name, ref_title
 
     def _mk_sub_command(self, aliases: list[str], help_msg: str, parser: ArgumentParser) -> section:
+        sub_title_prefix: str = self.options["group_sub_title_prefix"]
         title_prefix: str = self.options["group_title_prefix"]
         title_text: str = ""
         if title_prefix is not None:
             if title_prefix:
                 title_text += f"{title_prefix} "
-            title_text += " ".join(parser.prog.split(" ")[1:])
+            if sub_title_prefix is not None:
+                if sub_title_prefix:
+                    title_text += f"{sub_title_prefix} "
+            else:
+                if " " in parser.prog:
+                    title_text += parser.prog.split(" ")[1]
         else:
-            title_text += parser.prog
+            if sub_title_prefix is not None:
+                if " " in parser.prog:
+                    title_text += f"{parser.prog.split(' ')[0]} "
+                if sub_title_prefix:
+                    title_text += f"{sub_title_prefix} "
+            else:
+                title_text += parser.prog
+        title_text = title_text.rstrip()
 
         title_ref: str = parser.prog
         if aliases:
             aliases_text: str = f" ({', '.join(aliases)})"
             title_text += aliases_text
             title_ref += aliases_text
+        title_text = title_text.strip()
         ref_id = make_id(title_ref)
         group_section = section("", title("", Text(title_text)), ids=[ref_id], names=[title_ref])
         self._register_ref(ref_id, title_ref, group_section)

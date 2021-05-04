@@ -38,7 +38,8 @@ Within the reStructuredText files use the `sphinx_argparse_cli` directive that t
 | prog        | (optional) the module path to where the parser is defined                                                                     |
 | title       | (optional) when provided, overwrites the `<prog> - CLI interface` title added by default and when empty, will not be included |
 | usage_width | (optional) how large should usage examples be - defaults to 100 character                                                     |
-| group_title_prefix | (optional) groups subsection title prefixes - defaults to `<prog>` |
+| group_title_prefix | (optional) groups subsections title prefixes - defaults to `<prog>` |
+| group_sub_title_prefix | (optional) subcommands groups subsections title prefixes - defaults to `<prog> <subcommand>` |
 
 For example:
 
