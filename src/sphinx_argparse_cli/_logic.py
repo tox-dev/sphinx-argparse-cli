@@ -136,11 +136,18 @@ class SphinxArgparseCli(SphinxDirective):
 
         if title_prefix is not None:
             if title_prefix:
+                title_prefix = title_prefix.replace("{prog}", prefix.split(" ")[0])
+
                 title_text += f"{title_prefix} "
 
             if " " in prefix:
                 if sub_title_prefix is not None:
                     if sub_title_prefix:
+                        sub_title_prefix = sub_title_prefix.replace("{prog}", prefix.split(" ")[0]).replace(
+                            "{subcommand}",
+                            prefix.split(" ")[1:],
+                        )
+
                         title_text += f"{sub_title_prefix} "
                 else:
                     title_text += f"{' '.join(prefix.split(' ')[1:])} "
@@ -149,6 +156,11 @@ class SphinxArgparseCli(SphinxDirective):
                 if sub_title_prefix is not None:
                     title_text += f"{prefix.split(' ')[0]} "
                     if sub_title_prefix:
+                        sub_title_prefix = sub_title_prefix.replace("{prog}", prefix.split(" ")[0]).replace(
+                            "{subcommand}",
+                            " ".join(prefix.split(" ")[1:]),
+                        )
+
                         title_text += f"{sub_title_prefix} "
                 else:
                     title_text += f"{' '.join(prefix.split(' ')[:2])} "
@@ -240,10 +252,17 @@ class SphinxArgparseCli(SphinxDirective):
         title_prefix: str = self.options["group_title_prefix"]
         title_text: str = ""
         if title_prefix is not None:
+            title_prefix = title_prefix.replace("{prog}", parser.prog.split(" ")[0])
+
             if title_prefix:
                 title_text += f"{title_prefix} "
             if sub_title_prefix is not None:
                 if sub_title_prefix:
+                    sub_title_prefix = sub_title_prefix.replace("{prog}", parser.prog.split(" ")[0],).replace(
+                        "{subcommand}",
+                        parser.prog.split(" ")[1],
+                    )
+
                     title_text += f"{sub_title_prefix} "
             else:
                 title_text += parser.prog.split(" ")[1]
@@ -251,6 +270,11 @@ class SphinxArgparseCli(SphinxDirective):
             if sub_title_prefix is not None:
                 title_text += f"{parser.prog.split(' ')[0]} "
                 if sub_title_prefix:
+                    sub_title_prefix = sub_title_prefix.replace("{prog}", parser.prog.split(" ")[0],).replace(
+                        "{subcommand}",
+                        parser.prog.split(" ")[1],
+                    )
+
                     title_text += f"{sub_title_prefix} "
             else:
                 title_text += parser.prog
