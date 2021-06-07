@@ -137,7 +137,6 @@ class SphinxArgparseCli(SphinxDirective):
         if title_prefix is not None:
             if title_prefix:
                 title_prefix = title_prefix.replace("{prog}", prefix.split(" ")[0])
-
                 title_text += f"{title_prefix} "
 
             if " " in prefix:
