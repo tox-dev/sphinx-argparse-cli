@@ -3,6 +3,7 @@ anonlabels
 autosectionlabel
 buildername
 confdir
+cmd
 desc
 dest
 doc2path
@@ -11,6 +12,7 @@ docutils
 formatter
 Formatter
 fromlist
+grp
 lineno
 linesep
 metavar
@@ -27,3 +29,4 @@ subparsers
 subtype
 testroot
 util
+setdefault

@@ -124,3 +124,68 @@ def test_ref_duplicate_label(build_outcome: tuple[str, str]) -> None:
     assert build_outcome
     warnings = _REF_WARNING_STRING_IO.getvalue()
     assert "duplicate label prog---help" in warnings
+
+
+@pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-default")
+def test_group_title_prefix_default(build_outcome: str) -> None:
+    assert '<h2>prog positional arguments<a class="headerlink" href="#prog-positional-arguments"' in build_outcome
+
+
+@pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-empty")
+def test_group_title_prefix_empty(build_outcome: str) -> None:
+    assert '<h2>positional arguments<a class="headerlink" href="#prog-positional-arguments"' in build_outcome
+
+
+@pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-custom")
+def test_group_title_prefix_custom(build_outcome: str) -> None:
+    assert '<h2>custom positional arguments<a class="headerlink" href="#prog-positional-arguments"' in build_outcome
+
+
+@pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-prog-replacement")
+def test_group_title_prefix_prog_replacement(build_outcome: str) -> None:
+    assert '<h2>barfoo positional arguments<a class="headerlink" href="#bar-positional-arguments"' in build_outcome
+
+
+@pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-custom-subcommands")
+def test_group_title_prefix_custom_sub_commands(build_outcome: str) -> None:
+    assert '<h2>complex Exclusive<a class="headerlink" href="#complex-exclusive"' in build_outcome
+    assert '<h2>complex custom (f)<a class="headerlink" href="#complex-first-(f)"' in build_outcome
+    msg = '<h3>complex custom positional arguments<a class="headerlink" href="#complex-first-positional-arguments"'
+    assert msg in build_outcome
+    msg = '<h3>complex custom optional arguments<a class="headerlink" href="#complex-first-optional-arguments"'
+    assert msg in build_outcome
+    assert '<h2>complex custom<a class="headerlink" href="#complex-second"' in build_outcome
+    msg = '<h3>custom-2 optional arguments<a class="headerlink" href="#complex-first-optional-arguments"'
+    assert msg in build_outcome
+    msg = '<h3>myprog custom-3 optional arguments<a class="headerlink" href="#complex-second-optional-arguments"'
+    assert msg in build_outcome
+
+
+@pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-empty-subcommands")
+def test_group_title_prefix_empty_sub_commands(build_outcome: str) -> None:
+    assert '<h2>complex Exclusive<a class="headerlink" href="#complex-exclusive"' in build_outcome
+    assert '<h2>complex (f)<a class="headerlink" href="#complex-first-(f)"' in build_outcome
+    msg = '<h3>complex positional arguments<a class="headerlink" href="#complex-first-positional-arguments"'
+    assert msg in build_outcome
+    msg = '<h3>complex optional arguments<a class="headerlink" href="#complex-first-optional-arguments"'
+    assert msg in build_outcome
+    assert '<h2>complex<a class="headerlink" href="#complex-second"' in build_outcome
+    msg = '<h3>myprog optional arguments<a class="headerlink" href="#complex-second-optional-arguments"'
+    assert msg in build_outcome
+
+
+@pytest.mark.sphinx(buildername="html", testroot="group-title-empty-prefixes")
+def test_group_title_empty_prefixes(build_outcome: str) -> None:
+    assert '<h2>Exclusive<a class="headerlink" href="#complex-exclusive"' in build_outcome
+    assert '<h2>(f)<a class="headerlink" href="#complex-first-(f)"' in build_outcome
+    assert '<h3>positional arguments<a class="headerlink" href="#complex-first-positional-arguments"' in build_outcome
+    assert '<h3>optional arguments<a class="headerlink" href="#complex-first-optional-arguments"' in build_outcome
+    assert '<h2><a class="headerlink" href="#complex-second"' in build_outcome
+
+
+@pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-subcommand-replacement")
+def test_group_title_prefix_sub_command_replacement(build_outcome: str) -> None:
+    assert '<h2>bar optional arguments<a class="headerlink" href="#bar-optional-arguments"' in build_outcome
+    assert '<h2>bar Exclusive<a class="headerlink" href="#bar-exclusive"' in build_outcome
+    assert '<h2>bar baronlyroot (f)<a class="headerlink" href="#bar-root-first-(f)"' in build_outcome
+    assert '<h3>bar baronlyroot first positional arguments<a class="headerlink"' in build_outcome

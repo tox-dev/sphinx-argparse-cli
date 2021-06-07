@@ -51,13 +51,15 @@ class SphinxArgparseCli(SphinxDirective):
         "prog": unchanged,
         "title": unchanged,
         "usage_width": positive_int,
+        "group_title_prefix": unchanged,
+        "group_sub_title_prefix": unchanged,
     }
 
     def __init__(
         self,
         name: str,
         arguments: list[str],
-        options: dict[str, str],
+        options: dict[str, str | None],
         content: StringList,
         lineno: int,
         content_offset: int,
@@ -65,6 +67,8 @@ class SphinxArgparseCli(SphinxDirective):
         state: RSTState,
         state_machine: RSTStateMachine,
     ):
+        options.setdefault("group_title_prefix", None)
+        options.setdefault("group_sub_title_prefix", None)
         super().__init__(name, arguments, options, content, lineno, content_offset, block_text, state, state_machine)
         self._parser: ArgumentParser | None = None
         self._std_domain: StandardDomain = cast(StandardDomain, self.env.get_domain("std"))
@@ -126,8 +130,12 @@ class SphinxArgparseCli(SphinxDirective):
         return [home_section]
 
     def _mk_option_group(self, group: _ArgumentGroup, prefix: str) -> section:
-        title_text = f"{prefix}{' ' if prefix else ''}{group.title}"
-        ref_id = make_id(title_text)
+        sub_title_prefix: str = self.options["group_sub_title_prefix"]
+        title_prefix = self.options["group_title_prefix"]
+
+        title_text = self._build_opt_grp_title(group, prefix, sub_title_prefix, title_prefix)
+        title_ref: str = f"{prefix}{' ' if prefix else ''}{group.title}"
+        ref_id = make_id(title_ref)
         # the text sadly needs to be prefixed, because otherwise the autosectionlabel will conflict
         header = title("", Text(title_text))
         group_section = section("", header, ids=[ref_id], names=[ref_id])
@@ -140,6 +148,29 @@ class SphinxArgparseCli(SphinxDirective):
             opt_group += point
         group_section += opt_group
         return group_section
+
+    def _build_opt_grp_title(self, group: _ArgumentGroup, prefix: str, sub_title_prefix: str, title_prefix: str) -> str:
+        title_text, elements = "", prefix.split(" ")
+        if title_prefix is not None:
+            title_prefix = title_prefix.replace("{prog}", elements[0])
+            if title_prefix:
+                title_text += f"{title_prefix} "
+            if " " in prefix:
+                if sub_title_prefix is not None:
+                    title_text = self._append_title(title_text, sub_title_prefix, elements[0], " ".join(elements[1:]))
+                else:
+                    title_text += f"{' '.join(prefix.split(' ')[1:])} "
+        else:
+            if " " in prefix:
+                if sub_title_prefix is not None:
+                    title_text += f"{elements[0]} "
+                    title_text = self._append_title(title_text, sub_title_prefix, elements[0], " ".join(elements[1:]))
+                else:
+                    title_text += f"{' '.join(elements[:2])} "
+            else:
+                title_text += f"{prefix} "
+        title_text += group.title or ""
+        return title_text
 
     def _mk_option_line(self, action: Action, prefix: str) -> list_item:  # noqa
         line = paragraph()
@@ -205,12 +236,19 @@ class SphinxArgparseCli(SphinxDirective):
         self._std_domain.labels[name] = doc_name, ref_name, ref_title
 
     def _mk_sub_command(self, aliases: list[str], help_msg: str, parser: ArgumentParser) -> section:
-        title_text = f"{parser.prog}"
+        sub_title_prefix: str = self.options["group_sub_title_prefix"]
+        title_prefix: str = self.options["group_title_prefix"]
+
+        title_text = self._build_sub_cmd_title(parser, sub_title_prefix, title_prefix)
+        title_ref: str = parser.prog
         if aliases:
-            title_text += f" ({', '.join(aliases)})"
-        ref_id = make_id(title_text)
-        group_section = section("", title("", Text(title_text)), ids=[ref_id], names=[title_text])
-        self._register_ref(ref_id, title_text, group_section)
+            aliases_text: str = f" ({', '.join(aliases)})"
+            title_text += aliases_text
+            title_ref += aliases_text
+        title_text = title_text.strip()
+        ref_id = make_id(title_ref)
+        group_section = section("", title("", Text(title_text)), ids=[ref_id], names=[title_ref])
+        self._register_ref(ref_id, title_ref, group_section)
 
         command_desc = (parser.description or help_msg or "").strip()
         if command_desc:
@@ -222,6 +260,32 @@ class SphinxArgparseCli(SphinxDirective):
                 continue
             group_section += self._mk_option_group(group, prefix=parser.prog)
         return group_section
+
+    def _build_sub_cmd_title(self, parser: ArgumentParser, sub_title_prefix: str, title_prefix: str) -> str:
+        title_text, elements = "", parser.prog.split(" ")
+        if title_prefix is not None:
+            title_prefix = title_prefix.replace("{prog}", elements[0])
+            if title_prefix:
+                title_text += f"{title_prefix} "
+            if sub_title_prefix is not None:
+                title_text = self._append_title(title_text, sub_title_prefix, elements[0], elements[1])
+            else:
+                title_text += elements[1]
+        else:
+            if sub_title_prefix is not None:
+                title_text += f"{elements[0]} "
+                title_text = self._append_title(title_text, sub_title_prefix, elements[0], elements[1])
+            else:
+                title_text += parser.prog
+        return title_text.rstrip()
+
+    @staticmethod
+    def _append_title(title_text: str, sub_title_prefix: str, prog: str, sub_cmd: str) -> str:
+        if sub_title_prefix:
+            sub_title_prefix = sub_title_prefix.replace("{prog}", prog)
+            sub_title_prefix = sub_title_prefix.replace("{subcommand}", sub_cmd)
+            title_text += f"{sub_title_prefix} "
+        return title_text
 
     def _mk_usage(self, parser: ArgumentParser) -> literal_block:
         parser.formatter_class = lambda prog: HelpFormatter(prog, width=self.options.get("usage_width", 100))

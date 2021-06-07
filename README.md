@@ -31,13 +31,15 @@ extensions = ["sphinx_argparse_cli"]
 
 Within the reStructuredText files use the `sphinx_argparse_cli` directive that takes, at least, two arguments:
 
-| Name        | Description                                                                                                                   |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| module      | the module path to where the parser is defined                                                                                |
-| func        | the name of the function that once called with no arguments constructs the parser                                             |
-| prog        | (optional) the module path to where the parser is defined                                                                     |
-| title       | (optional) when provided, overwrites the `<prog> - CLI interface` title added by default and when empty, will not be included |
-| usage_width | (optional) how large should usage examples be - defaults to 100 character                                                     |
+| Name                   | Description                                                                                                                                                                      |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| module                 | the module path to where the parser is defined                                                                                                                                   |
+| func                   | the name of the function that once called with no arguments constructs the parser                                                                                                |
+| prog                   | (optional) the module path to where the parser is defined                                                                                                                        |
+| title                  | (optional) when provided, overwrites the `<prog> - CLI interface` title added by default and when empty, will not be included                                                    |
+| usage_width            | (optional) how large should usage examples be - defaults to 100 character                                                                                                        |
+| group_title_prefix     | (optional) groups subsections title prefixes, accepts the string `{prog}` as a replacement for the program name - defaults to `{prog}`                                           |
+| group_sub_title_prefix | (optional) subcommands groups subsections title prefixes, accepts replacement of `{prog}` and `{subcommand}` for program and subcommand name - defaults to `{prog} {subcommand}` |
 
 For example:
 
