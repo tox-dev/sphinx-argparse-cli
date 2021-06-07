@@ -10,7 +10,7 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.28.0
+    rev: v2.29.0
     hooks:
       - id: pyupgrade
   - repo: https://github.com/PyCQA/isort
@@ -27,7 +27,7 @@ repos:
     rev: v1.17.0
     hooks:
       - id: setup-cfg-fmt
-        args: ["--max-py-version", "3.9"]
+        args: ["--max-py-version", "3.10"]
   - repo: https://github.com/tox-dev/tox-ini-fmt
     rev: "0.5.1"
     hooks:
@@ -36,10 +36,12 @@ repos:
     rev: "3.9.2"
     hooks:
       - id: flake8
-        additional_dependencies: [
-            "flake8-bugbear == 21.4.3",
-            "flake8-unused-arguments == 0.0.6",
-            "flake8-comprehensions == 3.5.0",
-            "flake8-spellcheck == 0.24.0",
-            "flake8-pytest-style == 1.4.2",
-        ]
+        additional_dependencies:
+        - flake8-bugbear==21.9.2
+        - flake8-comprehensions==3.6.1
+        - flake8-pytest-style==1.5
+        - flake8-spellcheck==0.24
+        - flake8-unused-arguments==0.0.6
+        - flake8-noqa==1.1.0
+        - flake8-eradicate==1.1.0
+        - pep8-naming==0.12.1

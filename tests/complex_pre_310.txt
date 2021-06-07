@@ -7,8 +7,8 @@ argparse tester
            {first,f,second,third} ...
 
 
-complex options
-===============
+complex optional arguments
+==========================
 
 * **"-h"**, **"--help"** - show this help message and exit
 
@@ -49,8 +49,8 @@ complex first positional arguments
 * **"pos_two"** - second positional argument (default: "1")
 
 
-complex first options
----------------------
+complex first optional arguments
+--------------------------------
 
 * **"-h"**, **"--help"** - show this help message and exit
 
@@ -73,8 +73,8 @@ complex second positional arguments
 * **"pos_two"** - second positional argument (default: "green")
 
 
-complex second options
-----------------------
+complex second optional arguments
+---------------------------------
 
 * **"-h"**, **"--help"** - show this help message and exit
 
@@ -89,7 +89,7 @@ complex third
    complex third [-h]
 
 
-complex third options
----------------------
+complex third optional arguments
+--------------------------------
 
 * **"-h"**, **"--help"** - show this help message and exit
