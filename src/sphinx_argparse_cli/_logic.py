@@ -145,7 +145,7 @@ class SphinxArgparseCli(SphinxDirective):
                     if sub_title_prefix:
                         sub_title_prefix = sub_title_prefix.replace("{prog}", prefix.split(" ")[0]).replace(
                             "{subcommand}",
-                            prefix.split(" ")[1:],
+                            " ".join(prefix.split(" ")[1:]),
                         )
 
                         title_text += f"{sub_title_prefix} "
