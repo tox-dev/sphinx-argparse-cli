@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 from io import StringIO
 from pathlib import Path
-from typing import cast
 
 import pytest
 from _pytest.fixtures import SubRequest
@@ -16,7 +15,7 @@ def build_outcome(app: SphinxTestApp, request: SubRequest) -> str:
     if prepare_marker:
         directive_args: list[str] | None = prepare_marker.kwargs.get("directive_args")
         if directive_args:  # pragma: no branch
-            index = Path(cast(str, app.confdir)) / "index.rst"
+            index = Path(app.confdir) / "index.rst"
             if not any(i for i in directive_args if i.startswith(":module:")):  # pragma: no branch
                 directive_args.append(":module: parser")
             if not any(i for i in directive_args if i.startswith(":func:")):  # pragma: no branch

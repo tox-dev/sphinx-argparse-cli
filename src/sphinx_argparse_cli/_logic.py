@@ -24,7 +24,11 @@ from docutils.nodes import (
     strong,
     title,
 )
-from docutils.parsers.rst.directives import positive_int, unchanged, unchanged_required
+from docutils.parsers.rst.directives import (  # type: ignore # no stubs
+    positive_int,
+    unchanged,
+    unchanged_required,
+)
 from docutils.parsers.rst.states import RSTState, RSTStateMachine
 from docutils.statemachine import StringList
 from sphinx.domains.std import StandardDomain
@@ -69,7 +73,9 @@ class SphinxArgparseCli(SphinxDirective):
     ):
         options.setdefault("group_title_prefix", None)
         options.setdefault("group_sub_title_prefix", None)
-        super().__init__(name, arguments, options, content, lineno, content_offset, block_text, state, state_machine)
+        super().__init__(  # type: ignore # too many arguments to object
+            name, arguments, options, content, lineno, content_offset, block_text, state, state_machine
+        )
         self._parser: ArgumentParser | None = None
         self._std_domain: StandardDomain = cast(StandardDomain, self.env.get_domain("std"))
 
