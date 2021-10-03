@@ -1,12 +1,20 @@
 from __future__ import annotations
 
 import os
+import sys
 from io import StringIO
 from pathlib import Path
 
 import pytest
 from _pytest.fixtures import SubRequest
 from sphinx.testing.util import SphinxTestApp
+
+
+@pytest.fixture(scope="session")
+def opt_grp_name() -> tuple[str, str]:
+    if sys.version_info >= (3, 10):  # pragma: no branch  # https://bugs.python.org/issue9694
+        return "options", "options"  # pragma: no cover
+    return "optional arguments", "optional-arguments"  # pragma: no cover
 
 
 @pytest.fixture()
@@ -40,7 +48,8 @@ def test_basic_as_html(build_outcome: str) -> None:
 
 @pytest.mark.sphinx(buildername="text", testroot="complex")
 def test_complex_as_text(build_outcome: str) -> None:
-    expected = (Path(__file__).parent / "complex.txt").read_text()
+    name = "complex.txt" if sys.version_info >= (3, 10) else "complex_pre_310.txt"
+    expected = (Path(__file__).parent / name).read_text()
     assert build_outcome == expected
 
 
@@ -89,7 +98,7 @@ def test_usage_width_custom(build_outcome: str) -> None:
     ],
 )
 def test_help_loader(example: str, output: str) -> None:
-    from sphinx_argparse_cli._logic import load_help_text  # noqa
+    from sphinx_argparse_cli._logic import load_help_text
 
     result = load_help_text(example)
     assert result == output
@@ -146,45 +155,49 @@ def test_group_title_prefix_prog_replacement(build_outcome: str) -> None:
 
 
 @pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-custom-subcommands")
-def test_group_title_prefix_custom_sub_commands(build_outcome: str) -> None:
+def test_group_title_prefix_custom_sub_commands(build_outcome: str, opt_grp_name: tuple[str, str]) -> None:
+    grp, anchor = opt_grp_name
     assert '<h2>complex Exclusive<a class="headerlink" href="#complex-exclusive"' in build_outcome
     assert '<h2>complex custom (f)<a class="headerlink" href="#complex-first-(f)"' in build_outcome
     msg = '<h3>complex custom positional arguments<a class="headerlink" href="#complex-first-positional-arguments"'
     assert msg in build_outcome
-    msg = '<h3>complex custom optional arguments<a class="headerlink" href="#complex-first-optional-arguments"'
+    msg = f'<h3>complex custom {grp}<a class="headerlink" href="#complex-first-{anchor}"'
     assert msg in build_outcome
     assert '<h2>complex custom<a class="headerlink" href="#complex-second"' in build_outcome
-    msg = '<h3>custom-2 optional arguments<a class="headerlink" href="#complex-first-optional-arguments"'
+    msg = f'<h3>custom-2 {grp}<a class="headerlink" href="#complex-first-{anchor}"'
     assert msg in build_outcome
-    msg = '<h3>myprog custom-3 optional arguments<a class="headerlink" href="#complex-second-optional-arguments"'
+    msg = f'<h3>myprog custom-3 {grp}<a class="headerlink" href="#complex-second-{anchor}"'
     assert msg in build_outcome
 
 
 @pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-empty-subcommands")
-def test_group_title_prefix_empty_sub_commands(build_outcome: str) -> None:
+def test_group_title_prefix_empty_sub_commands(build_outcome: str, opt_grp_name: tuple[str, str]) -> None:
+    grp, anchor = opt_grp_name
     assert '<h2>complex Exclusive<a class="headerlink" href="#complex-exclusive"' in build_outcome
     assert '<h2>complex (f)<a class="headerlink" href="#complex-first-(f)"' in build_outcome
     msg = '<h3>complex positional arguments<a class="headerlink" href="#complex-first-positional-arguments"'
     assert msg in build_outcome
-    msg = '<h3>complex optional arguments<a class="headerlink" href="#complex-first-optional-arguments"'
+    msg = f'<h3>complex {grp}<a class="headerlink" href="#complex-first-{anchor}"'
     assert msg in build_outcome
     assert '<h2>complex<a class="headerlink" href="#complex-second"' in build_outcome
-    msg = '<h3>myprog optional arguments<a class="headerlink" href="#complex-second-optional-arguments"'
+    msg = f'<h3>myprog {grp}<a class="headerlink" href="#complex-second-{anchor}"'
     assert msg in build_outcome
 
 
 @pytest.mark.sphinx(buildername="html", testroot="group-title-empty-prefixes")
-def test_group_title_empty_prefixes(build_outcome: str) -> None:
+def test_group_title_empty_prefixes(build_outcome: str, opt_grp_name: tuple[str, str]) -> None:
+    grp, anchor = opt_grp_name
     assert '<h2>Exclusive<a class="headerlink" href="#complex-exclusive"' in build_outcome
     assert '<h2>(f)<a class="headerlink" href="#complex-first-(f)"' in build_outcome
     assert '<h3>positional arguments<a class="headerlink" href="#complex-first-positional-arguments"' in build_outcome
-    assert '<h3>optional arguments<a class="headerlink" href="#complex-first-optional-arguments"' in build_outcome
+    assert f'<h3>{grp}<a class="headerlink" href="#complex-first-{anchor}"' in build_outcome
     assert '<h2><a class="headerlink" href="#complex-second"' in build_outcome
 
 
 @pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-subcommand-replacement")
-def test_group_title_prefix_sub_command_replacement(build_outcome: str) -> None:
-    assert '<h2>bar optional arguments<a class="headerlink" href="#bar-optional-arguments"' in build_outcome
+def test_group_title_prefix_sub_command_replacement(build_outcome: str, opt_grp_name: tuple[str, str]) -> None:
+    grp, anchor = opt_grp_name
+    assert f'<h2>bar {grp}<a class="headerlink" href="#bar-{anchor}"' in build_outcome
     assert '<h2>bar Exclusive<a class="headerlink" href="#bar-exclusive"' in build_outcome
     assert '<h2>bar baronlyroot (f)<a class="headerlink" href="#bar-root-first-(f)"' in build_outcome
     assert '<h3>bar baronlyroot first positional arguments<a class="headerlink"' in build_outcome

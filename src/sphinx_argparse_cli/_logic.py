@@ -3,9 +3,14 @@ from __future__ import annotations
 import os
 import re
 import sys
-from argparse import _ArgumentGroup  # noqa
-from argparse import _SubParsersAction  # noqa
-from argparse import SUPPRESS, Action, ArgumentParser, HelpFormatter
+from argparse import (
+    SUPPRESS,
+    Action,
+    ArgumentParser,
+    HelpFormatter,
+    _ArgumentGroup,
+    _SubParsersAction,
+)
 from collections import defaultdict, namedtuple
 from typing import Iterator, cast
 
@@ -89,17 +94,17 @@ class SphinxArgparseCli(SphinxDirective):
         return self._parser
 
     def load_sub_parsers(self) -> Iterator[tuple[list[str], str, ArgumentParser]]:
-        top_sub_parser = self.parser._subparsers  # noqa
+        top_sub_parser = self.parser._subparsers
         if not top_sub_parser:
             return
         parser_to_args: dict[int, list[str]] = defaultdict(list)
         str_to_parser: dict[str, ArgumentParser] = {}
-        sub_parser = cast(_SubParsersAction, top_sub_parser._group_actions[0])  # noqa
-        for key, parser in sub_parser._name_parser_map.items():  # noqa
+        sub_parser = cast(_SubParsersAction, top_sub_parser._group_actions[0])
+        for key, parser in sub_parser._name_parser_map.items():
             parser_to_args[id(parser)].append(key)
             str_to_parser[key] = parser
         done_parser: set[int] = set()
-        for name, parser in sub_parser.choices.items():  # noqa
+        for name, parser in sub_parser.choices.items():
             parser_id = id(parser)
             if parser_id in done_parser:
                 continue
@@ -124,8 +129,8 @@ class SphinxArgparseCli(SphinxDirective):
             home_section += desc_paragraph
         # construct groups excluding sub-parsers
         home_section += self._mk_usage(self.parser)
-        for group in self.parser._action_groups:  # noqa
-            if not group._group_actions or group is self.parser._subparsers:  # noqa
+        for group in self.parser._action_groups:
+            if not group._group_actions or group is self.parser._subparsers:
                 continue
             home_section += self._mk_option_group(group, prefix=self.parser.prog.split("/")[-1])
         # construct sub-parser
@@ -147,7 +152,7 @@ class SphinxArgparseCli(SphinxDirective):
             group_section += paragraph("", Text(group.description))
         self._register_ref(ref_id, title_text, group_section)
         opt_group = bullet_list()
-        for action in group._group_actions:  # noqa
+        for action in group._group_actions:
             point = self._mk_option_line(action, prefix)
             opt_group += point
         group_section += opt_group
@@ -176,7 +181,7 @@ class SphinxArgparseCli(SphinxDirective):
         title_text += group.title or ""
         return title_text
 
-    def _mk_option_line(self, action: Action, prefix: str) -> list_item:  # noqa
+    def _mk_option_line(self, action: Action, prefix: str) -> list_item:
         line = paragraph()
         as_key = action.dest
         if action.metavar:
@@ -259,7 +264,7 @@ class SphinxArgparseCli(SphinxDirective):
             desc_paragraph = paragraph("", Text(command_desc))
             group_section += desc_paragraph
         group_section += self._mk_usage(parser)
-        for group in parser._action_groups:  # noqa
+        for group in parser._action_groups:
             if not group._group_actions:  # do not show empty groups
                 continue
             group_section += self._mk_option_group(group, prefix=parser.prog)

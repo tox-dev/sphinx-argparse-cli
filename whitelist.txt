@@ -2,15 +2,14 @@ addinivalue
 anonlabels
 autosectionlabel
 buildername
-confdir
 cmd
+confdir
 desc
 dest
 doc2path
 docname
 docutils
 formatter
-Formatter
 fromlist
 grp
 lineno
@@ -24,9 +23,9 @@ prog
 refid
 reftitle
 rst
+setdefault
 statemachine
 subparsers
 subtype
 testroot
 util
-setdefault
