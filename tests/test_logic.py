@@ -204,6 +204,6 @@ def test_group_title_prefix_sub_command_replacement(build_outcome: str, opt_grp_
 
 
 @pytest.mark.sphinx(buildername="html", testroot="store-true-false")
-def test_store_true_false(build_outcome: str):
+def test_store_true_false(build_outcome: str) -> None:
     assert "False" not in build_outcome
     assert "True" not in build_outcome
