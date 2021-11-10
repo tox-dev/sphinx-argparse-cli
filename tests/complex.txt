@@ -12,9 +12,9 @@ complex options
 
 * **"-h"**, **"--help"** - show this help message and exit
 
-* **"--root"** - root flag (default: "False")
+* **"--root"** - root flag
 
-* **"--no-help"** (default: "False")
+* **"--no-help"**
 
 * **"--outdir"** "OUT_DIR", **"-o"** "OUT_DIR" - output directory
   (default: "None")
@@ -28,9 +28,9 @@ complex Exclusive
 
 this is an exclusive group
 
-* **"--foo"** - foo (default: "False")
+* **"--foo"** - foo
 
-* **"--bar"** - bar (default: "False")
+* **"--bar"** - bar
 
 
 complex first (f)
@@ -54,9 +54,9 @@ complex first options
 
 * **"-h"**, **"--help"** - show this help message and exit
 
-* **"--flag"** - a parser first flag (default: "False")
+* **"--flag"** - a parser first flag
 
-* **"--root"** - root flag (default: "False")
+* **"--root"** - root flag
 
 
 complex second
@@ -78,9 +78,9 @@ complex second options
 
 * **"-h"**, **"--help"** - show this help message and exit
 
-* **"--flag"** - a parser second flag (default: "False")
+* **"--flag"** - a parser second flag
 
-* **"--root"** - root flag (default: "False")
+* **"--root"** - root flag
 
 
 complex third
