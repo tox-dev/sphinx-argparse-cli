@@ -9,6 +9,8 @@ from argparse import (
     ArgumentParser,
     HelpFormatter,
     _ArgumentGroup,
+    _StoreFalseAction,
+    _StoreTrueAction,
     _SubParsersAction,
 )
 from collections import defaultdict, namedtuple
@@ -209,7 +211,11 @@ class SphinxArgparseCli(SphinxDirective):
             line += Text(" - ")
             for content in cast(paragraph, temp.children[0]).children:
                 line += content
-        if action.default != SUPPRESS and not re.match(r".*[ (]default[s]? .*", (action.help or "")):
+        if (
+            action.default != SUPPRESS
+            and not re.match(r".*[ (]default[s]? .*", (action.help or ""))
+            and not isinstance(action, (_StoreTrueAction, _StoreFalseAction))
+        ):
             line += Text(" (default: ")
             line += literal(text=str(action.default).replace(os.getcwd(), "{cwd}"))
             line += Text(")")

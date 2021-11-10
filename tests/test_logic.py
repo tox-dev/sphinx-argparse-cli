@@ -203,6 +203,12 @@ def test_group_title_prefix_sub_command_replacement(build_outcome: str, opt_grp_
     assert '<h3>bar baronlyroot first positional arguments<a class="headerlink"' in build_outcome
 
 
+@pytest.mark.sphinx(buildername="html", testroot="store-true-false")
+def test_store_true_false(build_outcome: str) -> None:
+    assert "False" not in build_outcome
+    assert "True" not in build_outcome
+
+
 @pytest.mark.sphinx(buildername="html", testroot="lower-upper-refs")
 def test_lower_upper_refs(build_outcome: str) -> None:
     assert '<p id="basic--d"><a class="reference internal" href="#basic--d" title="basic -d">' in build_outcome
