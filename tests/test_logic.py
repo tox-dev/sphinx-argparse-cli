@@ -201,3 +201,9 @@ def test_group_title_prefix_sub_command_replacement(build_outcome: str, opt_grp_
     assert '<h2>bar Exclusive<a class="headerlink" href="#bar-exclusive"' in build_outcome
     assert '<h2>bar baronlyroot (f)<a class="headerlink" href="#bar-root-first-(f)"' in build_outcome
     assert '<h3>bar baronlyroot first positional arguments<a class="headerlink"' in build_outcome
+
+
+@pytest.mark.sphinx(buildername="html", testroot="store-true-false")
+def test_store_true_false(build_outcome: str):
+    assert "False" not in build_outcome
+    assert "True" not in build_outcome
