@@ -45,7 +45,7 @@ TextAsDefault = namedtuple("TextAsDefault", ["text"])
 
 
 def make_id(key: str) -> str:
-    return "-".join(key.split()).rstrip("-").lower()
+    return "-".join(key.split()).rstrip("-")
 
 
 logger = getLogger(__name__)
