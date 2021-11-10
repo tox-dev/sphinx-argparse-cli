@@ -157,7 +157,7 @@ def test_group_title_prefix_prog_replacement(build_outcome: str) -> None:
 @pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-custom-subcommands")
 def test_group_title_prefix_custom_sub_commands(build_outcome: str, opt_grp_name: tuple[str, str]) -> None:
     grp, anchor = opt_grp_name
-    assert '<h2>complex Exclusive<a class="headerlink" href="#complex-exclusive"' in build_outcome
+    assert '<h2>complex Exclusive<a class="headerlink" href="#complex-Exclusive"' in build_outcome
     assert '<h2>complex custom (f)<a class="headerlink" href="#complex-first-(f)"' in build_outcome
     msg = '<h3>complex custom positional arguments<a class="headerlink" href="#complex-first-positional-arguments"'
     assert msg in build_outcome
@@ -173,7 +173,7 @@ def test_group_title_prefix_custom_sub_commands(build_outcome: str, opt_grp_name
 @pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-empty-subcommands")
 def test_group_title_prefix_empty_sub_commands(build_outcome: str, opt_grp_name: tuple[str, str]) -> None:
     grp, anchor = opt_grp_name
-    assert '<h2>complex Exclusive<a class="headerlink" href="#complex-exclusive"' in build_outcome
+    assert '<h2>complex Exclusive<a class="headerlink" href="#complex-Exclusive"' in build_outcome
     assert '<h2>complex (f)<a class="headerlink" href="#complex-first-(f)"' in build_outcome
     msg = '<h3>complex positional arguments<a class="headerlink" href="#complex-first-positional-arguments"'
     assert msg in build_outcome
@@ -187,7 +187,7 @@ def test_group_title_prefix_empty_sub_commands(build_outcome: str, opt_grp_name:
 @pytest.mark.sphinx(buildername="html", testroot="group-title-empty-prefixes")
 def test_group_title_empty_prefixes(build_outcome: str, opt_grp_name: tuple[str, str]) -> None:
     grp, anchor = opt_grp_name
-    assert '<h2>Exclusive<a class="headerlink" href="#complex-exclusive"' in build_outcome
+    assert '<h2>Exclusive<a class="headerlink" href="#complex-Exclusive"' in build_outcome
     assert '<h2>(f)<a class="headerlink" href="#complex-first-(f)"' in build_outcome
     assert '<h3>positional arguments<a class="headerlink" href="#complex-first-positional-arguments"' in build_outcome
     assert f'<h3>{grp}<a class="headerlink" href="#complex-first-{anchor}"' in build_outcome
@@ -198,7 +198,7 @@ def test_group_title_empty_prefixes(build_outcome: str, opt_grp_name: tuple[str,
 def test_group_title_prefix_sub_command_replacement(build_outcome: str, opt_grp_name: tuple[str, str]) -> None:
     grp, anchor = opt_grp_name
     assert f'<h2>bar {grp}<a class="headerlink" href="#bar-{anchor}"' in build_outcome
-    assert '<h2>bar Exclusive<a class="headerlink" href="#bar-exclusive"' in build_outcome
+    assert '<h2>bar Exclusive<a class="headerlink" href="#bar-Exclusive"' in build_outcome
     assert '<h2>bar baronlyroot (f)<a class="headerlink" href="#bar-root-first-(f)"' in build_outcome
     assert '<h3>bar baronlyroot first positional arguments<a class="headerlink"' in build_outcome
 
@@ -207,3 +207,9 @@ def test_group_title_prefix_sub_command_replacement(build_outcome: str, opt_grp_
 def test_store_true_false(build_outcome: str) -> None:
     assert "False" not in build_outcome
     assert "True" not in build_outcome
+
+
+@pytest.mark.sphinx(buildername="html", testroot="lower-upper-refs")
+def test_lower_upper_refs(build_outcome: str) -> None:
+    assert '<p id="basic--d"><a class="reference internal" href="#basic--d" title="basic -d">' in build_outcome
+    assert '<p id="basic--D"><a class="reference internal" href="#basic--D" title="basic -D">' in build_outcome
