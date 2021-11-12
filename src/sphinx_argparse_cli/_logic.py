@@ -30,6 +30,7 @@ from docutils.nodes import (
     section,
     strong,
     title,
+    whitespace_normalize_name,
 )
 from docutils.parsers.rst.directives import (  # type: ignore # no stubs
     positive_int,
@@ -229,15 +230,16 @@ class SphinxArgparseCli(SphinxDirective):
         st = strong()
         st += literal(text=opt)
         ref += st
-        self._register_ref(ref_id, ref_title, ref)
+        self._register_ref(ref_id, ref_title, ref, is_cli_option=True)
         line += ref
 
-    def _register_ref(self, ref_name: str, ref_title: str, node: Element) -> None:
+    def _register_ref(self, ref_name: str, ref_title: str, node: Element, is_cli_option: bool = False) -> None:
         doc_name = self.env.docname
+        normalize_name = whitespace_normalize_name if is_cli_option else fully_normalize_name
         if self.env.config.sphinx_argparse_cli_prefix_document:
-            name = fully_normalize_name(f"{doc_name}:{ref_name}")
+            name = normalize_name(f"{doc_name}:{ref_name}")
         else:
-            name = fully_normalize_name(ref_name)
+            name = normalize_name(ref_name)
         if name in self._std_domain.labels:
             logger.warning(
                 __("duplicate label %s, other instance in %s"),

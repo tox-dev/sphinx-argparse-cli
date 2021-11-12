@@ -210,6 +210,7 @@ def test_store_true_false(build_outcome: str) -> None:
 
 
 @pytest.mark.sphinx(buildername="html", testroot="lower-upper-refs")
-def test_lower_upper_refs(build_outcome: str) -> None:
+def test_lower_upper_refs(build_outcome: str, warning: StringIO) -> None:
     assert '<p id="basic--d"><a class="reference internal" href="#basic--d" title="basic -d">' in build_outcome
     assert '<p id="basic--D"><a class="reference internal" href="#basic--D" title="basic -D">' in build_outcome
+    assert not warning.getvalue()
