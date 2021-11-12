@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.8.2
+
+- Don't raise label clashing warnings for options which only differ between upper and lower case
+
 ## 1.8.1
 
 - Fix reference clashing for options which only differ between upper and lower case
