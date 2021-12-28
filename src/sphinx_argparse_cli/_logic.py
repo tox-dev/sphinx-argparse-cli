@@ -102,7 +102,7 @@ class SphinxArgparseCli(SphinxDirective):
             return
         parser_to_args: dict[int, list[str]] = defaultdict(list)
         str_to_parser: dict[str, ArgumentParser] = {}
-        sub_parser = cast(_SubParsersAction, top_sub_parser._group_actions[0])
+        sub_parser: _SubParsersAction[ArgumentParser] = top_sub_parser._group_actions[0]  # type: ignore
         for key, parser in sub_parser._name_parser_map.items():
             parser_to_args[id(parser)].append(key)
             str_to_parser[key] = parser
