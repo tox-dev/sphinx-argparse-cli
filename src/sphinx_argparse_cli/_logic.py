@@ -97,8 +97,8 @@ class SphinxArgparseCli(SphinxDirective):
                 ArgumentParser.parse_known_args = _argparse_parse_known_args_hook  # type: ignore
                 try:
                     parser_creator()
-                except HookExit as exc:
-                    self._parser = exc.parser
+                except HookError as hooked:
+                    self._parser = hooked.parser
                 finally:
                     ArgumentParser.parse_known_args = original_parse_known_args  # type: ignore
 
@@ -338,13 +338,13 @@ def load_help_text(help_text: str) -> str:
     return literal_curly_braces
 
 
-class HookExit(Exception):
+class HookError(Exception):
     def __init__(self, parser: ArgumentParser):
         self.parser = parser
 
 
-def _argparse_parse_known_args_hook(self: ArgumentParser, *args: Any, **kwargs: Any) -> None:
-    raise HookExit(self)
+def _argparse_parse_known_args_hook(self: ArgumentParser, *args: Any, **kwargs: Any) -> None:  # noqa: U100
+    raise HookError(self)
 
 
 __all__ = ("SphinxArgparseCli",)
