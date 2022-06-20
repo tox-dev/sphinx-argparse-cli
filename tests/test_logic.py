@@ -63,6 +63,12 @@ def test_hook(build_outcome: str) -> None:
     assert build_outcome
 
 
+@pytest.mark.sphinx(buildername="html", testroot="hook-fail")
+def test_hook_fail(app: SphinxTestApp) -> None:
+    app.build()
+    assert app._warncount == 1
+
+
 @pytest.mark.sphinx(buildername="text", testroot="prog")
 def test_prog_as_text(build_outcome: str) -> None:
     assert build_outcome == "magic - CLI interface\n*********************\n\n   magic\n"

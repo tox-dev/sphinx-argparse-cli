@@ -101,14 +101,15 @@ class SphinxArgparseCli(SphinxDirective):
                     self._parser = hooked.parser
                 finally:
                     ArgumentParser.parse_known_args = original_parse_known_args  # type: ignore
-
-                if self._parser is None:
-                    raise Exception("Failed to hook argparse to get ArgumentParser")
             else:
                 self._parser = parser_creator()
+
+            del sys.modules[module_name]  # no longer needed cleanup
+            if self._parser is None:
+                raise self.error("Failed to hook argparse to get ArgumentParser")
+
             if "prog" in self.options:
                 self._parser.prog = self.options["prog"]
-            del sys.modules[module_name]  # no longer needed cleanup
         return self._parser
 
     def load_sub_parsers(self) -> Iterator[tuple[list[str], str, ArgumentParser]]:
