@@ -14,7 +14,7 @@ from argparse import (
     _SubParsersAction,
 )
 from collections import defaultdict, namedtuple
-from typing import Iterator, cast
+from typing import Any, Iterator, cast
 
 from docutils.nodes import (
     Element,
@@ -89,13 +89,16 @@ class SphinxArgparseCli(SphinxDirective):
             parser_creator = getattr(__import__(module_name, fromlist=[attr_name]), attr_name)
             if "hook" in self.options:
                 original_parse_known_args = ArgumentParser.parse_known_args
-                ArgumentParser.parse_known_args = _argparse_parse_known_args_hook
+                ArgumentParser.parse_known_args = _argparse_parse_known_args_hook  # type: ignore
                 try:
                     parser_creator()
                 except HookExit as exc:
                     self._parser = exc.parser
                 finally:
-                    ArgumentParser.parse_known_args = original_parse_known_args
+                    ArgumentParser.parse_known_args = original_parse_known_args  # type: ignore
+
+                if self._parser is None:
+                    raise Exception("Failed to hook argparse to get ArgumentParser")
             else:
                 self._parser = parser_creator()
             if "prog" in self.options:
@@ -331,11 +334,11 @@ def load_help_text(help_text: str) -> str:
 
 
 class HookExit(Exception):
-    def __init__(self, parser):
+    def __init__(self, parser: ArgumentParser):
         self.parser = parser
 
 
-def _argparse_parse_known_args_hook(self, *args, **kwargs):
+def _argparse_parse_known_args_hook(self: ArgumentParser, *args: Any, **kwargs: Any) -> None:
     raise HookExit(self)
 
 
