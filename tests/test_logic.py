@@ -58,6 +58,11 @@ def test_complex_as_html(build_outcome: str) -> None:
     assert build_outcome
 
 
+@pytest.mark.sphinx(buildername="html", testroot="hook")
+def test_hook(build_outcome: str) -> None:
+    assert build_outcome
+
+
 @pytest.mark.sphinx(buildername="text", testroot="prog")
 def test_prog_as_text(build_outcome: str) -> None:
     assert build_outcome == "magic - CLI interface\n*********************\n\n   magic\n"
