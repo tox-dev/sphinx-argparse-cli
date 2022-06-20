@@ -73,6 +73,16 @@ def test_empty_title_as_text(build_outcome: str) -> None:
     assert build_outcome == "   foo\n"
 
 
+@pytest.mark.sphinx(buildername="text", testroot="description-set")
+def test_set_description_as_text(build_outcome: str) -> None:
+    assert build_outcome == "foo - CLI interface\n*******************\n\nMy own description\n\n   foo\n"
+
+
+@pytest.mark.sphinx(buildername="text", testroot="description-empty")
+def test_empty_description_as_text(build_outcome: str) -> None:
+    assert build_outcome == "foo - CLI interface\n*******************\n\n   foo\n"
+
+
 @pytest.mark.sphinx(buildername="text", testroot="complex")
 @pytest.mark.prepare(directive_args=[":usage_width: 100"])
 def test_usage_width_default(build_outcome: str) -> None:
