@@ -32,7 +32,12 @@ from docutils.nodes import (
     title,
     whitespace_normalize_name,
 )
-from docutils.parsers.rst.directives import flag, positive_int, unchanged, unchanged_required
+from docutils.parsers.rst.directives import (
+    flag,
+    positive_int,
+    unchanged,
+    unchanged_required,
+)
 from docutils.parsers.rst.states import RSTState, RSTStateMachine
 from docutils.statemachine import StringList
 from sphinx.domains.std import StandardDomain
