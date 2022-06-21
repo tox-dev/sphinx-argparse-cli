@@ -63,10 +63,12 @@ def test_hook(build_outcome: str) -> None:
     assert build_outcome
 
 
-@pytest.mark.sphinx(buildername="html", testroot="hook-fail")
+@pytest.mark.sphinx(buildername="text", testroot="hook-fail")
 def test_hook_fail(app: SphinxTestApp) -> None:
     app.build()
-    assert app._warncount == 1
+    text = (Path(app.outdir) / "index.txt").read_text()
+    assert "Failed to hook argparse to get ArgumentParser" in app._warning.getvalue()
+    assert text == ""
 
 
 @pytest.mark.sphinx(buildername="text", testroot="prog")
