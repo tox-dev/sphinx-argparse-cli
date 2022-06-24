@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.9.0
+
+- Add the option to override the description using the `description` attribute of the directive
+- Add the option to retrieve the arguments by hooking argparse, in cases where `func` consumes the arguments
+  and does not return them
+
 ## 1.8.2
 
 - Don't raise label clashing warnings for options which only differ between upper and lower case

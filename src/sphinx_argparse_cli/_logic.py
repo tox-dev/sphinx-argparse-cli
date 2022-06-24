@@ -64,6 +64,7 @@ class SphinxArgparseCli(SphinxDirective):
         "hook": flag,
         "prog": unchanged,
         "title": unchanged,
+        "description": unchanged,
         "usage_width": positive_int,
         "group_title_prefix": unchanged,
         "group_sub_title_prefix": unchanged,
@@ -143,8 +144,9 @@ class SphinxArgparseCli(SphinxDirective):
         else:
             home_section = section("", title("", Text(title_text)), ids=[make_id(title_text)], names=[title_text])
 
-        if self.parser.description:
-            desc_paragraph = paragraph("", Text(self.parser.description))
+        description = self.options.get("description", self.parser.description)
+        if description:
+            desc_paragraph = paragraph("", Text(description))
             home_section += desc_paragraph
         # construct groups excluding sub-parsers
         home_section += self._mk_usage(self.parser)
