@@ -34,6 +34,7 @@ Within the reStructuredText files use the `sphinx_argparse_cli` directive that t
 | module                 | the module path to where the parser is defined                                                                                                                                   |
 | func                   | the name of the function that once called with no arguments constructs the parser                                                                                                |
 | prog                   | (optional) the module path to where the parser is defined                                                                                                                        |
+| hook                   | (optional) hook `argparse` to retrieve the parser if `func` uses a parser instead of returning it.                                                                               |
 | title                  | (optional) when provided, overwrites the `<prog> - CLI interface` title added by default and when empty, will not be included                                                    |
 | usage_width            | (optional) how large should usage examples be - defaults to 100 character                                                                                                        |
 | group_title_prefix     | (optional) groups subsections title prefixes, accepts the string `{prog}` as a replacement for the program name - defaults to `{prog}`                                           |
@@ -45,6 +46,16 @@ For example:
 .. sphinx_argparse_cli::
   :module: a_project.cli
   :func: build_parser
+  :prog: my-cli-program
+```
+
+If you have code that creates and uses a parser but does not return it, you can specify the `:hook:` flag:
+
+```rst
+.. sphinx_argparse_cli::
+  :module: a_project.cli
+  :func: main
+  :hook:
   :prog: my-cli-program
 ```
 

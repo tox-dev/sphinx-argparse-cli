@@ -14,7 +14,7 @@ from argparse import (
     _SubParsersAction,
 )
 from collections import defaultdict, namedtuple
-from typing import Iterator, cast
+from typing import Any, Iterator, cast
 
 from docutils.nodes import (
     Element,
@@ -32,7 +32,12 @@ from docutils.nodes import (
     title,
     whitespace_normalize_name,
 )
-from docutils.parsers.rst.directives import positive_int, unchanged, unchanged_required
+from docutils.parsers.rst.directives import (
+    flag,
+    positive_int,
+    unchanged,
+    unchanged_required,
+)
 from docutils.parsers.rst.states import RSTState, RSTStateMachine
 from docutils.statemachine import StringList
 from sphinx.domains.std import StandardDomain
@@ -56,6 +61,7 @@ class SphinxArgparseCli(SphinxDirective):
     option_spec = {
         "module": unchanged_required,
         "func": unchanged_required,
+        "hook": flag,
         "prog": unchanged,
         "title": unchanged,
         "usage_width": positive_int,
@@ -86,10 +92,24 @@ class SphinxArgparseCli(SphinxDirective):
         if self._parser is None:
             module_name, attr_name = self.options["module"], self.options["func"]
             parser_creator = getattr(__import__(module_name, fromlist=[attr_name]), attr_name)
-            self._parser = parser_creator()
+            if "hook" in self.options:
+                original_parse_known_args = ArgumentParser.parse_known_args
+                ArgumentParser.parse_known_args = _argparse_parse_known_args_hook  # type: ignore
+                try:
+                    parser_creator()
+                except HookError as hooked:
+                    self._parser = hooked.parser
+                finally:
+                    ArgumentParser.parse_known_args = original_parse_known_args  # type: ignore
+            else:
+                self._parser = parser_creator()
+
+            del sys.modules[module_name]  # no longer needed cleanup
+            if self._parser is None:
+                raise self.error("Failed to hook argparse to get ArgumentParser")
+
             if "prog" in self.options:
                 self._parser.prog = self.options["prog"]
-            del sys.modules[module_name]  # no longer needed cleanup
         return self._parser
 
     def load_sub_parsers(self) -> Iterator[tuple[list[str], str, ArgumentParser]]:
@@ -317,6 +337,15 @@ def load_help_text(help_text: str) -> str:
     double_quote = DOUBLE_QUOTE.sub('``"\\1"``', single_quote)
     literal_curly_braces = CURLY_BRACES.sub("``{\\1}``", double_quote)
     return literal_curly_braces
+
+
+class HookError(Exception):
+    def __init__(self, parser: ArgumentParser):
+        self.parser = parser
+
+
+def _argparse_parse_known_args_hook(self: ArgumentParser, *args: Any, **kwargs: Any) -> None:  # noqa: U100
+    raise HookError(self)
 
 
 __all__ = ("SphinxArgparseCli",)

@@ -58,6 +58,19 @@ def test_complex_as_html(build_outcome: str) -> None:
     assert build_outcome
 
 
+@pytest.mark.sphinx(buildername="html", testroot="hook")
+def test_hook(build_outcome: str) -> None:
+    assert build_outcome
+
+
+@pytest.mark.sphinx(buildername="text", testroot="hook-fail")
+def test_hook_fail(app: SphinxTestApp, warning: StringIO) -> None:
+    app.build()
+    text = (Path(app.outdir) / "index.txt").read_text()
+    assert "Failed to hook argparse to get ArgumentParser" in warning.getvalue()
+    assert text == ""
+
+
 @pytest.mark.sphinx(buildername="text", testroot="prog")
 def test_prog_as_text(build_outcome: str) -> None:
     assert build_outcome == "magic - CLI interface\n*********************\n\n   magic\n"
@@ -124,14 +137,10 @@ def test_ref_prefix_doc(build_outcome: str) -> None:
     assert ref in build_outcome
 
 
-_REF_WARNING_STRING_IO = StringIO()  # could not find any better way to get the warning
-
-
-@pytest.mark.sphinx(buildername="text", testroot="ref-duplicate-label", warning=_REF_WARNING_STRING_IO)
-def test_ref_duplicate_label(build_outcome: tuple[str, str]) -> None:
+@pytest.mark.sphinx(buildername="text", testroot="ref-duplicate-label")
+def test_ref_duplicate_label(build_outcome: tuple[str, str], warning: StringIO) -> None:
     assert build_outcome
-    warnings = _REF_WARNING_STRING_IO.getvalue()
-    assert "duplicate label prog---help" in warnings
+    assert "duplicate label prog---help" in warning.getvalue()
 
 
 @pytest.mark.sphinx(buildername="html", testroot="group-title-prefix-default")
