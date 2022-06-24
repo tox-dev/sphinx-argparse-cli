@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.9.0
+
+- Add the option to override the description using the `description` attribute of the directive.
+
 ## 1.8.2
 
 - Don't raise label clashing warnings for options which only differ between upper and lower case
