@@ -33,7 +33,8 @@ Within the reStructuredText files use the `sphinx_argparse_cli` directive that t
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | module                 | the module path to where the parser is defined                                                                                                                                   |
 | func                   | the name of the function that once called with no arguments constructs the parser                                                                                                |
-| prog                   | (optional) when provided, overwrites the `<prog>` name.                                                                                                                          |
+| prog                   | (optional) when provided, overwrites the `<prog>` name.                                                                                                                          |                                                                                                                     |
+| hook                   | (optional) hook `argparse` to retrieve the parser if `func` uses a parser instead of returning it.                                                                               |
 | title                  | (optional) when provided, overwrites the `<prog> - CLI interface` title added by default and when empty, will not be included                                                    |
 | description            | (optional) when provided, overwrites the description and when empty, will not be included                                                                                        |
 | usage_width            | (optional) how large should usage examples be - defaults to 100 character                                                                                                        |
@@ -46,6 +47,16 @@ For example:
 .. sphinx_argparse_cli::
   :module: a_project.cli
   :func: build_parser
+  :prog: my-cli-program
+```
+
+If you have code that creates and uses a parser but does not return it, you can specify the `:hook:` flag:
+
+```rst
+.. sphinx_argparse_cli::
+  :module: a_project.cli
+  :func: main
+  :hook:
   :prog: my-cli-program
 ```
 
