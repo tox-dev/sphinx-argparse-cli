@@ -18,12 +18,10 @@ metavar
 nitpicky
 outdir
 parsers
-pathlib
 prog
 refid
 reftitle
 rst
-setdefault
 statemachine
 subparsers
 subtype
