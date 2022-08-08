@@ -233,3 +233,11 @@ def test_lower_upper_refs(build_outcome: str, warning: StringIO) -> None:
     assert '<p id="basic--d"><a class="reference internal" href="#basic--d" title="basic -d">' in build_outcome
     assert '<p id="basic--D"><a class="reference internal" href="#basic--D" title="basic -D">' in build_outcome
     assert not warning.getvalue()
+
+
+@pytest.mark.sphinx(buildername="text", testroot="default-handling")
+def test_with_default(build_outcome: str) -> None:
+    assert (
+        build_outcome
+        == 'foo - CLI interface\n*******************\n\n   foo x\n\n\nfoo positional arguments\n========================\n\n* **"x"** - arg (default: True)\n'
+    )
