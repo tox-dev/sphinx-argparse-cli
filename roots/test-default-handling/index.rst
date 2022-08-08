@@ -1,5 +1,5 @@
 .. sphinx_argparse_cli::
   :module: parser
   :func: main
-  :no_default_values: false
+  :no_default_values:
   :hook:
