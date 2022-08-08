@@ -239,5 +239,15 @@ def test_lower_upper_refs(build_outcome: str, warning: StringIO) -> None:
 def test_with_default(build_outcome: str) -> None:
     assert (
         build_outcome
-        == 'foo - CLI interface\n*******************\n\n   foo x\n\n\nfoo positional arguments\n========================\n\n* **"x"** - arg (default: True)\n'
+        == """foo - CLI interface
+*******************
+
+   foo x
+
+
+foo positional arguments
+========================
+
+* **"x"** - arg (default: True)
+"""
     )
