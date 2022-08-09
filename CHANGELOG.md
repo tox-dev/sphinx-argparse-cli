@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## 1.9.1
+## 1.10.0
 
 - Add the option to override the generated `default` part of the CLI parameter description.
 
