@@ -68,6 +68,7 @@ class SphinxArgparseCli(SphinxDirective):
         "usage_width": positive_int,
         "group_title_prefix": unchanged,
         "group_sub_title_prefix": unchanged,
+        "no_default_values": unchanged,
     }
 
     def __init__(
@@ -231,7 +232,8 @@ class SphinxArgparseCli(SphinxDirective):
             for content in cast(paragraph, temp.children[0]).children:
                 line += content
         if (
-            action.default != SUPPRESS
+            "no_default_values" not in self.options
+            and action.default != SUPPRESS
             and not re.match(r".*[ (]default[s]? .*", (action.help or ""))
             and not isinstance(action, (_StoreTrueAction, _StoreFalseAction))
         ):
