@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.11.0
+
+- Hatchling as backend and exclude sphinx 6.1 support.
+
 ## 1.10.0
 
 - Add the option to override the generated `default` part of the CLI parameter description.
@@ -9,8 +13,8 @@ All notable changes to this project will be documented in this file.
 ## 1.9.0
 
 - Add the option to override the description using the `description` attribute of the directive
-- Add the option to retrieve the arguments by hooking argparse, in cases where `func` consumes the arguments
-  and does not return them
+- Add the option to retrieve the arguments by hooking argparse, in cases where `func` consumes the arguments and does
+  not return them
 
 ## 1.8.2
 
@@ -27,7 +31,8 @@ All notable changes to this project will be documented in this file.
 
 ## 1.7.0
 
-- Support for adding custom subsection group title prefix (`group_title_prefix` and `group_sub_title_prefix` directive arguments)
+- Support for adding custom subsection group title prefix (`group_title_prefix` and `group_sub_title_prefix` directive
+  arguments)
 
 ## 1.6.0 (2021-04-15)
 

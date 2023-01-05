@@ -1,24 +1,75 @@
 [build-system]
-requires = ["setuptools>=65.5", "setuptools-scm>=7.0.5"]
-build-backend = "setuptools.build_meta"
+build-backend = "hatchling.build"
+requires = ["hatchling>=1.12", "hatch-vcs>=0.3"]
+
+[project]
+name = "sphinx_argparse_cli"
+description = "render CLI arguments (sub-commands friendly) defined by argparse module"
+readme = "README.md"
+license = "MIT"
+maintainers = [{ name = "Bernat Gabor", email = "gaborjbernat@gmail.com" }]
+urls.Documentation = "https://github.com/tox-dev/sphinx-argparse-cli#sphinx-argparse-cli"
+urls.Homepage = "https://github.com/tox-dev/sphinx-argparse-cli"
+urls.Source = "https://github.com/tox-dev/sphinx-argparse-cli"
+urls.Tracker = "https://github.com/tox-dev/sphinx-argparse-cli/issues"
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: Console",
+  "Framework :: Sphinx",
+  "Framework :: Sphinx :: Extension",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Topic :: Documentation",
+  "Topic :: Documentation :: Sphinx",
+]
+keywords = ["sphinx", "argparse"]
+requires-python = ">=3.7"
+dependencies = ["sphinx>=5.3,!=6.1"]
+optional-dependencies.test = ["covdefaults>=2.2.2", "pytest>=7.2", "pytest-cov>=4"]
+dynamic = ["version"]
+
+[tool.hatch]
+build.hooks.vcs.version-file = "src/sphinx_argparse_cli/version.py"
+build.targets.sdist.include = ["/src", "/tests"]
+version.source = "vcs"
 
 [tool.black]
 line-length = 120
 
+[tool.coverage]
+html.show_contexts = true
+html.skip_covered = false
+paths.source = ["src", "**/site-packages"]
+report.fail_under = 76
+run.dynamic_context = "test_function"
+run.parallel = true
+run.plugins = ["covdefaults"]
+run.relative_files = true
+
 [tool.isort]
+known_first_party = ["sphinx_argparse_cli", "tests"]
 profile = "black"
-known_first_party = ["sphinx_argparse_cli"]
+line_length = 120
 
-[tool.setuptools_scm]
-write_to = "src/sphinx_argparse_cli/version.py"
-write_to_template = """
-\"\"\" Version information \"\"\"
-from __future__ import annotations
+[tool.mypy]
+python_version = "3.11"
+show_error_codes = true
+strict = true
 
-__version__: str = "{version}"
-"""
+[tool.pep8]
+max-line-length = "120"
 
-[tool.pytest.ini_options]
-filterwarnings = [
-    "ignore::DeprecationWarning:docutils",
+[tool.flake8]
+max-complexity = 22
+max-line-length = 120
+unused-arguments-ignore-abstract-functions = true
+noqa-require-code = true
+dictionaries = ["en_US", "python", "technical", "django"]
+ignore = [
+  "E203", # whitespace before ':'
+  "W503", #  line break before binary operator
 ]
