@@ -6,7 +6,7 @@ requires = [
 ]
 
 [project]
-name = "sphinx_argparse_cli"
+name = "sphinx-argparse-cli"
 description = "render CLI arguments (sub-commands friendly) defined by argparse module"
 readme = "README.md"
 keywords = [
@@ -54,28 +54,10 @@ version.source = "vcs"
 [tool.black]
 line-length = 120
 
-[tool.coverage]
-html.show_contexts = true
-html.skip_covered = false
-paths.source = ["src", "**/site-packages"]
-report.fail_under = 76
-run.dynamic_context = "test_function"
-run.parallel = true
-run.plugins = ["covdefaults"]
-run.relative_files = true
-
 [tool.isort]
 known_first_party = ["sphinx_argparse_cli", "tests"]
 profile = "black"
 line_length = 120
-
-[tool.mypy]
-python_version = "3.11"
-show_error_codes = true
-strict = true
-
-[tool.pep8]
-max-line-length = "120"
 
 [tool.flake8]
 max-complexity = 22
@@ -87,3 +69,21 @@ ignore = [
   "E203", # whitespace before ':'
   "W503", #  line break before binary operator
 ]
+
+[tool.coverage]
+html.show_contexts = true
+html.skip_covered = false
+paths.source = ["src", "**/site-packages"]
+report.fail_under = 76
+run.dynamic_context = "test_function"
+run.parallel = true
+run.plugins = ["covdefaults"]
+run.relative_files = true
+
+[tool.mypy]
+python_version = "3.11"
+show_error_codes = true
+strict = true
+
+[tool.pep8]
+max-line-length = "120"
