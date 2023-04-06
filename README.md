@@ -8,9 +8,9 @@
 ![check](https://github.com/tox-dev/sphinx-argparse-cli/workflows/check/badge.svg?branch=main)
 
 Render CLI arguments (sub-commands friendly) defined by the argparse module. For live demo checkout the documentation of
-[tox](https://tox.readthedocs.io/en/rewrite/cli_interface.html),
-[python-build](https://pypa-build.readthedocs.io/en/latest/#python-m-build) and
-[mdpo](https://mdpo.readthedocs.io/en/master/cli.html#command-line-interfaces).
+[tox](https://tox.wiki/en/latest/cli_interface.html),
+[pypa-build](https://pypa-build.readthedocs.io/en/latest/#python-m-build) and
+[mdpo](https://mondeja.github.io/mdpo/latest/cli.html).
 
 ## installation
 
