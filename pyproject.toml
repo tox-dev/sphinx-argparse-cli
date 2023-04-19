@@ -15,7 +15,7 @@ keywords = [
 ]
 license = "MIT"
 maintainers = [{ name = "Bernat Gabor", email = "gaborjbernat@gmail.com" }]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
@@ -34,7 +34,7 @@ dynamic = [
   "version",
 ]
 dependencies = [
-  "sphinx!=6.1,>=6.1.3",
+  "sphinx>=6.1.3",
 ]
 optional-dependencies.test = [
   "covdefaults>=2.3",
