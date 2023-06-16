@@ -72,13 +72,13 @@ to avoid reference label clash when the same anchors are generated in multiple d
 
 For example in case of a `tox` command, and `sphinx_argparse_cli_prefix_document=False` (default):
 
-- to refer to the optional arguments group use `` :ref:`tox-optional-arguments`  ``,
-- to refer to the run subcommand use `` :ref:`tox-run`  ``,
-- to refer to flag `--magic` of the `run` sub-command use `` :ref:`tox-run---magic`  ``.
+- to refer to the optional arguments group use ``:ref:`tox-optional-arguments` ``,
+- to refer to the run subcommand use ``:ref:`tox-run` ``,
+- to refer to flag `--magic` of the `run` sub-command use ``:ref:`tox-run---magic` ``.
 
 For example in case of a `tox` command, and `sphinx_argparse_cli_prefix_document=True`, and the current document name
 being `cli`:
 
-- to refer to the optional arguments group use `` :ref:`cli:tox-optional-arguments`  ``,
-- to refer to the run subcommand use `` :ref:`cli:tox-run`  ``,
-- to refer to flag `--magic` of the `run` sub-command use `` :ref:`cli:tox-run---magic`  ``.
+- to refer to the optional arguments group use ``:ref:`cli:tox-optional-arguments` ``,
+- to refer to the run subcommand use ``:ref:`cli:tox-run` ``,
+- to refer to flag `--magic` of the `run` sub-command use ``:ref:`cli:tox-run---magic` ``.
