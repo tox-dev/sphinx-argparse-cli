@@ -2,12 +2,16 @@ from __future__ import annotations
 
 import os
 import sys
-from io import StringIO
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
-from _pytest.fixtures import SubRequest
-from sphinx.testing.util import SphinxTestApp
+
+if TYPE_CHECKING:
+    from io import StringIO
+
+    from _pytest.fixtures import SubRequest
+    from sphinx.testing.util import SphinxTestApp
 
 
 @pytest.fixture(scope="session")
@@ -29,7 +33,7 @@ def build_outcome(app: SphinxTestApp, request: SubRequest) -> str:
             if not any(i for i in directive_args if i.startswith(":func:")):  # pragma: no branch
                 directive_args.append(":func: make")
             args = [f"  {i}" for i in directive_args]
-            index.write_text(os.linesep.join([".. sphinx_argparse_cli::"] + args))
+            index.write_text(os.linesep.join([".. sphinx_argparse_cli::", *args]))
 
     ext_mapping = {"html": "html", "text": "txt"}
     sphinx_marker = request.node.get_closest_marker("sphinx")

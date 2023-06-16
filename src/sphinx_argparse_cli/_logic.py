@@ -14,7 +14,7 @@ from argparse import (
     _SubParsersAction,
 )
 from collections import defaultdict, namedtuple
-from typing import Any, Iterator, cast
+from typing import TYPE_CHECKING, Any, Iterator, cast
 
 from docutils.nodes import (
     Element,
@@ -33,12 +33,14 @@ from docutils.nodes import (
     whitespace_normalize_name,
 )
 from docutils.parsers.rst.directives import flag, positive_int, unchanged, unchanged_required
-from docutils.parsers.rst.states import RSTState, RSTStateMachine
 from docutils.statemachine import StringList
 from sphinx.domains.std import StandardDomain
 from sphinx.locale import __
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
+
+if TYPE_CHECKING:
+    from docutils.parsers.rst.states import RSTState, RSTStateMachine
 
 TextAsDefault = namedtuple("TextAsDefault", ["text"])
 
@@ -77,7 +79,7 @@ class SphinxArgparseCli(SphinxDirective):
         block_text: str,
         state: RSTState,
         state_machine: RSTStateMachine,
-    ):
+    ) -> None:
         options.setdefault("group_title_prefix", None)
         options.setdefault("group_sub_title_prefix", None)
         super().__init__(name, arguments, options, content, lineno, content_offset, block_text, state, state_machine)
@@ -103,7 +105,8 @@ class SphinxArgparseCli(SphinxDirective):
 
             del sys.modules[module_name]  # no longer needed cleanup
             if self._parser is None:
-                raise self.error("Failed to hook argparse to get ArgumentParser")
+                msg = "Failed to hook argparse to get ArgumentParser"
+                raise self.error(msg)
 
             if "prog" in self.options:
                 self._parser.prog = self.options["prog"]
@@ -339,11 +342,11 @@ def load_help_text(help_text: str) -> str:
 
 
 class HookError(Exception):
-    def __init__(self, parser: ArgumentParser):
+    def __init__(self, parser: ArgumentParser) -> None:
         self.parser = parser
 
 
-def _argparse_parse_known_args_hook(self: ArgumentParser, *args: Any, **kwargs: Any) -> None:  # noqa: U100
+def _argparse_parse_known_args_hook(self: ArgumentParser, *args: Any, **kwargs: Any) -> None:
     raise HookError(self)
 
 

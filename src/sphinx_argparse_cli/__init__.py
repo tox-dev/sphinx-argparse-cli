@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from sphinx.application import Sphinx
+from typing import TYPE_CHECKING
 
 from .version import __version__
+
+if TYPE_CHECKING:
+    from sphinx.application import Sphinx
 
 
 def setup(app: Sphinx) -> None:
