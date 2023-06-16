@@ -62,7 +62,7 @@ line-length = 120
 select = ["ALL"]
 line-length = 120
 target-version = "py38"
-isort = {known-first-party = ["pypi_changes"], required-imports = ["from __future__ import annotations"]}
+isort = {known-first-party = ["sphinx_argparse_cli"], required-imports = ["from __future__ import annotations"]}
 ignore = [
   "ANN101",  # no typoe annotation for self
   "ANN401",  # allow Any as type annotation

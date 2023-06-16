@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import re
 import sys
 from argparse import (
@@ -14,6 +13,7 @@ from argparse import (
     _SubParsersAction,
 )
 from collections import defaultdict, namedtuple
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Iterator, cast
 
 from docutils.nodes import (
@@ -93,13 +93,13 @@ class SphinxArgparseCli(SphinxDirective):
             parser_creator = getattr(__import__(module_name, fromlist=[attr_name]), attr_name)
             if "hook" in self.options:
                 original_parse_known_args = ArgumentParser.parse_known_args
-                ArgumentParser.parse_known_args = _argparse_parse_known_args_hook  # type: ignore
+                ArgumentParser.parse_known_args = _parse_known_args_hook  # type: ignore[method-assign,assignment]
                 try:
                     parser_creator()
                 except HookError as hooked:
                     self._parser = hooked.parser
                 finally:
-                    ArgumentParser.parse_known_args = original_parse_known_args  # type: ignore
+                    ArgumentParser.parse_known_args = original_parse_known_args  # type: ignore[method-assign]
             else:
                 self._parser = parser_creator()
 
@@ -118,7 +118,8 @@ class SphinxArgparseCli(SphinxDirective):
             return
         parser_to_args: dict[int, list[str]] = defaultdict(list)
         str_to_parser: dict[str, ArgumentParser] = {}
-        sub_parser: _SubParsersAction[ArgumentParser] = top_sub_parser._group_actions[0]  # type: ignore  # noqa: SLF001
+        sub_parser: _SubParsersAction[ArgumentParser]
+        sub_parser = top_sub_parser._group_actions[0]  # type: ignore[assignment]  # noqa: SLF001
         for key, parser in sub_parser._name_parser_map.items():  # noqa: SLF001
             parser_to_args[id(parser)].append(key)
             str_to_parser[key] = parser
@@ -138,7 +139,7 @@ class SphinxArgparseCli(SphinxDirective):
         # construct headers
         self.env.note_reread()  # this document needs to be always updated
         title_text = self.options.get("title", f"{self.parser.prog} - CLI interface").strip()
-        if title_text.strip() == "":
+        if not title_text.strip():
             home_section: Element = paragraph()
         else:
             home_section = section("", title("", Text(title_text)), ids=[make_id(title_text)], names=[title_text])
@@ -189,15 +190,14 @@ class SphinxArgparseCli(SphinxDirective):
                     title_text = self._append_title(title_text, sub_title_prefix, elements[0], " ".join(elements[1:]))
                 else:
                     title_text += f"{' '.join(prefix.split(' ')[1:])} "
-        else:
-            if " " in prefix:
-                if sub_title_prefix is not None:
-                    title_text += f"{elements[0]} "
-                    title_text = self._append_title(title_text, sub_title_prefix, elements[0], " ".join(elements[1:]))
-                else:
-                    title_text += f"{' '.join(elements[:2])} "
+        elif " " in prefix:
+            if sub_title_prefix is not None:
+                title_text += f"{elements[0]} "
+                title_text = self._append_title(title_text, sub_title_prefix, elements[0], " ".join(elements[1:]))
             else:
-                title_text += f"{prefix} "
+                title_text += f"{' '.join(elements[:2])} "
+        else:
+            title_text += f"{prefix} "
         title_text += group.title or ""
         return title_text
 
@@ -236,7 +236,7 @@ class SphinxArgparseCli(SphinxDirective):
             and not isinstance(action, (_StoreTrueAction, _StoreFalseAction))
         ):
             line += Text(" (default: ")
-            line += literal(text=str(action.default).replace(os.getcwd(), "{cwd}"))
+            line += literal(text=str(action.default).replace(str(Path.cwd()), "{cwd}"))
             line += Text(")")
         return point
 
@@ -312,12 +312,11 @@ class SphinxArgparseCli(SphinxDirective):
                 title_text = self._append_title(title_text, sub_title_prefix, elements[0], elements[1])
             else:
                 title_text += elements[1]
+        elif sub_title_prefix is not None:
+            title_text += f"{elements[0]} "
+            title_text = self._append_title(title_text, sub_title_prefix, elements[0], elements[1])
         else:
-            if sub_title_prefix is not None:
-                title_text += f"{elements[0]} "
-                title_text = self._append_title(title_text, sub_title_prefix, elements[0], elements[1])
-            else:
-                title_text += parser.prog
+            title_text += parser.prog
         return title_text.rstrip()
 
     @staticmethod
@@ -343,8 +342,7 @@ CURLY_BRACES = re.compile(r"[{](.+?)[}]")
 def load_help_text(help_text: str) -> str:
     single_quote = SINGLE_QUOTE.sub("``'\\1'``", help_text)
     double_quote = DOUBLE_QUOTE.sub('``"\\1"``', single_quote)
-    literal_curly_braces = CURLY_BRACES.sub("``{\\1}``", double_quote)
-    return literal_curly_braces
+    return CURLY_BRACES.sub("``{\\1}``", double_quote)
 
 
 class HookError(Exception):
@@ -352,8 +350,10 @@ class HookError(Exception):
         self.parser = parser
 
 
-def _argparse_parse_known_args_hook(self: ArgumentParser, *args: Any, **kwargs: Any) -> None:  # noqa: ARG001
+def _parse_known_args_hook(self: ArgumentParser, *args: Any, **kwargs: Any) -> None:  # noqa: ARG001
     raise HookError(self)
 
 
-__all__ = ("SphinxArgparseCli",)
+__all__ = [
+    "SphinxArgparseCli",
+]

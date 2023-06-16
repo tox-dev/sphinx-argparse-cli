@@ -1,3 +1,4 @@
+"""Sphinx generator for argparse."""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -17,4 +18,6 @@ def setup(app: Sphinx) -> None:
     app.add_config_value("sphinx_argparse_cli_prefix_document", False, "env")  # noqa: FBT003
 
 
-__all__ = ("__version__",)
+__all__ = [
+    "__version__",
+]

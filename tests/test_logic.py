@@ -41,8 +41,7 @@ def build_outcome(app: SphinxTestApp, request: SubRequest) -> str:
     ext = ext_mapping[sphinx_marker.kwargs.get("buildername")]
 
     app.build()
-    text = (Path(app.outdir) / f"index.{ext}").read_text()
-    return text
+    return (Path(app.outdir) / f"index.{ext}").read_text()
 
 
 @pytest.mark.sphinx(buildername="html", testroot="basic")
@@ -72,7 +71,7 @@ def test_hook_fail(app: SphinxTestApp, warning: StringIO) -> None:
     app.build()
     text = (Path(app.outdir) / "index.txt").read_text()
     assert "Failed to hook argparse to get ArgumentParser" in warning.getvalue()
-    assert text == ""
+    assert not text
 
 
 @pytest.mark.sphinx(buildername="text", testroot="prog")
