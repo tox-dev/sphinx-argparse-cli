@@ -2,12 +2,16 @@ from __future__ import annotations
 
 import os
 import sys
-from io import StringIO
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
-from _pytest.fixtures import SubRequest
-from sphinx.testing.util import SphinxTestApp
+
+if TYPE_CHECKING:
+    from io import StringIO
+
+    from _pytest.fixtures import SubRequest
+    from sphinx.testing.util import SphinxTestApp
 
 
 @pytest.fixture(scope="session")
@@ -29,7 +33,7 @@ def build_outcome(app: SphinxTestApp, request: SubRequest) -> str:
             if not any(i for i in directive_args if i.startswith(":func:")):  # pragma: no branch
                 directive_args.append(":func: make")
             args = [f"  {i}" for i in directive_args]
-            index.write_text(os.linesep.join([".. sphinx_argparse_cli::"] + args))
+            index.write_text(os.linesep.join([".. sphinx_argparse_cli::", *args]))
 
     ext_mapping = {"html": "html", "text": "txt"}
     sphinx_marker = request.node.get_closest_marker("sphinx")
@@ -37,8 +41,7 @@ def build_outcome(app: SphinxTestApp, request: SubRequest) -> str:
     ext = ext_mapping[sphinx_marker.kwargs.get("buildername")]
 
     app.build()
-    text = (Path(app.outdir) / f"index.{ext}").read_text()
-    return text
+    return (Path(app.outdir) / f"index.{ext}").read_text()
 
 
 @pytest.mark.sphinx(buildername="html", testroot="basic")
@@ -68,7 +71,7 @@ def test_hook_fail(app: SphinxTestApp, warning: StringIO) -> None:
     app.build()
     text = (Path(app.outdir) / "index.txt").read_text()
     assert "Failed to hook argparse to get ArgumentParser" in warning.getvalue()
-    assert text == ""
+    assert not text
 
 
 @pytest.mark.sphinx(buildername="text", testroot="prog")

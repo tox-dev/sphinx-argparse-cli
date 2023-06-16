@@ -1,16 +1,20 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
-from _pytest.config import Config
 from docutils import __version__ as docutils_version
 from sphinx import __display_version__ as sphinx_version
 from sphinx.testing.path import path
+
+if TYPE_CHECKING:
+    from _pytest.config import Config
 
 pytest_plugins = "sphinx.testing.fixtures"
 collect_ignore = ["roots"]
 
 
-def pytest_report_header(config: Config) -> str:  # noqa: U100
+def pytest_report_header(config: Config) -> str:  # noqa: ARG001
     return f"libraries: Sphinx-{sphinx_version}, docutils-{docutils_version}"
 
 
