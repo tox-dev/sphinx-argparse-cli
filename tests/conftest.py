@@ -14,7 +14,7 @@ pytest_plugins = "sphinx.testing.fixtures"
 collect_ignore = ["roots"]
 
 
-def pytest_report_header(config: Config) -> str:
+def pytest_report_header(config: Config) -> str:  # noqa: ARG001
     return f"libraries: Sphinx-{sphinx_version}, docutils-{docutils_version}"
 
 

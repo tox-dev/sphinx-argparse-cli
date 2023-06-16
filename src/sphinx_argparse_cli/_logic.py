@@ -68,7 +68,7 @@ class SphinxArgparseCli(SphinxDirective):
         "no_default_values": unchanged,
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         arguments: list[str],
@@ -113,13 +113,13 @@ class SphinxArgparseCli(SphinxDirective):
         return self._parser
 
     def load_sub_parsers(self) -> Iterator[tuple[list[str], str, ArgumentParser]]:
-        top_sub_parser = self.parser._subparsers
+        top_sub_parser = self.parser._subparsers  # noqa: SLF001
         if not top_sub_parser:
             return
         parser_to_args: dict[int, list[str]] = defaultdict(list)
         str_to_parser: dict[str, ArgumentParser] = {}
-        sub_parser: _SubParsersAction[ArgumentParser] = top_sub_parser._group_actions[0]  # type: ignore
-        for key, parser in sub_parser._name_parser_map.items():
+        sub_parser: _SubParsersAction[ArgumentParser] = top_sub_parser._group_actions[0]  # type: ignore  # noqa: SLF001
+        for key, parser in sub_parser._name_parser_map.items():  # noqa: SLF001
             parser_to_args[id(parser)].append(key)
             str_to_parser[key] = parser
         done_parser: set[int] = set()
@@ -131,7 +131,7 @@ class SphinxArgparseCli(SphinxDirective):
             aliases = parser_to_args[id(parser)]
             aliases.remove(name)
             # help is stored in a pseudo action
-            help_msg = next((a.help for a in sub_parser._choices_actions if a.dest == name), None) or ""
+            help_msg = next((a.help for a in sub_parser._choices_actions if a.dest == name), None) or ""  # noqa: SLF001
             yield aliases, help_msg, parser
 
     def run(self) -> list[Node]:
@@ -149,8 +149,8 @@ class SphinxArgparseCli(SphinxDirective):
             home_section += desc_paragraph
         # construct groups excluding sub-parsers
         home_section += self._mk_usage(self.parser)
-        for group in self.parser._action_groups:
-            if not group._group_actions or group is self.parser._subparsers:
+        for group in self.parser._action_groups:  # noqa: SLF001
+            if not group._group_actions or group is self.parser._subparsers:  # noqa: SLF001
                 continue
             home_section += self._mk_option_group(group, prefix=self.parser.prog.split("/")[-1])
         # construct sub-parser
@@ -172,7 +172,7 @@ class SphinxArgparseCli(SphinxDirective):
             group_section += paragraph("", Text(group.description))
         self._register_ref(ref_id, title_text, group_section)
         opt_group = bullet_list()
-        for action in group._group_actions:
+        for action in group._group_actions:  # noqa: SLF001
             point = self._mk_option_line(action, prefix)
             opt_group += point
         group_section += opt_group
@@ -251,7 +251,13 @@ class SphinxArgparseCli(SphinxDirective):
         self._register_ref(ref_id, ref_title, ref, is_cli_option=True)
         line += ref
 
-    def _register_ref(self, ref_name: str, ref_title: str, node: Element, is_cli_option: bool = False) -> None:
+    def _register_ref(
+        self,
+        ref_name: str,
+        ref_title: str,
+        node: Element,
+        is_cli_option: bool = False,  # noqa: FBT001, FBT002
+    ) -> None:
         doc_name = self.env.docname
         normalize_name = whitespace_normalize_name if is_cli_option else fully_normalize_name
         if self.env.config.sphinx_argparse_cli_prefix_document:
@@ -290,8 +296,8 @@ class SphinxArgparseCli(SphinxDirective):
             desc_paragraph = paragraph("", Text(command_desc))
             group_section += desc_paragraph
         group_section += self._mk_usage(parser)
-        for group in parser._action_groups:
-            if not group._group_actions:  # do not show empty groups
+        for group in parser._action_groups:  # noqa: SLF001
+            if not group._group_actions:  # do not show empty groups  # noqa: SLF001
                 continue
             group_section += self._mk_option_group(group, prefix=parser.prog)
         return group_section
@@ -346,7 +352,7 @@ class HookError(Exception):
         self.parser = parser
 
 
-def _argparse_parse_known_args_hook(self: ArgumentParser, *args: Any, **kwargs: Any) -> None:
+def _argparse_parse_known_args_hook(self: ArgumentParser, *args: Any, **kwargs: Any) -> None:  # noqa: ARG001
     raise HookError(self)
 
 
