@@ -14,7 +14,7 @@ from argparse import (
 )
 from collections import defaultdict, namedtuple
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterator, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Iterator, cast
 
 from docutils.nodes import (
     Element,
@@ -55,7 +55,7 @@ logger = getLogger(__name__)
 class SphinxArgparseCli(SphinxDirective):
     name = "sphinx_argparse_cli"
     has_content = False
-    option_spec = {
+    option_spec: ClassVar[dict[str, Any]] = {
         "module": unchanged_required,
         "func": unchanged_required,
         "hook": flag,
