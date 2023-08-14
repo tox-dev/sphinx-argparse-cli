@@ -12,9 +12,9 @@ from argparse import (
     _StoreTrueAction,
     _SubParsersAction,
 )
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar, Iterator, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Iterator, NamedTuple, cast
 
 from docutils.nodes import (
     Element,
@@ -42,7 +42,9 @@ from sphinx.util.logging import getLogger
 if TYPE_CHECKING:
     from docutils.parsers.rst.states import RSTState, RSTStateMachine
 
-TextAsDefault = namedtuple("TextAsDefault", ["text"])
+
+class TextAsDefault(NamedTuple):
+    text: str
 
 
 def make_id(key: str) -> str:

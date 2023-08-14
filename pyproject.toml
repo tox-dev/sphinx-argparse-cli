@@ -38,11 +38,11 @@ dynamic = [
   "version",
 ]
 dependencies = [
-  "sphinx>=7.0.1",
+  "sphinx>=7.1.2",
 ]
 optional-dependencies.test = [
   "covdefaults>=2.3",
-  "pytest>=7.3.2",
+  "pytest>=7.4",
   "pytest-cov>=4.1",
 ]
 urls.Documentation = "https://github.com/tox-dev/sphinx-argparse-cli#sphinx-argparse-cli"
