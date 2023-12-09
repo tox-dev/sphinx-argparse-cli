@@ -1,7 +1,7 @@
 [build-system]
 build-backend = "hatchling.build"
 requires = [
-  "hatch-vcs>=0.3",
+  "hatch-vcs>=0.4",
   "hatchling>=1.18",
 ]
 
@@ -42,7 +42,7 @@ dependencies = [
 ]
 optional-dependencies.test = [
   "covdefaults>=2.3",
-  "pytest>=7.4",
+  "pytest>=7.4.3",
   "pytest-cov>=4.1",
 ]
 urls.Documentation = "https://github.com/tox-dev/sphinx-argparse-cli#sphinx-argparse-cli"
