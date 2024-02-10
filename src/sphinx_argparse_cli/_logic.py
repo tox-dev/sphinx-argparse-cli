@@ -7,6 +7,7 @@ from argparse import (
     Action,
     ArgumentParser,
     HelpFormatter,
+    RawDescriptionHelpFormatter,
     _ArgumentGroup,
     _StoreFalseAction,
     _StoreTrueAction,
@@ -22,10 +23,12 @@ from docutils.nodes import (
     Text,
     bullet_list,
     fully_normalize_name,
+    line_block,
     list_item,
     literal,
     literal_block,
     paragraph,
+    raw,
     reference,
     section,
     strong,
@@ -148,8 +151,12 @@ class SphinxArgparseCli(SphinxDirective):
 
         description = self.options.get("description", self.parser.description)
         if description:
-            desc_paragraph = paragraph("", Text(description))
-            home_section += desc_paragraph
+            if isinstance(self.parser.formatter_class(""), RawDescriptionHelpFormatter) and "\n" in description:
+                lit = literal_block("", Text(description))
+                lit["language"] = "none"
+                home_section += lit
+            else:
+               home_section += paragraph("", Text(description))
         # construct groups excluding sub-parsers
         home_section += self._mk_usage(self.parser)
         for group in self.parser._action_groups:  # noqa: SLF001
@@ -172,7 +179,7 @@ class SphinxArgparseCli(SphinxDirective):
         header = title("", Text(title_text))
         group_section = section("", header, ids=[ref_id], names=[ref_id])
         if group.description:
-            group_section += paragraph("", Text(group.description))
+           group_section += paragraph("", Text(group.description))
         self._register_ref(ref_id, title_text, group_section)
         opt_group = bullet_list()
         for action in group._group_actions:  # noqa: SLF001
