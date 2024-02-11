@@ -15,5 +15,5 @@ spans multiple lines.
 Now this should be a separate paragraph.
 """,
         formatter_class=RawDescriptionHelpFormatter,
-        add_help=False
+        add_help=False,
     )
