@@ -7,6 +7,7 @@ from argparse import (
     Action,
     ArgumentParser,
     HelpFormatter,
+    RawDescriptionHelpFormatter,
     _ArgumentGroup,
     _StoreFalseAction,
     _StoreTrueAction,
@@ -148,8 +149,12 @@ class SphinxArgparseCli(SphinxDirective):
 
         description = self.options.get("description", self.parser.description)
         if description:
-            desc_paragraph = paragraph("", Text(description))
-            home_section += desc_paragraph
+            if isinstance(self.parser.formatter_class(""), RawDescriptionHelpFormatter) and "\n" in description:
+                lit = literal_block("", Text(description))
+                lit["language"] = "none"
+                home_section += lit
+            else:
+                home_section += paragraph("", Text(description))
         # construct groups excluding sub-parsers
         home_section += self._mk_usage(self.parser)
         for group in self.parser._action_groups:  # noqa: SLF001

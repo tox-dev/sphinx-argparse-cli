@@ -99,6 +99,15 @@ def test_empty_description_as_text(build_outcome: str) -> None:
     assert build_outcome == "foo - CLI interface\n*******************\n\n   foo\n"
 
 
+@pytest.mark.sphinx(buildername="html", testroot="description-multiline")
+def test_multiline_description_as_html(build_outcome: str) -> None:
+    ref = (
+        "This description\nspans multiple lines.\n\n  this line is indented.\n    and also this.\n\nNow this should be"
+        " a separate paragraph.\n"
+    )
+    assert ref in build_outcome
+
+
 @pytest.mark.sphinx(buildername="text", testroot="complex")
 @pytest.mark.prepare(directive_args=[":usage_width: 100"])
 def test_usage_width_default(build_outcome: str) -> None:
