@@ -65,6 +65,7 @@ class SphinxArgparseCli(SphinxDirective):
         "prog": unchanged,
         "title": unchanged,
         "description": unchanged,
+        "epilog": unchanged,
         "usage_width": positive_int,
         "group_title_prefix": unchanged,
         "group_sub_title_prefix": unchanged,
@@ -147,9 +148,11 @@ class SphinxArgparseCli(SphinxDirective):
         else:
             home_section = section("", title("", Text(title_text)), ids=[make_id(title_text)], names=[title_text])
 
+        raw_format = self.parser.formatter_class == RawDescriptionHelpFormatter
+
         description = self.options.get("description", self.parser.description)
         if description:
-            if isinstance(self.parser.formatter_class(""), RawDescriptionHelpFormatter) and "\n" in description:
+            if raw_format and "\n" in description:
                 lit = literal_block("", Text(description))
                 lit["language"] = "none"
                 home_section += lit
@@ -164,6 +167,16 @@ class SphinxArgparseCli(SphinxDirective):
         # construct sub-parser
         for aliases, help_msg, parser in self.load_sub_parsers():
             home_section += self._mk_sub_command(aliases, help_msg, parser)
+
+        epilog = self.options.get("epilog", self.parser.epilog)
+        if epilog:
+            if raw_format and "\n" in epilog:
+                lit = literal_block("", Text(epilog))
+                lit["language"] = "none"
+                home_section += lit
+            else:
+                home_section += paragraph("", Text(epilog))
+
         return [home_section]
 
     def _mk_option_group(self, group: _ArgumentGroup, prefix: str) -> section:
