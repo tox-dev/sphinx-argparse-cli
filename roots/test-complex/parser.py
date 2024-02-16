@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 
 
 def make() -> ArgumentParser:
-    parser = ArgumentParser(description="argparse tester", prog="complex")
+    parser = ArgumentParser(description="argparse tester", prog="complex", epilog="test epilog")
     parser.add_argument("--root", action="store_true", help="root flag")
     parser.add_argument("--no-help", action="store_true")
     parser.add_argument("--outdir", "-o", type=str, help="output directory", metavar="out_dir")
