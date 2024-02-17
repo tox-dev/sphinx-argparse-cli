@@ -67,6 +67,7 @@ class SphinxArgparseCli(SphinxDirective):
         "description": unchanged,
         "epilog": unchanged,
         "usage_width": positive_int,
+        "usage_first": flag,
         "group_title_prefix": unchanged,
         "group_sub_title_prefix": unchanged,
         "no_default_values": unchanged,
@@ -148,6 +149,9 @@ class SphinxArgparseCli(SphinxDirective):
         else:
             home_section = section("", title("", Text(title_text)), ids=[make_id(title_text)], names=[title_text])
 
+        if "usage_first" in self.options:
+            home_section += self._mk_usage(self.parser)
+
         raw_format = self.parser.formatter_class == RawDescriptionHelpFormatter
 
         description = self.options.get("description", self.parser.description)
@@ -158,8 +162,11 @@ class SphinxArgparseCli(SphinxDirective):
                 home_section += lit
             else:
                 home_section += paragraph("", Text(description))
+
+        if "usage_first" not in self.options:
+            home_section += self._mk_usage(self.parser)
+
         # construct groups excluding sub-parsers
-        home_section += self._mk_usage(self.parser)
         for group in self.parser._action_groups:  # noqa: SLF001
             if not group._group_actions or group is self.parser._subparsers:  # noqa: SLF001
                 continue
@@ -313,11 +320,17 @@ class SphinxArgparseCli(SphinxDirective):
         group_section = section("", title("", Text(title_text)), ids=[ref_id], names=[title_ref])
         self._register_ref(ref_id, title_ref, group_section)
 
+        if "usage_first" in self.options:
+            group_section += self._mk_usage(parser)
+
         command_desc = (parser.description or help_msg or "").strip()
         if command_desc:
             desc_paragraph = paragraph("", Text(command_desc))
             group_section += desc_paragraph
-        group_section += self._mk_usage(parser)
+
+        if "usage_first" not in self.options:
+            group_section += self._mk_usage(parser)
+
         for group in parser._action_groups:  # noqa: SLF001
             if not group._group_actions:  # do not show empty groups  # noqa: SLF001
                 continue
