@@ -107,6 +107,7 @@ def test_multiline_description_as_html(build_outcome: str) -> None:
     )
     assert ref in build_outcome
 
+
 @pytest.mark.sphinx(buildername="text", testroot="epilog-set")
 def test_set_epilog_as_text(build_outcome: str) -> None:
     assert build_outcome == "foo - CLI interface\n*******************\n\n   foo\n\nMy own epilog\n"
@@ -124,6 +125,7 @@ def test_multiline_epilog_as_html(build_outcome: str) -> None:
         " a separate paragraph.\n"
     )
     assert ref in build_outcome
+
 
 @pytest.mark.sphinx(buildername="text", testroot="complex")
 @pytest.mark.prepare(directive_args=[":usage_width: 100"])
