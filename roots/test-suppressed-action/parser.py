@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from argparse import ArgumentParser, SUPPRESS
+from argparse import SUPPRESS, ArgumentParser
 
 
 def make() -> ArgumentParser:
