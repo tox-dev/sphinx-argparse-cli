@@ -181,6 +181,8 @@ class SphinxArgparseCli(SphinxDirective):
         self._register_ref(ref_id, title_text, group_section)
         opt_group = bullet_list()
         for action in group._group_actions:  # noqa: SLF001
+            if action.help == SUPPRESS:
+                continue
             point = self._mk_option_line(action, prefix)
             opt_group += point
         group_section += opt_group

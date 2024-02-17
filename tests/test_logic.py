@@ -120,6 +120,11 @@ def test_usage_width_custom(build_outcome: str) -> None:
     assert "complex second [-h] [--flag] [--root]\n" in build_outcome
 
 
+@pytest.mark.sphinx(buildername="text", testroot="suppressed-action")
+def test_suppressed_action(build_outcome: str) -> None:
+    assert "--activities-since" not in build_outcome
+
+
 @pytest.mark.parametrize(
     ("example", "output"),
     [
