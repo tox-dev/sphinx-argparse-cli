@@ -153,15 +153,13 @@ class SphinxArgparseCli(SphinxDirective):
             home_section += self._mk_usage(self.parser)
 
         raw_format = self.parser.formatter_class == RawDescriptionHelpFormatter
-
         description = self.options.get("description", self.parser.description)
-        if description:
-            if raw_format and "\n" in description:
-                lit = literal_block("", Text(description))
-                lit["language"] = "none"
-                home_section += lit
-            else:
-                home_section += paragraph("", Text(description))
+        if raw_format and "\n" in description:
+            lit = literal_block("", Text(description))
+            lit["language"] = "none"
+            home_section += lit
+        elif description:
+            home_section += paragraph("", Text(description))
 
         if "usage_first" not in self.options:
             home_section += self._mk_usage(self.parser)
@@ -176,13 +174,12 @@ class SphinxArgparseCli(SphinxDirective):
             home_section += self._mk_sub_command(aliases, help_msg, parser)
 
         epilog = self.options.get("epilog", self.parser.epilog)
-        if epilog:
-            if raw_format and "\n" in epilog:
-                lit = literal_block("", Text(epilog))
-                lit["language"] = "none"
-                home_section += lit
-            else:
-                home_section += paragraph("", Text(epilog))
+        if raw_format and "\n" in epilog:
+            lit = literal_block("", Text(epilog))
+            lit["language"] = "none"
+            home_section += lit
+        elif epilog:
+            home_section += paragraph("", Text(epilog))
 
         return [home_section]
 
