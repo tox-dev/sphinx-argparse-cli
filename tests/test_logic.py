@@ -139,6 +139,13 @@ def test_usage_width_custom(build_outcome: str) -> None:
     assert "complex second [-h] [--flag] [--root]\n" in build_outcome
 
 
+@pytest.mark.sphinx(buildername="text", testroot="complex")
+@pytest.mark.prepare(directive_args=[":usage_first:"])
+def test_set_usage_first(build_outcome: str) -> None:
+    assert "complex [-h]" in build_outcome.split("argparse tester")[0]
+    assert "complex first [-h]" in build_outcome.split("a-first-desc")[0]
+
+
 @pytest.mark.sphinx(buildername="text", testroot="suppressed-action")
 def test_suppressed_action(build_outcome: str) -> None:
     assert "--activities-since" not in build_outcome

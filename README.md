@@ -39,6 +39,7 @@ Within the reStructuredText files use the `sphinx_argparse_cli` directive that t
 | description            | (optional) when provided, overwrites the description and when empty, will not be included                                                                                        |
 | epilog            | (optional) when provided, overwrites the epilog and when empty, will not be included                                                                                        |
 | usage_width            | (optional) how large should usage examples be - defaults to 100 character                                                                                                        |
+| usage_first            | (optional) show usage before description                                                                                                        |
 | group_title_prefix     | (optional) groups subsections title prefixes, accepts the string `{prog}` as a replacement for the program name - defaults to `{prog}`                                           |
 | group_sub_title_prefix | (optional) subcommands groups subsections title prefixes, accepts replacement of `{prog}` and `{subcommand}` for program and subcommand name - defaults to `{prog} {subcommand}` |
 | no_default_values      | (optional) suppresses generation of `default` entries                                                                                                                             |

@@ -67,6 +67,7 @@ class SphinxArgparseCli(SphinxDirective):
         "description": unchanged,
         "epilog": unchanged,
         "usage_width": positive_int,
+        "usage_first": flag,
         "group_title_prefix": unchanged,
         "group_sub_title_prefix": unchanged,
         "no_default_values": unchanged,
@@ -89,6 +90,7 @@ class SphinxArgparseCli(SphinxDirective):
         super().__init__(name, arguments, options, content, lineno, content_offset, block_text, state, state_machine)
         self._parser: ArgumentParser | None = None
         self._std_domain: StandardDomain = cast(StandardDomain, self.env.get_domain("std"))
+        self._raw_format: bool = False
 
     @property
     def parser(self) -> ArgumentParser:
@@ -114,6 +116,8 @@ class SphinxArgparseCli(SphinxDirective):
 
             if "prog" in self.options:
                 self._parser.prog = self.options["prog"]
+
+            self._raw_format = self._parser.formatter_class == RawDescriptionHelpFormatter
         return self._parser
 
     def load_sub_parsers(self) -> Iterator[tuple[list[str], str, ArgumentParser]]:
@@ -148,18 +152,16 @@ class SphinxArgparseCli(SphinxDirective):
         else:
             home_section = section("", title("", Text(title_text)), ids=[make_id(title_text)], names=[title_text])
 
-        raw_format = self.parser.formatter_class == RawDescriptionHelpFormatter
+        if "usage_first" in self.options:
+            home_section += self._mk_usage(self.parser)
 
-        description = self.options.get("description", self.parser.description)
-        if description:
-            if raw_format and "\n" in description:
-                lit = literal_block("", Text(description))
-                lit["language"] = "none"
-                home_section += lit
-            else:
-                home_section += paragraph("", Text(description))
+        if description := self._pre_format(self.options.get("description", self.parser.description)):
+            home_section += description
+
+        if "usage_first" not in self.options:
+            home_section += self._mk_usage(self.parser)
+
         # construct groups excluding sub-parsers
-        home_section += self._mk_usage(self.parser)
         for group in self.parser._action_groups:  # noqa: SLF001
             if not group._group_actions or group is self.parser._subparsers:  # noqa: SLF001
                 continue
@@ -168,16 +170,19 @@ class SphinxArgparseCli(SphinxDirective):
         for aliases, help_msg, parser in self.load_sub_parsers():
             home_section += self._mk_sub_command(aliases, help_msg, parser)
 
-        epilog = self.options.get("epilog", self.parser.epilog)
-        if epilog:
-            if raw_format and "\n" in epilog:
-                lit = literal_block("", Text(epilog))
-                lit["language"] = "none"
-                home_section += lit
-            else:
-                home_section += paragraph("", Text(epilog))
+        if epilog := self._pre_format(self.options.get("epilog", self.parser.epilog)):
+            home_section += epilog
 
         return [home_section]
+
+    def _pre_format(self, block: None | str) -> None | paragraph | literal_block:
+        if block is None:
+            return None
+        if self._raw_format and "\n" in block:
+            lit = literal_block("", Text(block))
+            lit["language"] = "none"
+            return lit
+        return paragraph("", Text(block))
 
     def _mk_option_group(self, group: _ArgumentGroup, prefix: str) -> section:
         sub_title_prefix: str = self.options["group_sub_title_prefix"]
@@ -313,11 +318,17 @@ class SphinxArgparseCli(SphinxDirective):
         group_section = section("", title("", Text(title_text)), ids=[ref_id], names=[title_ref])
         self._register_ref(ref_id, title_ref, group_section)
 
+        if "usage_first" in self.options:
+            group_section += self._mk_usage(parser)
+
         command_desc = (parser.description or help_msg or "").strip()
         if command_desc:
             desc_paragraph = paragraph("", Text(command_desc))
             group_section += desc_paragraph
-        group_section += self._mk_usage(parser)
+
+        if "usage_first" not in self.options:
+            group_section += self._mk_usage(parser)
+
         for group in parser._action_groups:  # noqa: SLF001
             if not group._group_actions:  # do not show empty groups  # noqa: SLF001
                 continue
