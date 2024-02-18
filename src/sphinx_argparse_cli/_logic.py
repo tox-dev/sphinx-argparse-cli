@@ -90,6 +90,7 @@ class SphinxArgparseCli(SphinxDirective):
         super().__init__(name, arguments, options, content, lineno, content_offset, block_text, state, state_machine)
         self._parser: ArgumentParser | None = None
         self._std_domain: StandardDomain = cast(StandardDomain, self.env.get_domain("std"))
+        self._raw_format = self.parser.formatter_class == RawDescriptionHelpFormatter
 
     @property
     def parser(self) -> ArgumentParser:
@@ -152,9 +153,8 @@ class SphinxArgparseCli(SphinxDirective):
         if "usage_first" in self.options:
             home_section += self._mk_usage(self.parser)
 
-        raw_format = self.parser.formatter_class == RawDescriptionHelpFormatter
         description = self.options.get("description", self.parser.description)
-        if raw_format and "\n" in description:
+        if self._raw_format and "\n" in description:
             lit = literal_block("", Text(description))
             lit["language"] = "none"
             home_section += lit
@@ -174,7 +174,7 @@ class SphinxArgparseCli(SphinxDirective):
             home_section += self._mk_sub_command(aliases, help_msg, parser)
 
         epilog = self.options.get("epilog", self.parser.epilog)
-        if raw_format and "\n" in epilog:
+        if self._raw_format and "\n" in epilog:
             lit = literal_block("", Text(epilog))
             lit["language"] = "none"
             home_section += lit
