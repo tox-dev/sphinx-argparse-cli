@@ -180,7 +180,7 @@ class SphinxArgparseCli(SphinxDirective):
             lit = literal_block("", Text(block))
             lit["language"] = "none"
             return lit
-        if block:
+        if block is not None:
             return paragraph("", Text(block))
         return None
 
