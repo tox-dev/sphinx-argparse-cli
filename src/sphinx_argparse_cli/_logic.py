@@ -116,7 +116,7 @@ class SphinxArgparseCli(SphinxDirective):
 
             if "prog" in self.options:
                 self._parser.prog = self.options["prog"]
-    
+
             self._parser.formatter_class == RawDescriptionHelpFormatter
         return self._parser
 
