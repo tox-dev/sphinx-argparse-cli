@@ -181,9 +181,8 @@ class SphinxArgparseCli(SphinxDirective):
             lit["language"] = "none"
             return lit
         if block:
-             return paragraph("", Text(block))
-        return
-
+            return paragraph("", Text(block))
+        return None
 
     def _mk_option_group(self, group: _ArgumentGroup, prefix: str) -> section:
         sub_title_prefix: str = self.options["group_sub_title_prefix"]
