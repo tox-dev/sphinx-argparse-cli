@@ -90,7 +90,7 @@ class SphinxArgparseCli(SphinxDirective):
         super().__init__(name, arguments, options, content, lineno, content_offset, block_text, state, state_machine)
         self._parser: ArgumentParser | None = None
         self._std_domain: StandardDomain = cast(StandardDomain, self.env.get_domain("std"))
-        self._raw_format = self.parser.formatter_class == RawDescriptionHelpFormatter
+        self._raw_format: bool = False
 
     @property
     def parser(self) -> ArgumentParser:
@@ -116,6 +116,8 @@ class SphinxArgparseCli(SphinxDirective):
 
             if "prog" in self.options:
                 self._parser.prog = self.options["prog"]
+    
+            self._parser.formatter_class == RawDescriptionHelpFormatter
         return self._parser
 
     def load_sub_parsers(self) -> Iterator[tuple[list[str], str, ArgumentParser]]:
