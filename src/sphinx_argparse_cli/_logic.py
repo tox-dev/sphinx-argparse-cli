@@ -155,7 +155,7 @@ class SphinxArgparseCli(SphinxDirective):
         if "usage_first" in self.options:
             home_section += self._mk_usage(self.parser)
 
-        if description := self._pre_format(self.options.get("description", self.parser.description))
+        if description := self._pre_format(self.options.get("description", self.parser.description)):
             home_section += description
 
         if "usage_first" not in self.options:
@@ -170,7 +170,7 @@ class SphinxArgparseCli(SphinxDirective):
         for aliases, help_msg, parser in self.load_sub_parsers():
             home_section += self._mk_sub_command(aliases, help_msg, parser)
 
-        if epilog := self._pre_format(self.options.get("epilog", self.parser.epilog))
+        if epilog := self._pre_format(self.options.get("epilog", self.parser.epilog)):
             home_section += epilog
 
         return [home_section]
