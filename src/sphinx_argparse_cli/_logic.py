@@ -177,7 +177,7 @@ class SphinxArgparseCli(SphinxDirective):
 
     def _pre_format(self, block: None | str) -> None | paragraph | literal_block:
         if block is None:
-            return
+            return None
         if self._raw_format and "\n" in block:
             lit = literal_block("", Text(block))
             lit["language"] = "none"
