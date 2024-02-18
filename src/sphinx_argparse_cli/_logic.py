@@ -153,13 +153,8 @@ class SphinxArgparseCli(SphinxDirective):
         if "usage_first" in self.options:
             home_section += self._mk_usage(self.parser)
 
-        description = self.options.get("description", self.parser.description)
-        if self._raw_format and "\n" in description:
-            lit = literal_block("", Text(description))
-            lit["language"] = "none"
-            home_section += lit
-        elif description:
-            home_section += paragraph("", Text(description))
+        if description := self._pre_format(self.options.get("description", self.parser.description))
+            home_section += description
 
         if "usage_first" not in self.options:
             home_section += self._mk_usage(self.parser)
@@ -173,15 +168,20 @@ class SphinxArgparseCli(SphinxDirective):
         for aliases, help_msg, parser in self.load_sub_parsers():
             home_section += self._mk_sub_command(aliases, help_msg, parser)
 
-        epilog = self.options.get("epilog", self.parser.epilog)
-        if self._raw_format and "\n" in epilog:
-            lit = literal_block("", Text(epilog))
-            lit["language"] = "none"
-            home_section += lit
-        elif epilog:
-            home_section += paragraph("", Text(epilog))
+        if epilog := self._pre_format(self.options.get("epilog", self.parser.epilog))
+            home_section += epilog
 
         return [home_section]
+
+    def _pre_format(self, block: None | str) -> None | paragraph | literal_block:
+        if self._raw_format and "\n" in block:
+            lit = literal_block("", Text(block))
+            lit["language"] = "none"
+            return lit
+        if block:
+             return paragraph("", Text(block))
+        return
+
 
     def _mk_option_group(self, group: _ArgumentGroup, prefix: str) -> section:
         sub_title_prefix: str = self.options["group_sub_title_prefix"]
