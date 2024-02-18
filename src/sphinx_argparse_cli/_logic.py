@@ -176,13 +176,13 @@ class SphinxArgparseCli(SphinxDirective):
         return [home_section]
 
     def _pre_format(self, block: None | str) -> None | paragraph | literal_block:
+        if block is None:
+            return
         if self._raw_format and "\n" in block:
             lit = literal_block("", Text(block))
             lit["language"] = "none"
             return lit
-        if block is not None:
-            return paragraph("", Text(block))
-        return None
+        return paragraph("", Text(block))
 
     def _mk_option_group(self, group: _ArgumentGroup, prefix: str) -> section:
         sub_title_prefix: str = self.options["group_sub_title_prefix"]
