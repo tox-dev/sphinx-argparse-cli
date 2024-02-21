@@ -194,8 +194,8 @@ class SphinxArgparseCli(SphinxDirective):
         # the text sadly needs to be prefixed, because otherwise the autosectionlabel will conflict
         header = title("", Text(title_text))
         group_section = section("", header, ids=[ref_id], names=[ref_id])
-        if group.description:
-            group_section += paragraph("", Text(group.description))
+        if description := self._pre_format(group.description):
+            group_section += description
         self._register_ref(ref_id, title_text, group_section)
         opt_group = bullet_list()
         for action in group._group_actions:  # noqa: SLF001
