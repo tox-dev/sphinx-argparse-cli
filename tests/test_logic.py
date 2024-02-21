@@ -107,7 +107,6 @@ def test_multiline_description_as_html(build_outcome: str) -> None:
     )
     assert ref in build_outcome
 
-    print(build_outcome)
     ref = "This group description\n\nspans multiple lines.\n"
     assert ref in build_outcome
 
