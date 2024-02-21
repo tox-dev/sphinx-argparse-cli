@@ -107,6 +107,10 @@ def test_multiline_description_as_html(build_outcome: str) -> None:
     )
     assert ref in build_outcome
 
+    print(build_outcome)
+    ref = "This group description\n\nspans multiple lines.\n"
+    assert ref in build_outcome
+
 
 @pytest.mark.sphinx(buildername="text", testroot="epilog-set")
 def test_set_epilog_as_text(build_outcome: str) -> None:
