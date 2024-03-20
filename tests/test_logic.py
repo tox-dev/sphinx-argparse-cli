@@ -297,3 +297,16 @@ foo positional arguments
 * **"x"** - arg (default: True)
 """
     )
+
+
+@pytest.mark.sphinx(buildername="html", testroot="nested")
+def test_nested_content(build_outcome: str) -> None:
+    assert '<section id="basic-1---CLI-interface">' in build_outcome
+    assert "<h1>basic-1 - CLI interface" in build_outcome
+    assert "<h2>basic-1 opt" in build_outcome
+    assert "<p>Some text inside first directive.</p>" in build_outcome
+    assert '<section id="basic-2---CLI-interface">' in build_outcome
+    assert "<h2>basic-2 - CLI interface" in build_outcome
+    assert "<h3>basic-2 opt" in build_outcome
+    assert "<p>Some text inside second directive.</p>" in build_outcome
+    assert "<p>Some text after directives.</p>" in build_outcome

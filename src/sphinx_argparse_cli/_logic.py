@@ -57,7 +57,7 @@ logger = getLogger(__name__)
 
 class SphinxArgparseCli(SphinxDirective):
     name = "sphinx_argparse_cli"
-    has_content = False
+    has_content = True
     option_spec: ClassVar[dict[str, Any]] = {
         "module": unchanged_required,
         "func": unchanged_required,
@@ -172,6 +172,9 @@ class SphinxArgparseCli(SphinxDirective):
 
         if epilog := self._pre_format(self.options.get("epilog", self.parser.epilog)):
             home_section += epilog
+
+        if self.content:
+            self.state.nested_parse(self.content, self.content_offset, home_section)
 
         return [home_section]
 

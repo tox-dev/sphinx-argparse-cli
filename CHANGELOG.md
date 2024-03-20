@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- Allow to add content to directive.
+
 ## 1.13.1
 
 - Fix multiline handling of group descriptions.
