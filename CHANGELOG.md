@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- Allow to add content to directive.
+
 ## 1.11.0
 
 - Hatchling as backend and exclude sphinx 6.1 support.
