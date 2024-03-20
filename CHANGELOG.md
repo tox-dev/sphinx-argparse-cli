@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.13.1
+
+- Fix multiline handling of group descriptions.
+
+## 1.13.0
+
+- Don't render arguments with `help=argparse.SUPPRESS`.
+- Show epilogue if present in the command description.
+- Add option to show usage before description.
+
+## 1.12.0
+
+- Support rendering with `argparse.RawDescriptionHelpFormatter`.
+
 ## 1.11.0
 
 - Hatchling as backend and exclude sphinx 6.1 support.
