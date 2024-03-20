@@ -309,4 +309,4 @@ def test_nested_content(build_outcome: str) -> None:
     assert "<h2>basic-2 - CLI interface" in build_outcome
     assert "<h3>basic-2 opt" in build_outcome
     assert "<p>Some text inside second directive.</p>" in build_outcome
-    assert "<p>Some text outside of directives.</p>" in build_outcome
+    assert "<p>Some text after directives.</p>" in build_outcome

@@ -10,4 +10,4 @@
 
     Some text inside second directive.
 
-Some text outside of directives.
+Some text after directives.
