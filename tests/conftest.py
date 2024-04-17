@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 from docutils import __version__ as docutils_version
 from sphinx import __display_version__ as sphinx_version
-from sphinx.testing.path import path
 
 if TYPE_CHECKING:
     from _pytest.config import Config
@@ -19,8 +19,8 @@ def pytest_report_header(config: Config) -> str:  # noqa: ARG001
 
 
 @pytest.fixture(scope="session", name="rootdir")
-def root_dir() -> path:
-    return path(__file__).parent.parent.abspath() / "roots"
+def root_dir() -> Path:
+    return Path(__file__).parents[1].absolute() / "roots"
 
 
 def pytest_configure(config: Config) -> None:
