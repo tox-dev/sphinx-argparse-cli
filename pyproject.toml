@@ -14,7 +14,9 @@ keywords = [
   "sphinx",
 ]
 license = "MIT"
-maintainers = [{ name = "Bernat Gabor", email = "gaborjbernat@gmail.com" }] # noqa: E999
+maintainers = [
+  { name = "Bernat Gabor", email = "gaborjbernat@gmail.com" },
+] # noqa: E999
 requires-python = ">=3.9"
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -52,7 +54,10 @@ urls.Tracker = "https://github.com/tox-dev/sphinx-argparse-cli/issues"
 
 [tool.hatch]
 build.hooks.vcs.version-file = "src/sphinx_argparse_cli/version.py"
-build.targets.sdist.include = ["/src", "/tests"]
+build.targets.sdist.include = [
+  "/src",
+  "/tests",
+]
 version.source = "vcs"
 
 [tool.black]
@@ -61,8 +66,14 @@ line-length = 120
 [tool.ruff]
 line-length = 120
 target-version = "py38"
-lint.select = ["ALL"]
-lint.isort = { known-first-party = ["sphinx_argparse_cli"], required-imports = ["from __future__ import annotations"] }
+lint.select = [
+  "ALL",
+]
+lint.isort = { known-first-party = [
+  "sphinx_argparse_cli",
+], required-imports = [
+  "from __future__ import annotations",
+] }
 lint.ignore = [
   "ANN101", # no type annotation for self
   "ANN401", # allow Any as type annotation
@@ -98,11 +109,16 @@ count = true
 [tool.coverage]
 html.show_contexts = true
 html.skip_covered = false
-paths.source = ["src", "**/site-packages"]
+paths.source = [
+  "src",
+  "**/site-packages",
+]
 report.fail_under = 76
 run.dynamic_context = "test_function"
 run.parallel = true
-run.plugins = ["covdefaults"]
+run.plugins = [
+  "covdefaults",
+]
 run.relative_files = true
 
 [tool.mypy]
