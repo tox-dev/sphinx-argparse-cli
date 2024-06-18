@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 - Allow to add content to directive.
+- Fix Sphinx warnings about parallel reads.
 
 ## 1.13.1
 
