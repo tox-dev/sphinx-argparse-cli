@@ -2,7 +2,7 @@
 build-backend = "hatchling.build"
 requires = [
   "hatch-vcs>=0.4",
-  "hatchling>=1.24",
+  "hatchling>=1.25",
 ]
 
 [project]
@@ -39,12 +39,12 @@ dynamic = [
   "version",
 ]
 dependencies = [
-  "sphinx>=7.3.5",
+  "sphinx>=7.3.7",
 ]
 optional-dependencies.test = [
   "covdefaults>=2.3",
   "defusedxml>=0.7.1", # needed for sphinx.testing
-  "pytest>=8.1.1",
+  "pytest>=8.2.2",
   "pytest-cov>=5",
 ]
 urls.Documentation = "https://github.com/tox-dev/sphinx-argparse-cli#sphinx-argparse-cli"
