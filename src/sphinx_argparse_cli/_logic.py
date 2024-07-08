@@ -82,7 +82,7 @@ class SphinxArgparseCli(SphinxDirective):
         lineno: int,
         content_offset: int,
         block_text: str,
-        state: RSTState[Any],
+        state: RSTState,
         state_machine: RSTStateMachine,
     ) -> None:
         options.setdefault("group_title_prefix", None)
