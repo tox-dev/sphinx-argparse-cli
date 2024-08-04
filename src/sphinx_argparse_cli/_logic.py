@@ -52,6 +52,11 @@ def make_id(key: str) -> str:
     return "-".join(key.split()).rstrip("-")
 
 
+def make_id_lower(key: str) -> str:
+    # replace all capital letters "X" with "_lower(X)"
+    return re.sub("[A-Z]", lambda m: "_" + m.group(0).lower(), make_id(key))
+
+
 logger = getLogger(__name__)
 
 
@@ -71,6 +76,10 @@ class SphinxArgparseCli(SphinxDirective):
         "group_title_prefix": unchanged,
         "group_sub_title_prefix": unchanged,
         "no_default_values": unchanged,
+        # :ref: only supports lower-case.  If this is set, any
+        # would-be-upper-case chars will be prefixed with _.  Since
+        # this is backwards incompatible for URL's, this is opt-in.
+        "force_refs_lower": flag,
     }
 
     def __init__(  # noqa: PLR0913
@@ -91,6 +100,7 @@ class SphinxArgparseCli(SphinxDirective):
         self._parser: ArgumentParser | None = None
         self._std_domain: StandardDomain = cast(StandardDomain, self.env.get_domain("std"))
         self._raw_format: bool = False
+        self.make_id = make_id_lower if "force_refs_lower" in self.options else make_id
 
     @property
     def parser(self) -> ArgumentParser:
@@ -150,7 +160,7 @@ class SphinxArgparseCli(SphinxDirective):
         if not title_text.strip():
             home_section: Element = paragraph()
         else:
-            home_section = section("", title("", Text(title_text)), ids=[make_id(title_text)], names=[title_text])
+            home_section = section("", title("", Text(title_text)), ids=[self.make_id(title_text)], names=[title_text])
 
         if "usage_first" in self.options:
             home_section += self._mk_usage(self.parser)
@@ -193,7 +203,7 @@ class SphinxArgparseCli(SphinxDirective):
 
         title_text = self._build_opt_grp_title(group, prefix, sub_title_prefix, title_prefix)
         title_ref: str = f"{prefix}{' ' if prefix else ''}{group.title}"
-        ref_id = make_id(title_ref)
+        ref_id = self.make_id(title_ref)
         # the text sadly needs to be prefixed, because otherwise the autosectionlabel will conflict
         header = title("", Text(title_text))
         group_section = section("", header, ids=[ref_id], names=[ref_id])
@@ -271,7 +281,7 @@ class SphinxArgparseCli(SphinxDirective):
         return point
 
     def _mk_option_name(self, line: paragraph, prefix: str, opt: str) -> None:
-        ref_id = make_id(f"{prefix}-{opt}")
+        ref_id = self.make_id(f"{prefix}-{opt}")
         ref_title = f"{prefix} {opt}"
         ref = reference("", refid=ref_id, reftitle=ref_title)
         line.attributes["ids"].append(ref_id)
@@ -317,7 +327,7 @@ class SphinxArgparseCli(SphinxDirective):
             title_text += aliases_text
             title_ref += aliases_text
         title_text = title_text.strip()
-        ref_id = make_id(title_ref)
+        ref_id = self.make_id(title_ref)
         group_section = section("", title("", Text(title_text)), ids=[ref_id], names=[title_ref])
         self._register_ref(ref_id, title_ref, group_section)
 

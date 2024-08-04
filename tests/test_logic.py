@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sphinx_argparse_cli._logic import make_id, make_id_lower
+
 if TYPE_CHECKING:
     from io import StringIO
 
@@ -278,6 +280,26 @@ def test_store_true_false(build_outcome: str) -> None:
 def test_lower_upper_refs(build_outcome: str, warning: StringIO) -> None:
     assert '<p id="basic--d"><a class="reference internal" href="#basic--d" title="basic -d">' in build_outcome
     assert '<p id="basic--D"><a class="reference internal" href="#basic--D" title="basic -D">' in build_outcome
+    assert not warning.getvalue()
+
+
+@pytest.mark.parametrize(
+    ("key", "mixed", "lower"),
+    [
+        ("ProgramName", "ProgramName", "_program_name"),
+        ("ProgramName -A", "ProgramName--A", "_program_name--_a"),
+        ("ProgramName -a", "ProgramName--a", "_program_name--a"),
+    ],
+)
+def test_make_id(key: str, mixed: str, lower: str) -> None:
+    assert make_id(key) == mixed
+    assert make_id_lower(key) == lower
+
+
+@pytest.mark.sphinx(buildername="html", testroot="force-refs-lower")
+def test_ref_cases(build_outcome: str, warning: StringIO) -> None:
+    assert '<a class="reference internal" href="#_prog--_b" title="Prog -B">' in build_outcome
+    assert '<a class="reference internal" href="#_prog--b" title="Prog -b">' in build_outcome
     assert not warning.getvalue()
 
 
