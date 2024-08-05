@@ -43,7 +43,7 @@ Within the reStructuredText files use the `sphinx_argparse_cli` directive that t
 | group_title_prefix     | (optional) groups subsections title prefixes, accepts the string `{prog}` as a replacement for the program name - defaults to `{prog}`                                           |
 | group_sub_title_prefix | (optional) subcommands groups subsections title prefixes, accepts replacement of `{prog}` and `{subcommand}` for program and subcommand name - defaults to `{prog} {subcommand}` |
 | no_default_values      | (optional) suppresses generation of `default` entries                                                                                                                             |
-
+| force_refs_lower       | (optional) Sphinx `:ref:` only supports lower-case references.  With this, any capital letter in generated reference anchors are lowered and given an `_` prefix (i.e. `A` becomes `_a`) |
 For example:
 
 ```rst
@@ -84,3 +84,14 @@ being `cli`:
 - to refer to the optional arguments group use ``:ref:`cli:tox-optional-arguments` ``,
 - to refer to the run subcommand use ``:ref:`cli:tox-run` ``,
 - to refer to flag `--magic` of the `run` sub-command use ``:ref:`cli:tox-run---magic` ``.
+
+Due to Sphinx's `:ref:` only supporting lower-case values, if you need to distinguish mixed case program names or
+arguments, set the `:force_refs_lower:` argument.  With this flag, captial-letters in references will be converted to
+their lower-case counterpart and prefixed with an `_`.  For example:
+
+- A `prog` name `SampleProgram` will be referenced as ``:ref:`_sample_program...` ``.
+- To distinguish between mixed case flags `-a` and `-A` use ``:ref:`_sample_program--a` `` and ``:ref:`_sample_program--_a` `` respectively
+
+Note that if you are _not_ concernced about using internal Sphinx `:ref:` cross-references, you may choose to leave this
+off to maintain mixed-case anchors in your output HTML; but be aware that later enabling it will change your anchors in
+the output HTML.
