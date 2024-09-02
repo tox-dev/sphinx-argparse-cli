@@ -23,7 +23,7 @@ def opt_grp_name() -> tuple[str, str]:
     return "optional arguments", "optional-arguments"  # pragma: no cover
 
 
-@pytest.fixture()
+@pytest.fixture
 def build_outcome(app: SphinxTestApp, request: SubRequest) -> str:
     prepare_marker = request.node.get_closest_marker("prepare")
     if prepare_marker:
