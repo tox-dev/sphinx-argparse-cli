@@ -45,7 +45,7 @@ Within the reStructuredText files use the `sphinx_argparse_cli` directive that t
 | no_default_values      | (optional) suppresses generation of `default` entries                                                                                                                                   |
 | force_refs_lower       | (optional) Sphinx `:ref:` only supports lower-case references. With this, any capital letter in generated reference anchors are lowered and given an `_` prefix (i.e. `A` becomes `_a`) |
 
-> > > > > > > bda12fb (Declare 3.13 support and drop 3.9) For example:
+For example:
 
 ```rst
 .. sphinx_argparse_cli::
