@@ -18,6 +18,8 @@ Render CLI arguments (sub-commands friendly) defined by the argparse module. For
 python -m pip install sphinx-argparse-cli
 ```
 
+[README.md](README.md)
+
 ## enable in your `conf.py`
 
 ```python
@@ -29,22 +31,23 @@ extensions = ["sphinx_argparse_cli"]
 
 Within the reStructuredText files use the `sphinx_argparse_cli` directive that takes, at least, two arguments:
 
-| Name                   | Description                                                                                                                                                                      |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| module                 | the module path to where the parser is defined                                                                                                                                   |
-| func                   | the name of the function that once called with no arguments constructs the parser                                                                                                |
-| prog                   | (optional) when provided, overwrites the `<prog>` name.                                                                                                                          |
-| hook                   | (optional) hook `argparse` to retrieve the parser if `func` uses a parser instead of returning it.                                                                               |
-| title                  | (optional) when provided, overwrites the `<prog> - CLI interface` title added by default and when empty, will not be included                                                    |
-| description            | (optional) when provided, overwrites the description and when empty, will not be included                                                                                        |
-| epilog            | (optional) when provided, overwrites the epilog and when empty, will not be included                                                                                        |
-| usage_width            | (optional) how large should usage examples be - defaults to 100 character                                                                                                        |
-| usage_first            | (optional) show usage before description                                                                                                        |
-| group_title_prefix     | (optional) groups subsections title prefixes, accepts the string `{prog}` as a replacement for the program name - defaults to `{prog}`                                           |
-| group_sub_title_prefix | (optional) subcommands groups subsections title prefixes, accepts replacement of `{prog}` and `{subcommand}` for program and subcommand name - defaults to `{prog} {subcommand}` |
-| no_default_values      | (optional) suppresses generation of `default` entries                                                                                                                             |
-| force_refs_lower       | (optional) Sphinx `:ref:` only supports lower-case references.  With this, any capital letter in generated reference anchors are lowered and given an `_` prefix (i.e. `A` becomes `_a`) |
-For example:
+| Name                   | Description                                                                                                                                                                             |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| module                 | the module path to where the parser is defined                                                                                                                                          |
+| func                   | the name of the function that once called with no arguments constructs the parser                                                                                                       |
+| prog                   | (optional) when provided, overwrites the `<prog>` name.                                                                                                                                 |
+| hook                   | (optional) hook `argparse` to retrieve the parser if `func` uses a parser instead of returning it.                                                                                      |
+| title                  | (optional) when provided, overwrites the `<prog> - CLI interface` title added by default and when empty, will not be included                                                           |
+| description            | (optional) when provided, overwrites the description and when empty, will not be included                                                                                               |
+| epilog                 | (optional) when provided, overwrites the epilog and when empty, will not be included                                                                                                    |
+| usage_width            | (optional) how large should usage examples be - defaults to 100 character                                                                                                               |
+| usage_first            | (optional) show usage before description                                                                                                                                                |
+| group_title_prefix     | (optional) groups subsections title prefixes, accepts the string `{prog}` as a replacement for the program name - defaults to `{prog}`                                                  |
+| group_sub_title_prefix | (optional) subcommands groups subsections title prefixes, accepts replacement of `{prog}` and `{subcommand}` for program and subcommand name - defaults to `{prog} {subcommand}`        |
+| no_default_values      | (optional) suppresses generation of `default` entries                                                                                                                                   |
+| force_refs_lower       | (optional) Sphinx `:ref:` only supports lower-case references. With this, any capital letter in generated reference anchors are lowered and given an `_` prefix (i.e. `A` becomes `_a`) |
+
+> > > > > > > bda12fb (Declare 3.13 support and drop 3.9) For example:
 
 ```rst
 .. sphinx_argparse_cli::
@@ -86,11 +89,12 @@ being `cli`:
 - to refer to flag `--magic` of the `run` sub-command use ``:ref:`cli:tox-run---magic` ``.
 
 Due to Sphinx's `:ref:` only supporting lower-case values, if you need to distinguish mixed case program names or
-arguments, set the `:force_refs_lower:` argument.  With this flag, captial-letters in references will be converted to
-their lower-case counterpart and prefixed with an `_`.  For example:
+arguments, set the `:force_refs_lower:` argument. With this flag, captial-letters in references will be converted to
+their lower-case counterpart and prefixed with an `_`. For example:
 
 - A `prog` name `SampleProgram` will be referenced as ``:ref:`_sample_program...` ``.
-- To distinguish between mixed case flags `-a` and `-A` use ``:ref:`_sample_program--a` `` and ``:ref:`_sample_program--_a` `` respectively
+- To distinguish between mixed case flags `-a` and `-A` use ``:ref:`_sample_program--a` `` and
+  ``:ref:`_sample_program--_a` `` respectively
 
 Note that if you are _not_ concernced about using internal Sphinx `:ref:` cross-references, you may choose to leave this
 off to maintain mixed-case anchors in your output HTML; but be aware that later enabling it will change your anchors in
