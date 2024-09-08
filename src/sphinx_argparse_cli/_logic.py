@@ -15,7 +15,7 @@ from argparse import (
 )
 from collections import defaultdict
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar, Iterator, NamedTuple, cast
+from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, cast
 
 from docutils.nodes import (
     Element,
@@ -41,6 +41,8 @@ from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from docutils.parsers.rst.states import RSTState, RSTStateMachine
 
 
@@ -273,7 +275,7 @@ class SphinxArgparseCli(SphinxDirective):
             "no_default_values" not in self.options
             and action.default != SUPPRESS
             and not re.match(r".*[ (]default[s]? .*", (action.help or ""))
-            and not isinstance(action, (_StoreTrueAction, _StoreFalseAction))
+            and not isinstance(action, _StoreTrueAction | _StoreFalseAction)
         ):
             line += Text(" (default: ")
             line += literal(text=str(action.default).replace(str(Path.cwd()), "{cwd}"))

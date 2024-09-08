@@ -18,8 +18,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture(scope="session")
 def opt_grp_name() -> tuple[str, str]:
-    if sys.version_info >= (3, 10):  # pragma: no branch  # https://bugs.python.org/issue9694
-        return "options", "options"  # pragma: no cover
+    return "options", "options"  # pragma: no cover
     return "optional arguments", "optional-arguments"  # pragma: no cover
 
 
