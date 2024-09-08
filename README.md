@@ -12,15 +12,13 @@ Render CLI arguments (sub-commands friendly) defined by the argparse module. For
 [pypa-build](https://pypa-build.readthedocs.io/en/latest/#python-m-build) and
 [mdpo](https://mondeja.github.io/mdpo/latest/cli.html).
 
-## installation
+## Installation
 
 ```bash
 python -m pip install sphinx-argparse-cli
 ```
 
-[README.md](README.md)
-
-## enable in your `conf.py`
+## Enable in `conf.py`
 
 ```python
 # just add it to your list of extensions to load within conf.py
@@ -96,6 +94,6 @@ their lower-case counterpart and prefixed with an `_`. For example:
 - To distinguish between mixed case flags `-a` and `-A` use ``:ref:`_sample_program--a` `` and
   ``:ref:`_sample_program--_a` `` respectively
 
-Note that if you are _not_ concernced about using internal Sphinx `:ref:` cross-references, you may choose to leave this
+Note that if you are _not_ concerned about using internal Sphinx `:ref:` cross-references, you may choose to leave this
 off to maintain mixed-case anchors in your output HTML; but be aware that later enabling it will change your anchors in
 the output HTML.
