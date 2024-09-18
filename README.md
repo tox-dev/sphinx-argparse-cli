@@ -5,7 +5,7 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sphinx-argparse-cli?style=flat-square)](https://pypi.org/project/sphinx-argparse-cli)
 [![Downloads](https://static.pepy.tech/badge/sphinx-argparse-cli/month)](https://pepy.tech/project/sphinx-argparse-cli)
 [![PyPI - License](https://img.shields.io/pypi/l/sphinx-argparse-cli?style=flat-square)](https://opensource.org/licenses/MIT)
-![check](https://github.com/tox-dev/sphinx-argparse-cli/workflows/check/badge.svg?branch=main)
+[![check](https://github.com/tox-dev/sphinx-argparse-cli/actions/workflows/check.yaml/badge.svg)](https://github.com/tox-dev/sphinx-argparse-cli/actions/workflows/check.yaml)
 
 Render CLI arguments (sub-commands friendly) defined by the argparse module. For live demo checkout the documentation of
 [tox](https://tox.wiki/en/latest/cli_interface.html),
