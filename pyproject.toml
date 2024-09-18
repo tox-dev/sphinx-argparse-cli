@@ -41,7 +41,7 @@ dynamic = [
 dependencies = [
   "sphinx>=8.0.2",
 ]
-optional-dependencies.test = [
+optional-dependencies.testing = [
   "covdefaults>=2.3",
   "defusedxml>=0.7.1", # needed for sphinx.testing
   "pytest>=8.3.2",
