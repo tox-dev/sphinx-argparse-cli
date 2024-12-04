@@ -331,3 +331,18 @@ def test_nested_content(build_outcome: str) -> None:
     assert "<h3>basic-2 opt" in build_outcome
     assert "<p>Some text inside second directive.</p>" in build_outcome
     assert "<p>Some text after directives.</p>" in build_outcome
+
+
+@pytest.mark.sphinx(buildername="html", testroot="subparsers")
+def test_subparsers(build_outcome: str) -> None:
+    assert '<section id="test-options">' in build_outcome
+    assert '<section id="test-subparser">' in build_outcome
+    assert '<section id="test-subparser-options">' in build_outcome
+    assert '<section id="test-subparser-child_two">' in build_outcome
+    assert '<section id="test-subparser-child_two-options">' in build_outcome
+    assert '<section id="test-subparser-child_two-child_three">' in build_outcome
+    assert '<section id="test-subparser-child_two-child_three-positional-arguments">' in build_outcome
+    assert '<section id="test-subparser-child_two-child_three-options">' in build_outcome
+    assert '<section id="test-no_child">' in build_outcome
+    assert '<section id="test-no_child-positional-arguments">' in build_outcome
+    assert '<section id="test-no_child-options">' in build_outcome

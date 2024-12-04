@@ -132,18 +132,16 @@ class SphinxArgparseCli(SphinxDirective):
             self._raw_format = self._parser.formatter_class == RawDescriptionHelpFormatter
         return self._parser
 
-    def load_sub_parsers(self) -> Iterator[tuple[list[str], str, ArgumentParser]]:
-        top_sub_parser = self.parser._subparsers  # noqa: SLF001
-        if not top_sub_parser:
-            return
+    def _load_sub_parsers(
+        self, sub_parser: _SubParsersAction[ArgumentParser]
+    ) -> Iterator[tuple[list[str], str, ArgumentParser]]:
         parser_to_args: dict[int, list[str]] = defaultdict(list)
         str_to_parser: dict[str, ArgumentParser] = {}
-        sub_parser: _SubParsersAction[ArgumentParser]
-        sub_parser = top_sub_parser._group_actions[0]  # type: ignore[assignment]  # noqa: SLF001
         for key, parser in sub_parser._name_parser_map.items():  # noqa: SLF001
             parser_to_args[id(parser)].append(key)
             str_to_parser[key] = parser
         done_parser: set[int] = set()
+
         for name, parser in sub_parser.choices.items():
             parser_id = id(parser)
             if parser_id in done_parser:
@@ -154,6 +152,21 @@ class SphinxArgparseCli(SphinxDirective):
             # help is stored in a pseudo action
             help_msg = next((a.help for a in sub_parser._choices_actions if a.dest == name), None) or ""  # noqa: SLF001
             yield aliases, help_msg, parser
+
+            # If this parser has a subparser, recurse into it
+            if parser._subparsers:  # noqa: SLF001
+                sub_sub_parser: _SubParsersAction[ArgumentParser]
+                sub_sub_parser = parser._subparsers._group_actions[0]  # type: ignore[assignment]  # noqa: SLF001
+                yield from self._load_sub_parsers(sub_sub_parser)
+
+    def load_sub_parsers(self) -> Iterator[tuple[list[str], str, ArgumentParser]]:
+        top_sub_parser = self.parser._subparsers  # noqa: SLF001
+        if not top_sub_parser:
+            return
+        sub_parser: _SubParsersAction[ArgumentParser]
+        sub_parser = top_sub_parser._group_actions[0]  # type: ignore[assignment]  # noqa: SLF001
+
+        yield from self._load_sub_parsers(sub_parser)
 
     def run(self) -> list[Node]:
         # construct headers
@@ -202,7 +215,6 @@ class SphinxArgparseCli(SphinxDirective):
     def _mk_option_group(self, group: _ArgumentGroup, prefix: str) -> section:
         sub_title_prefix: str = self.options["group_sub_title_prefix"]
         title_prefix = self.options["group_title_prefix"]
-
         title_text = self._build_opt_grp_title(group, prefix, sub_title_prefix, title_prefix)
         title_ref: str = f"{prefix}{' ' if prefix else ''}{group.title}"
         ref_id = self.make_id(title_ref)
@@ -237,7 +249,7 @@ class SphinxArgparseCli(SphinxDirective):
                 title_text += f"{elements[0]} "
                 title_text = self._append_title(title_text, sub_title_prefix, elements[0], " ".join(elements[1:]))
             else:
-                title_text += f"{' '.join(elements[:2])} "
+                title_text += f"{' '.join(elements)} "
         else:
             title_text += f"{prefix} "
         title_text += group.title or ""
@@ -346,6 +358,9 @@ class SphinxArgparseCli(SphinxDirective):
 
         for group in parser._action_groups:  # noqa: SLF001
             if not group._group_actions:  # do not show empty groups  # noqa: SLF001
+                continue
+            if isinstance(group._group_actions[0], _SubParsersAction):  # noqa: SLF001
+                # If this is a subparser, ignore it
                 continue
             group_section += self._mk_option_group(group, prefix=parser.prog)
         return group_section
