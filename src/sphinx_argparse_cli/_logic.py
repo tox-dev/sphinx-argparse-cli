@@ -35,7 +35,6 @@ from docutils.nodes import (
 )
 from docutils.parsers.rst.directives import flag, positive_int, unchanged, unchanged_required
 from docutils.statemachine import StringList
-from sphinx.domains.std import StandardDomain
 from sphinx.locale import __
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
@@ -44,6 +43,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from docutils.parsers.rst.states import RSTState, RSTStateMachine
+    from sphinx.domains.std import StandardDomain
 
 
 class TextAsDefault(NamedTuple):
@@ -100,7 +100,7 @@ class SphinxArgparseCli(SphinxDirective):
         options.setdefault("group_sub_title_prefix", None)
         super().__init__(name, arguments, options, content, lineno, content_offset, block_text, state, state_machine)
         self._parser: ArgumentParser | None = None
-        self._std_domain: StandardDomain = cast(StandardDomain, self.env.get_domain("std"))
+        self._std_domain: StandardDomain = cast("StandardDomain", self.env.get_domain("std"))
         self._raw_format: bool = False
         self.make_id = make_id_lower if "force_refs_lower" in self.options else make_id
 
@@ -281,7 +281,7 @@ class SphinxArgparseCli(SphinxDirective):
             temp = paragraph()
             self.state.nested_parse(StringList(help_text.split("\n")), 0, temp)
             line += Text(" - ")
-            for content in cast(paragraph, temp.children[0]).children:
+            for content in cast("paragraph", temp.children[0]).children:
                 line += content
         if (
             "no_default_values" not in self.options
