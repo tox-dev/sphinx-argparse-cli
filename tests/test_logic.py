@@ -168,7 +168,7 @@ def test_suppressed_action(build_outcome: str) -> None:
     ],
 )
 def test_help_loader(example: str, output: str) -> None:
-    from sphinx_argparse_cli._logic import load_help_text
+    from sphinx_argparse_cli._logic import load_help_text  # noqa: PLC0415
 
     result = load_help_text(example)
     assert result == output
