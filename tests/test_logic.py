@@ -23,7 +23,7 @@ def opt_grp_name() -> tuple[str, str]:
 
 
 @pytest.fixture
-def build_outcome(app: SphinxTestApp, request: SubRequest) -> str:
+def build_outcome(app: SphinxTestApp, request: SubRequest, monkeypatch: pytest.MonkeyPatch) -> str:
     prepare_marker = request.node.get_closest_marker("prepare")
     if prepare_marker:
         directive_args: list[str] | None = prepare_marker.kwargs.get("directive_args")
@@ -41,6 +41,8 @@ def build_outcome(app: SphinxTestApp, request: SubRequest) -> str:
     assert sphinx_marker is not None
     ext = ext_mapping[sphinx_marker.kwargs.get("buildername")]
 
+    monkeypatch.setenv("FORCE_COLOR", "1")
+    monkeypatch.delenv("NO_COLOR", raising=False)
     app.build()
     return (Path(app.outdir) / f"index.{ext}").read_text()
 
