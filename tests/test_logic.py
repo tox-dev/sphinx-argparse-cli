@@ -99,7 +99,7 @@ def test_set_description_as_text(build_outcome: str) -> None:
 
 @pytest.mark.sphinx(buildername="text", testroot="description-empty")
 def test_empty_description_as_text(build_outcome: str) -> None:
-    assert build_outcome == "foo - CLI interface\n*******************\n\n   foo\n"
+    assert build_outcome == "foo - CLI interface\n*******************\n\n\n   foo\n"
 
 
 @pytest.mark.sphinx(buildername="html", testroot="description-multiline")
@@ -121,7 +121,7 @@ def test_set_epilog_as_text(build_outcome: str) -> None:
 
 @pytest.mark.sphinx(buildername="text", testroot="epilog-empty")
 def test_empty_epilog_as_text(build_outcome: str) -> None:
-    assert build_outcome == "foo - CLI interface\n*******************\n\n   foo\n"
+    assert build_outcome == "foo - CLI interface\n*******************\n\n   foo\n\n"
 
 
 @pytest.mark.sphinx(buildername="html", testroot="epilog-multiline")
