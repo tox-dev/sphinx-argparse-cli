@@ -16,7 +16,7 @@ keywords = [
 license = "MIT"
 maintainers = [
   { name = "Bernat Gabor", email = "gaborjbernat@gmail.com" },
-] # noqa: E999
+]
 requires-python = ">=3.11"
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -82,7 +82,6 @@ lint.ignore = [
   "ISC001", # Conflict with formatter
   "S104",   # Possible binding to all interface
 ]
-
 lint.per-file-ignores."roots/**/*.py" = [
   "D",      # no docs
   "INP001", # no namespace
