@@ -111,18 +111,18 @@ count = true
 max_supported_python = "3.14"
 
 [tool.coverage]
-html.show_contexts = true
-html.skip_covered = false
-paths.source = [
-  "src",
-  "**/site-packages",
-]
-report.fail_under = 76
 run.parallel = true
 run.plugins = [
   "covdefaults",
 ]
 run.relative_files = true
+paths.source = [
+  "src",
+  "**/site-packages",
+]
+report.fail_under = 76
+html.show_contexts = true
+html.skip_covered = false
 
 [tool.mypy]
 python_version = "3.12"
