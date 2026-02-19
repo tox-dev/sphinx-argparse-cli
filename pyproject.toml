@@ -41,16 +41,27 @@ dynamic = [
 dependencies = [
   "sphinx>=9.0.4",
 ]
-optional-dependencies.testing = [
-  "covdefaults>=2.3",
-  "defusedxml>=0.7.1", # needed for sphinx.testing
-  "pytest>=9.0.2",
-  "pytest-cov>=7",
-]
 urls.Documentation = "https://github.com/tox-dev/sphinx-argparse-cli#sphinx-argparse-cli"
 urls.Homepage = "https://github.com/tox-dev/sphinx-argparse-cli"
 urls.Source = "https://github.com/tox-dev/sphinx-argparse-cli"
 urls.Tracker = "https://github.com/tox-dev/sphinx-argparse-cli/issues"
+
+[dependency-groups]
+dev = [
+  { include-group = "lint" },
+  { include-group = "pkg-meta" },
+  { include-group = "test" },
+  { include-group = "type" },
+]
+test = [
+  "covdefaults>=2.3",
+  "defusedxml>=0.7.1",
+  "pytest>=9.0.2",
+  "pytest-cov>=7",
+]
+type = [ "ty>=0.0.17", { include-group = "test" }, ]
+lint = [ "pre-commit-uv>=4.2", ]
+pkg-meta = [ "check-wheel-contents>=0.6.3", "twine>=6.2", "uv>=0.9.16", ]
 
 [tool.hatch]
 build.hooks.vcs.version-file = "src/sphinx_argparse_cli/version.py"
