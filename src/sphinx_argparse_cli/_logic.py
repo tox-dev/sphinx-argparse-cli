@@ -120,7 +120,7 @@ class SphinxArgparseCli(SphinxDirective):
                 except HookError as hooked:
                     self._parser = hooked.parser
                 finally:
-                    ArgumentParser.parse_known_args = original_parse_known_args  # type: ignore[method-assign]
+                    ArgumentParser.parse_known_args = original_parse_known_args
             else:
                 self._parser = parser_creator()
 
@@ -158,8 +158,7 @@ class SphinxArgparseCli(SphinxDirective):
 
             # If this parser has a subparser, recurse into it
             if parser._subparsers:  # noqa: SLF001
-                sub_sub_parser: _SubParsersAction[ArgumentParser]
-                sub_sub_parser = parser._subparsers._group_actions[0]  # type: ignore[assignment]  # noqa: SLF001
+                sub_sub_parser: _SubParsersAction[ArgumentParser] = parser._subparsers._group_actions[0]  # type: ignore[assignment]  # noqa: SLF001
                 yield from self._load_sub_parsers(sub_sub_parser)
 
     def load_sub_parsers(self) -> Iterator[tuple[list[str], str, ArgumentParser]]:
