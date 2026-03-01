@@ -14,7 +14,9 @@ pytest_plugins = "sphinx.testing.fixtures"
 collect_ignore = ["roots"]
 
 
-def pytest_report_header(config: Config) -> str:  # noqa: ARG001
+def pytest_report_header(
+    config: Config,  # noqa: ARG001
+) -> str:  # pragma: no cover  # runs during collection before coverage starts
     return f"libraries: Sphinx-{sphinx_version}, docutils-{docutils_version}"
 
 
