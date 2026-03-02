@@ -49,6 +49,7 @@ def build_outcome(app: SphinxTestApp, request: SubRequest, monkeypatch: pytest.M
 @pytest.mark.sphinx(buildername="html", testroot="basic")
 def test_basic_as_html(build_outcome: str) -> None:
     assert build_outcome
+    assert "custom.css" not in build_outcome
 
 
 @pytest.mark.sphinx(buildername="text", testroot="complex")

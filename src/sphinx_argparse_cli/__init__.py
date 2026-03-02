@@ -11,8 +11,6 @@ if TYPE_CHECKING:
 
 
 def setup(app: Sphinx) -> dict[str, Any]:
-    app.add_css_file("custom.css")
-
     from ._logic import SphinxArgparseCli  # noqa: PLC0415
 
     app.add_directive(SphinxArgparseCli.name, SphinxArgparseCli)
