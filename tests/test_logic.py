@@ -397,3 +397,9 @@ def test_prog_subcommands(build_outcome: str) -> None:
     assert "my-tool" in build_outcome
     assert "original-name" not in build_outcome
     assert "my-tool foo" in build_outcome
+
+
+@pytest.mark.sphinx(buildername="text", testroot="multiword-prog")
+def test_multiword_prog(build_outcome: str) -> None:
+    assert "python -m build positional arguments" in build_outcome
+    assert "python -m build options" in build_outcome
