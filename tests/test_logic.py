@@ -390,3 +390,10 @@ def test_tuple_metavar(build_outcome: str) -> None:
     assert "select a pair" in build_outcome
     assert "default: None" not in build_outcome
     assert '"VAL"' in build_outcome
+
+
+@pytest.mark.sphinx(buildername="text", testroot="prog-subcommands")
+def test_prog_subcommands(build_outcome: str) -> None:
+    assert "my-tool" in build_outcome
+    assert "original-name" not in build_outcome
+    assert "my-tool foo" in build_outcome

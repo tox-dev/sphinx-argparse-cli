@@ -140,7 +140,9 @@ class SphinxArgparseCli(SphinxDirective):
                 raise self.error(msg)
 
             if "prog" in self.options:
-                self._parser.prog = self.options["prog"]
+                old_prog, new_prog = self._parser.prog, self.options["prog"]
+                self._parser.prog = new_prog
+                _update_sub_parser_prog(self._parser, old_prog, new_prog)
 
             self._raw_format = self._parser.formatter_class == RawDescriptionHelpFormatter
         return self._parser
@@ -451,6 +453,15 @@ _ANSI_COLOR_RE = re.compile(r"\x1b\[[0-9;]*m")
 def _strip_ansi_colors(text: str) -> str:  # pragma: >=3.14 cover
     # needed due to https://github.com/python/cpython/issues/139809
     return _ANSI_COLOR_RE.sub("", text)
+
+
+def _update_sub_parser_prog(parser: ArgumentParser, old_prog: str, new_prog: str) -> None:
+    if not (sub_parsers := parser._subparsers):  # noqa: SLF001
+        return
+    sub_action: _SubParsersAction[ArgumentParser] = sub_parsers._group_actions[0]  # type: ignore[assignment]  # noqa: SLF001
+    for sub_parser in sub_action.choices.values():
+        sub_parser.prog = sub_parser.prog.replace(old_prog, new_prog, 1)
+        _update_sub_parser_prog(sub_parser, old_prog, new_prog)
 
 
 __all__ = [
