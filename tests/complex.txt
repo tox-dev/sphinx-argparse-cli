@@ -17,10 +17,8 @@ complex options
 * **"--no-help"**
 
 * **"--outdir"** "OUT_DIR", **"-o"** "OUT_DIR" - output directory
-  (default: "None")
 
 * **"--in-dir"** "IN_DIR", **"-i"** "IN_DIR" - input directory
-  (default: "None")
 
 
 complex Exclusive
@@ -44,7 +42,7 @@ a-first-desc
 complex first positional arguments
 ----------------------------------
 
-* **"one"** - first positional argument (default: "None")
+* **"one"** - first positional argument
 
 * **"pos_two"** - second positional argument (default: "1")
 
@@ -68,7 +66,7 @@ complex second
 complex second positional arguments
 -----------------------------------
 
-* **"one"** - first positional argument (default: "None")
+* **"one"** - first positional argument
 
 * **"pos_two"** - second positional argument (default: "green")
 
