@@ -268,7 +268,12 @@ class SphinxArgparseCli(SphinxDirective):
                 self._mk_option_name(line, prefix, opt)
                 if not is_flag:
                     line += Text(" ")
-                    line += literal(text=as_key.upper())
+                    metavar_text = (
+                        " ".join(meta.upper() for meta in action.metavar)
+                        if isinstance(action.metavar, tuple)
+                        else as_key.upper()
+                    )
+                    line += literal(text=metavar_text)
         else:
             self._mk_option_name(line, prefix, as_key)
 
@@ -282,6 +287,7 @@ class SphinxArgparseCli(SphinxDirective):
                 line += content
         if (
             "no_default_values" not in self.options
+            and action.default is not None
             and action.default != SUPPRESS
             and not re.match(r".*[ (]default[s]? .*", (action.help or ""))
             and not isinstance(action, _StoreTrueAction | _StoreFalseAction)

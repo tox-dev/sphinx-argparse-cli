@@ -366,8 +366,9 @@ def test_nargs(build_outcome: str) -> None:
     assert "pos_optional" in build_outcome
     assert "pos_zero_or_more" in build_outcome
     assert "pos_one_or_more" in build_outcome
-    assert "KEY" in build_outcome
-    assert "VALUE" in build_outcome
+    assert "KEY VALUE" in build_outcome
+    assert "(default: " in build_outcome  # default_val is not None, should show
+    assert 'default: "None"' not in build_outcome
 
 
 @pytest.mark.sphinx(buildername="text", testroot="choices")
@@ -381,3 +382,11 @@ def test_actions(build_outcome: str) -> None:
     assert "increase verbosity" in build_outcome
     assert "paths to include" in build_outcome
     assert "a required optional argument" in build_outcome
+
+
+@pytest.mark.sphinx(buildername="text", testroot="tuple-metavar")
+def test_tuple_metavar(build_outcome: str) -> None:
+    assert '"A B"' in build_outcome or "A B" in build_outcome
+    assert "select a pair" in build_outcome
+    assert "default: None" not in build_outcome
+    assert '"VAL"' in build_outcome
