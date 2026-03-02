@@ -403,3 +403,9 @@ def test_prog_subcommands(build_outcome: str) -> None:
 def test_multiword_prog(build_outcome: str) -> None:
     assert "python -m build positional arguments" in build_outcome
     assert "python -m build options" in build_outcome
+
+
+@pytest.mark.sphinx(buildername="html", testroot="title-empty-groups")
+def test_empty_title_groups_in_toctree(build_outcome: str) -> None:
+    assert '<section id="tool-options">' in build_outcome
+    assert "be verbose" in build_outcome
