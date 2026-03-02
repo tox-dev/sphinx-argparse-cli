@@ -335,7 +335,7 @@ class SphinxArgparseCli(SphinxDirective):
             # https://github.com/python/cpython/issues/139809
             parser.prog = _strip_ansi_colors(parser.prog)
 
-        title_text = self._build_sub_cmd_title(parser, sub_title_prefix, title_prefix, stripped=True)
+        title_text = self._build_sub_cmd_title(parser, sub_title_prefix, title_prefix)
         title_ref: str = parser.prog
         if aliases:
             aliases_text: str = f" ({', '.join(aliases)})"
@@ -366,12 +366,9 @@ class SphinxArgparseCli(SphinxDirective):
             group_section += self._mk_option_group(group, prefix=parser.prog)
         return group_section
 
-    def _build_sub_cmd_title(
-        self, parser: ArgumentParser, sub_title_prefix: str, title_prefix: str, *, stripped: bool = False
-    ) -> str:
-        prog = parser.prog if stripped else _strip_ansi_colors(parser.prog)
-        elements = prog.split(" ")
-        return self._resolve_prefix(elements[0], elements[1], prog, title_prefix, sub_title_prefix).rstrip()
+    def _build_sub_cmd_title(self, parser: ArgumentParser, sub_title_prefix: str, title_prefix: str) -> str:
+        elements = parser.prog.split(" ")
+        return self._resolve_prefix(elements[0], elements[1], parser.prog, title_prefix, sub_title_prefix).rstrip()
 
     def _resolve_prefix(
         self,
@@ -445,8 +442,7 @@ def _parse_known_args_hook(self: ArgumentParser, *args: Any, **kwargs: Any) -> N
 _ANSI_COLOR_RE = re.compile(r"\x1b\[[0-9;]*m")
 
 
-def _strip_ansi_colors(text: str) -> str:
-    """Remove ANSI color/style escape sequences (SGR codes) from text."""
+def _strip_ansi_colors(text: str) -> str:  # pragma: >=3.14 cover
     # needed due to https://github.com/python/cpython/issues/139809
     return _ANSI_COLOR_RE.sub("", text)
 
