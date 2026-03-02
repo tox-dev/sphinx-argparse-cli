@@ -18,8 +18,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture(scope="session")
 def opt_grp_name() -> tuple[str, str]:
-    return "options", "options"  # pragma: no cover
-    return "optional arguments", "optional-arguments"  # pragma: no cover
+    return "options", "options"
 
 
 @pytest.fixture
@@ -348,3 +347,37 @@ def test_subparsers(build_outcome: str) -> None:
     assert '<section id="test-no_child">' in build_outcome
     assert '<section id="test-no_child-positional-arguments">' in build_outcome
     assert '<section id="test-no_child-options">' in build_outcome
+
+
+@pytest.mark.sphinx(buildername="text", testroot="bad-module")
+def test_bad_module(app: SphinxTestApp, warning: StringIO) -> None:
+    app.build()
+    assert "Failed to import module 'nonexistent_module'" in warning.getvalue()
+
+
+@pytest.mark.sphinx(buildername="text", testroot="bad-func")
+def test_bad_func(app: SphinxTestApp, warning: StringIO) -> None:
+    app.build()
+    assert "Module 'parser' has no attribute 'nonexistent_func'" in warning.getvalue()
+
+
+@pytest.mark.sphinx(buildername="text", testroot="nargs")
+def test_nargs(build_outcome: str) -> None:
+    assert "pos_optional" in build_outcome
+    assert "pos_zero_or_more" in build_outcome
+    assert "pos_one_or_more" in build_outcome
+    assert "KEY" in build_outcome
+    assert "VALUE" in build_outcome
+
+
+@pytest.mark.sphinx(buildername="text", testroot="choices")
+def test_choices(build_outcome: str) -> None:
+    assert "output format" in build_outcome
+    assert "verbosity level" in build_outcome
+
+
+@pytest.mark.sphinx(buildername="text", testroot="actions")
+def test_actions(build_outcome: str) -> None:
+    assert "increase verbosity" in build_outcome
+    assert "paths to include" in build_outcome
+    assert "a required optional argument" in build_outcome
