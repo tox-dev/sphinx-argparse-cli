@@ -204,7 +204,9 @@ class SphinxArgparseCli(SphinxDirective):
         for group in self.parser._action_groups:  # noqa: SLF001
             if not group._group_actions or group is self.parser._subparsers:  # noqa: SLF001
                 continue
-            home_section += self._mk_option_group(group, prefix=self.parser.prog.split("/")[-1])
+            home_section += self._mk_option_group(
+                group, prefix=self.parser.prog.split("/")[-1], prog=self.parser.prog.split("/")[-1]
+            )
         # construct sub-parser
         for aliases, help_msg, parser in self.load_sub_parsers():
             home_section += self._mk_sub_command(aliases, help_msg, parser)
@@ -226,10 +228,10 @@ class SphinxArgparseCli(SphinxDirective):
             return lit
         return paragraph("", Text(block))
 
-    def _mk_option_group(self, group: _ArgumentGroup, prefix: str) -> section:
+    def _mk_option_group(self, group: _ArgumentGroup, prefix: str, prog: str) -> section:
         sub_title_prefix: str = self.options["group_sub_title_prefix"]
         title_prefix = self.options["group_title_prefix"]
-        title_text = self._build_opt_grp_title(group, prefix, sub_title_prefix, title_prefix)
+        title_text = self._build_opt_grp_title(group, prefix, prog, sub_title_prefix, title_prefix)
         title_ref: str = f"{prefix}{' ' if prefix else ''}{group.title}"
         ref_id = self.make_id(title_ref)
         # the text sadly needs to be prefixed, because otherwise the autosectionlabel will conflict
@@ -247,10 +249,11 @@ class SphinxArgparseCli(SphinxDirective):
         group_section += opt_group
         return group_section
 
-    def _build_opt_grp_title(self, group: _ArgumentGroup, prefix: str, sub_title_prefix: str, title_prefix: str) -> str:
-        elements = prefix.split(" ")
-        sub_cmd = " ".join(elements[1:]) if " " in prefix else None
-        title_text = self._resolve_prefix(elements[0], sub_cmd, prefix, title_prefix, sub_title_prefix)
+    def _build_opt_grp_title(
+        self, group: _ArgumentGroup, prefix: str, prog: str, sub_title_prefix: str, title_prefix: str
+    ) -> str:
+        sub_cmd = prefix[len(prog) :].strip() or None if prefix != prog else None
+        title_text = self._resolve_prefix(prog, sub_cmd, prefix, title_prefix, sub_title_prefix)
         title_text += group.title or ""
         return title_text
 
@@ -371,12 +374,13 @@ class SphinxArgparseCli(SphinxDirective):
             if isinstance(group._group_actions[0], _SubParsersAction):  # noqa: SLF001
                 # If this is a subparser, ignore it
                 continue
-            group_section += self._mk_option_group(group, prefix=parser.prog)
+            group_section += self._mk_option_group(group, prefix=parser.prog, prog=self.parser.prog.split("/")[-1])
         return group_section
 
     def _build_sub_cmd_title(self, parser: ArgumentParser, sub_title_prefix: str, title_prefix: str) -> str:
-        elements = parser.prog.split(" ")
-        return self._resolve_prefix(elements[0], elements[1], parser.prog, title_prefix, sub_title_prefix).rstrip()
+        root_prog = self.parser.prog.split("/")[-1]
+        sub_cmd = parser.prog[len(root_prog) :].strip().split(" ", maxsplit=1)[0]
+        return self._resolve_prefix(root_prog, sub_cmd, parser.prog, title_prefix, sub_title_prefix).rstrip()
 
     def _resolve_prefix(
         self,
