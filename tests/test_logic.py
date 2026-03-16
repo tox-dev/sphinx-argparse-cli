@@ -407,6 +407,10 @@ def test_multiword_prog(build_outcome: str) -> None:
 
 
 @pytest.mark.sphinx(buildername="html", testroot="title-empty-groups")
-def test_empty_title_groups_in_toctree(build_outcome: str) -> None:
-    assert '<section id="tool-options">' in build_outcome
-    assert "be verbose" in build_outcome
+def test_empty_title_groups_in_toctree(app: SphinxTestApp, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("FORCE_COLOR", "1")
+    monkeypatch.delenv("NO_COLOR", raising=False)
+    app.build()
+    cli_html = (Path(app.outdir) / "cli.html").read_text()
+    assert '<section id="tool-options">' in cli_html
+    assert "be verbose" in cli_html
