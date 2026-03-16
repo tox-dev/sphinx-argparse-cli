@@ -25,6 +25,7 @@ from docutils.nodes import (
     Node,
     Text,
     bullet_list,
+    container,
     fully_normalize_name,
     list_item,
     literal,
@@ -187,7 +188,7 @@ class SphinxArgparseCli(SphinxDirective):
         self.env.note_reread()  # this document needs to be always updated
         title_text = self.options.get("title", f"{self.parser.prog} - CLI interface").strip()
         if not title_text:
-            home_section: Element = section("")
+            home_section: Element = container("")
         else:
             home_section = section("", title("", Text(title_text)), ids=[self.make_id(title_text)], names=[title_text])
 
