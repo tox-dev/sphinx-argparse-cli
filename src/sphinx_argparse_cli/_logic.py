@@ -145,7 +145,8 @@ class SphinxArgparseCli(SphinxDirective):
                 self._parser.prog = new_prog
                 _update_sub_parser_prog(self._parser, old_prog, new_prog)
 
-            self._raw_format = self._parser.formatter_class == RawDescriptionHelpFormatter
+            formatter = self._parser.formatter_class
+            self._raw_format = isinstance(formatter, type) and issubclass(formatter, RawDescriptionHelpFormatter)
         return self._parser
 
     def _load_sub_parsers(
@@ -224,7 +225,7 @@ class SphinxArgparseCli(SphinxDirective):
         if block is None:
             return None
         if self._raw_format and "\n" in block:
-            lit = literal_block("", Text(block))
+            lit = literal_block("", Text(block), classes=["sphinx-argparse-cli-wrap"])
             lit["language"] = "none"
             return lit
         return paragraph("", Text(block))
@@ -424,7 +425,7 @@ class SphinxArgparseCli(SphinxDirective):
         with self.no_color():
             texts = parser.format_usage()[len("usage: ") :].splitlines()
         texts = [line if at == 0 else f"{' ' * (len(parser.prog) + 1)}{line.lstrip()}" for at, line in enumerate(texts)]
-        return literal_block("", Text("\n".join(texts)))
+        return literal_block("", Text("\n".join(texts)), classes=["sphinx-argparse-cli-wrap"])
 
     @contextmanager
     def no_color(self) -> Iterator[None]:
