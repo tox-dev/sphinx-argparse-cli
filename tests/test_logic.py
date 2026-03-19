@@ -133,6 +133,15 @@ def test_multiline_epilog_as_html(build_outcome: str) -> None:
     assert ref in build_outcome
 
 
+@pytest.mark.sphinx(buildername="html", testroot="epilog-multiline-subclass")
+def test_multiline_epilog_subclass_formatter_as_html(build_outcome: str) -> None:
+    ref = (
+        "This epilog\nspans multiple lines.\n\n  this line is indented.\n    and also this.\n\nNow this should be"
+        " a separate paragraph.\n"
+    )
+    assert ref in build_outcome
+
+
 @pytest.mark.sphinx(buildername="text", testroot="complex")
 @pytest.mark.prepare(directive_args=[":usage_width: 100"])
 def test_usage_width_default(build_outcome: str) -> None:
