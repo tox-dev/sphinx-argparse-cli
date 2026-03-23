@@ -130,6 +130,9 @@ count = true
 [tool.pyproject-fmt]
 max_supported_python = "3.14"
 
+[tool.ty]
+environment.python-version = "3.14"
+
 [tool.coverage]
 run.parallel = true
 run.plugins = [
@@ -143,6 +146,3 @@ paths.source = [
 report.fail_under = 100
 html.show_contexts = true
 html.skip_covered = false
-
-[tool.ty]
-environment.python-version = "3.14"
