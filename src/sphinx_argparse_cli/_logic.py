@@ -22,11 +22,13 @@ from unittest.mock import patch
 
 from docutils.nodes import (
     Element,
+    FixedTextElement,
     Node,
     Text,
     bullet_list,
     container,
     fully_normalize_name,
+    inline,
     list_item,
     literal,
     literal_block,
@@ -228,7 +230,9 @@ class SphinxArgparseCli(SphinxDirective):
             lit = literal_block("", Text(block), classes=["sphinx-argparse-cli-wrap"])
             lit["language"] = "none"
             return lit
-        return paragraph("", Text(block))
+        para = paragraph("", Text(block))
+        _protect_option_dashes(para)
+        return para
 
     def _mk_option_group(self, group: _ArgumentGroup, prefix: str, prog: str) -> section:
         sub_title_prefix: str = self.options["group_sub_title_prefix"]
@@ -302,6 +306,7 @@ class SphinxArgparseCli(SphinxDirective):
             line += Text(" (default: ")
             line += literal(text=str(action.default).replace(str(Path.cwd()), "{cwd}"))
             line += Text(")")
+        _protect_option_dashes(line)
         return point
 
     def _mk_option_name(self, line: paragraph, prefix: str, opt: str) -> None:
@@ -365,6 +370,7 @@ class SphinxArgparseCli(SphinxDirective):
         command_desc = (parser.description or help_msg or "").strip()
         if command_desc:
             desc_paragraph = paragraph("", Text(command_desc))
+            _protect_option_dashes(desc_paragraph)
             group_section += desc_paragraph
 
         if "usage_first" not in self.options:
@@ -442,6 +448,38 @@ def load_help_text(help_text: str) -> str:
     single_quote = SINGLE_QUOTE.sub("``'\\1'``", help_text)
     double_quote = DOUBLE_QUOTE.sub('``"\\1"``', single_quote)
     return CURLY_BRACES.sub("``{\\1}``", double_quote)
+
+
+_OPTION_TOKEN = re.compile(r"((?<!\w)--[a-zA-Z0-9][\w-]*)")
+
+
+def _protect_option_dashes(node: Element) -> None:
+    """
+    Wrap ``--option`` tokens so smart quotes can't rewrite their ``--`` to an en dash.
+
+    Each token becomes an inline exempted via ``support_smartquotes``; surrounding text is
+    left untouched. The node is modified in place.
+    """
+    for text in list(node.findall(Text)):
+        parent = text.parent
+        if isinstance(parent, (literal, FixedTextElement)):
+            continue
+        # Capturing group => split() yields the option tokens at odd indices,
+        # interleaved with the surrounding text.
+        parts = _OPTION_TOKEN.split(text)
+        if len(parts) == 1:
+            continue
+        replacement: list[Node] = []
+        for i, part in enumerate(parts):
+            if not part:
+                continue
+            if i % 2:
+                inline_node = inline("", part)
+                inline_node["support_smartquotes"] = False
+                replacement.append(inline_node)
+            else:
+                replacement.append(Text(part))
+        parent.replace(text, replacement)
 
 
 class HookError(Exception):

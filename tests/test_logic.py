@@ -142,6 +142,19 @@ def test_multiline_epilog_subclass_formatter_as_html(build_outcome: str) -> None
     assert ref in build_outcome
 
 
+@pytest.mark.sphinx(buildername="html", testroot="smartquotes")
+def test_option_dashes_survive_smartquotes(build_outcome: str) -> None:
+    # option names mentioned in parser-supplied text keep their double hyphen
+    assert "Pass input via <span>--text</span> or stdin." in build_outcome
+    assert "see also <span>--2fa</span> and <span>--dry_run</span>." in build_outcome
+    assert "combine with <span>--output</span> for files" in build_outcome
+    assert "build things with <span>--flair</span>" in build_outcome
+    for mangled in ("\u2013text", "\u2013output", "\u20132fa", "\u2013dry_run", "\u2013flair"):
+        assert mangled not in build_outcome
+    # the surrounding text keeps normal typography
+    assert "north\u2013south and 10\u201320" in build_outcome
+
+
 @pytest.mark.sphinx(buildername="text", testroot="complex")
 @pytest.mark.prepare(directive_args=[":usage_width: 100"])
 def test_usage_width_default(build_outcome: str) -> None:
