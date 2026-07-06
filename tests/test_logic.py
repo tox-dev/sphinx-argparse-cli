@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sphinx_argparse_cli._logic import make_id, make_id_lower
+from sphinx_argparse_cli._logic import load_help_text, make_id, make_id_lower
 
 if TYPE_CHECKING:
     from io import StringIO
@@ -192,10 +192,7 @@ def test_suppressed_action(build_outcome: str) -> None:
     ],
 )
 def test_help_loader(example: str, output: str) -> None:
-    from sphinx_argparse_cli._logic import load_help_text  # noqa: PLC0415
-
-    result = load_help_text(example)
-    assert result == output
+    assert load_help_text(example) == output
 
 
 @pytest.mark.sphinx(buildername="html", testroot="ref")

@@ -13,6 +13,5 @@ def make() -> ArgumentParser:
     parser.add_argument(
         "--typography", help="typography still applies to non-options like these north--south and 10--20"
     )
-    sub = parser.add_subparsers()
-    sub.add_parser("build", help="build things with --flair")
+    parser.add_subparsers().add_parser("build", help="build things with --flair")
     return parser

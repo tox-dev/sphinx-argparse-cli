@@ -32,7 +32,7 @@ Use the directive in any reStructuredText file:
 ```
 
 `:module:` points to the Python module containing the parser, and `:func:` names a zero-argument function that returns
-an `ArgumentParser`. Build your docs and the full CLI reference appears automatically.
+an `ArgumentParser`. Build your docs and the full CLI reference appears.
 
 ## How-to guides
 
@@ -98,7 +98,7 @@ Set the character width for usage lines and optionally show usage before the des
 
 ### Override title, description, or epilog
 
-Replace auto-detected values, or pass an empty string to suppress them entirely:
+Replace auto-detected values, or pass an empty string to suppress them:
 
 ```rst
 .. sphinx_argparse_cli::
@@ -135,7 +135,7 @@ The anchor text is visible after the `#` in the URL when you click a heading.
 ### Handle mixed-case references
 
 Sphinx `:ref:` only supports lower-case targets. When your program name or flags contain capital letters, set
-`:force_refs_lower:` to convert them — each upper-case letter becomes its lower-case form prefixed with `_` (e.g. `A`
+`:force_refs_lower:` to convert them. Each upper-case letter becomes its lower-case form prefixed with `_` (e.g. `A`
 becomes `_a`):
 
 ```rst

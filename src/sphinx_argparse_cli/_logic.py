@@ -17,7 +17,7 @@ from argparse import (
 from collections import defaultdict
 from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Final, cast
 from unittest.mock import patch
 
 from docutils.nodes import (
@@ -50,22 +50,10 @@ if TYPE_CHECKING:
 
     from docutils.parsers.rst.states import RSTState, RSTStateMachine
     from sphinx.domains.std import StandardDomain
+    from sphinx.util.logging import SphinxLoggerAdapter
 
 
-class TextAsDefault(NamedTuple):
-    text: str
-
-
-def make_id(key: str) -> str:
-    return "-".join(key.split()).rstrip("-")
-
-
-def make_id_lower(key: str) -> str:
-    # replace all capital letters "X" with "_lower(X)"
-    return re.sub("[A-Z]", lambda m: "_" + m.group(0).lower(), make_id(key))
-
-
-logger = getLogger(__name__)
+_LOGGER: Final[SphinxLoggerAdapter] = getLogger(__name__)
 
 
 class SphinxArgparseCli(SphinxDirective):
@@ -84,9 +72,8 @@ class SphinxArgparseCli(SphinxDirective):
         "group_title_prefix": unchanged,
         "group_sub_title_prefix": unchanged,
         "no_default_values": unchanged,
-        # :ref: only supports lower-case.  If this is set, any
-        # would-be-upper-case chars will be prefixed with _.  Since
-        # this is backwards incompatible for URL's, this is opt-in.
+        # :ref: only supports lower-case, so this prefixes would-be-upper-case chars with _;
+        # opt-in because it breaks existing URLs.
         "force_refs_lower": flag,
     }
 
@@ -108,7 +95,7 @@ class SphinxArgparseCli(SphinxDirective):
         self._parser: ArgumentParser | None = None
         self._std_domain: StandardDomain = cast("StandardDomain", self.env.get_domain("std"))
         self._raw_format: bool = False
-        self.make_id = make_id_lower if "force_refs_lower" in self.options else make_id
+        self._make_id = make_id_lower if "force_refs_lower" in self.options else make_id
 
     @property
     def parser(self) -> ArgumentParser:
@@ -155,10 +142,8 @@ class SphinxArgparseCli(SphinxDirective):
         self, sub_parser: _SubParsersAction[ArgumentParser]
     ) -> Iterator[tuple[list[str], str, ArgumentParser]]:
         parser_to_args: dict[int, list[str]] = defaultdict(list)
-        str_to_parser: dict[str, ArgumentParser] = {}
         for key, parser in sub_parser._name_parser_map.items():  # noqa: SLF001
             parser_to_args[id(parser)].append(key)
-            str_to_parser[key] = parser
         done_parser: set[int] = set()
 
         for name, parser in sub_parser.choices.items():
@@ -172,28 +157,24 @@ class SphinxArgparseCli(SphinxDirective):
             help_msg = next((a.help for a in sub_parser._choices_actions if a.dest == name), None) or ""  # noqa: SLF001
             yield aliases, help_msg, parser
 
-            # If this parser has a subparser, recurse into it
             if parser._subparsers:  # noqa: SLF001
                 sub_sub_parser: _SubParsersAction[ArgumentParser] = parser._subparsers._group_actions[0]  # type: ignore[assignment]  # noqa: SLF001
                 yield from self._load_sub_parsers(sub_sub_parser)
 
-    def load_sub_parsers(self) -> Iterator[tuple[list[str], str, ArgumentParser]]:
+    def _iter_sub_commands(self) -> Iterator[tuple[list[str], str, ArgumentParser]]:
         top_sub_parser = self.parser._subparsers  # noqa: SLF001
         if not top_sub_parser:
             return
-        sub_parser: _SubParsersAction[ArgumentParser]
-        sub_parser = top_sub_parser._group_actions[0]  # type: ignore[assignment]  # noqa: SLF001
-
+        sub_parser: _SubParsersAction[ArgumentParser] = top_sub_parser._group_actions[0]  # type: ignore[assignment]  # noqa: SLF001
         yield from self._load_sub_parsers(sub_parser)
 
     def run(self) -> list[Node]:
-        # construct headers
-        self.env.note_reread()  # this document needs to be always updated
+        self.env.note_reread()  # this document needs to always be rebuilt
         title_text = self.options.get("title", f"{self.parser.prog} - CLI interface").strip()
         if not title_text:
             home_section: Element = container("")
         else:
-            home_section = section("", title("", Text(title_text)), ids=[self.make_id(title_text)], names=[title_text])
+            home_section = section("", title("", Text(title_text)), ids=[self._make_id(title_text)], names=[title_text])
 
         if "usage_first" in self.options:
             home_section += self._mk_usage(self.parser)
@@ -204,15 +185,13 @@ class SphinxArgparseCli(SphinxDirective):
         if "usage_first" not in self.options:
             home_section += self._mk_usage(self.parser)
 
-        # construct groups excluding sub-parsers
         for group in self.parser._action_groups:  # noqa: SLF001
             if not group._group_actions or group is self.parser._subparsers:  # noqa: SLF001
                 continue
             home_section += self._mk_option_group(
                 group, prefix=self.parser.prog.split("/")[-1], prog=self.parser.prog.split("/")[-1]
             )
-        # construct sub-parser
-        for aliases, help_msg, parser in self.load_sub_parsers():
+        for aliases, help_msg, parser in self._iter_sub_commands():
             home_section += self._mk_sub_command(aliases, help_msg, parser)
 
         if epilog := self._pre_format(self.options.get("epilog", self.parser.epilog)):
@@ -239,7 +218,7 @@ class SphinxArgparseCli(SphinxDirective):
         title_prefix = self.options["group_title_prefix"]
         title_text = self._build_opt_grp_title(group, prefix, prog, sub_title_prefix, title_prefix)
         title_ref: str = f"{prefix}{' ' if prefix else ''}{group.title}"
-        ref_id = self.make_id(title_ref)
+        ref_id = self._make_id(title_ref)
         # the text sadly needs to be prefixed, because otherwise the autosectionlabel will conflict
         header = title("", Text(title_text))
         group_section = section("", header, ids=[ref_id], names=[ref_id])
@@ -269,15 +248,11 @@ class SphinxArgparseCli(SphinxDirective):
         if action.metavar:
             as_key = action.metavar if isinstance(action.metavar, str) else action.metavar[0]
         if action.option_strings:
-            first = True
-            is_flag = action.nargs == 0
-            for opt in action.option_strings:
-                if first:
-                    first = False
-                else:
+            for at, opt in enumerate(action.option_strings):
+                if at:
                     line += Text(", ")
                 self._mk_option_name(line, prefix, opt)
-                if not is_flag:
+                if action.nargs != 0:
                     line += Text(" ")
                     metavar_text = (
                         " ".join(meta.upper() for meta in action.metavar)
@@ -288,7 +263,6 @@ class SphinxArgparseCli(SphinxDirective):
         else:
             self._mk_option_name(line, prefix, as_key)
 
-        point = list_item("", line, ids=[])
         if action.help:
             help_text = load_help_text(action.help)
             temp = paragraph()
@@ -307,16 +281,14 @@ class SphinxArgparseCli(SphinxDirective):
             line += literal(text=str(action.default).replace(str(Path.cwd()), "{cwd}"))
             line += Text(")")
         _protect_option_dashes(line)
-        return point
+        return list_item("", line, ids=[])
 
     def _mk_option_name(self, line: paragraph, prefix: str, opt: str) -> None:
-        ref_id = self.make_id(f"{prefix}-{opt}")
+        ref_id = self._make_id(f"{prefix}-{opt}")
         ref_title = f"{prefix} {opt}"
         ref = reference("", refid=ref_id, reftitle=ref_title)
         line.attributes["ids"].append(ref_id)
-        st = strong()
-        st += literal(text=opt)
-        ref += st
+        ref += strong("", "", literal(text=opt))
         self._register_ref(ref_id, ref_title, ref, is_cli_option=True)
         line += ref
 
@@ -334,7 +306,7 @@ class SphinxArgparseCli(SphinxDirective):
         else:
             name = normalize_name(ref_name)
         if name in self._std_domain.labels:
-            logger.warning(
+            _LOGGER.warning(
                 __("duplicate label %s, other instance in %s"),
                 name,
                 self.env.doc2path(self._std_domain.labels[name][0]),
@@ -360,7 +332,7 @@ class SphinxArgparseCli(SphinxDirective):
             title_text += aliases_text
             title_ref += aliases_text
         title_text = title_text.strip()
-        ref_id = self.make_id(title_ref)
+        ref_id = self._make_id(title_ref)
         group_section = section("", title("", Text(title_text)), ids=[ref_id], names=[title_ref])
         self._register_ref(ref_id, title_ref, group_section)
 
@@ -377,10 +349,9 @@ class SphinxArgparseCli(SphinxDirective):
             group_section += self._mk_usage(parser)
 
         for group in parser._action_groups:  # noqa: SLF001
-            if not group._group_actions:  # do not show empty groups  # noqa: SLF001
+            if not group._group_actions:  # noqa: SLF001
                 continue
             if isinstance(group._group_actions[0], _SubParsersAction):  # noqa: SLF001
-                # If this is a subparser, ignore it
                 continue
             group_section += self._mk_option_group(group, prefix=parser.prog, prog=self.parser.prog.split("/")[-1])
         return group_section
@@ -421,65 +392,64 @@ class SphinxArgparseCli(SphinxDirective):
     @staticmethod
     def _apply_sub_title(title_text: str, sub_title_prefix: str, prog: str, sub_cmd: str) -> str:
         if sub_title_prefix:
-            sub_title_prefix = sub_title_prefix.replace("{prog}", prog)
-            sub_title_prefix = sub_title_prefix.replace("{subcommand}", sub_cmd)
+            sub_title_prefix = sub_title_prefix.replace("{prog}", prog).replace("{subcommand}", sub_cmd)
             title_text += f"{sub_title_prefix} "
         return title_text
 
     def _mk_usage(self, parser: ArgumentParser) -> literal_block:
         parser.formatter_class = lambda prog: HelpFormatter(prog, width=self.options.get("usage_width", 100))
-        with self.no_color():
+        with self._no_color():
             texts = parser.format_usage()[len("usage: ") :].splitlines()
         texts = [line if at == 0 else f"{' ' * (len(parser.prog) + 1)}{line.lstrip()}" for at, line in enumerate(texts)]
         return literal_block("", Text("\n".join(texts)), classes=["sphinx-argparse-cli-wrap"])
 
     @contextmanager
-    def no_color(self) -> Iterator[None]:
+    def _no_color(self) -> Iterator[None]:
         with patch.dict(os.environ, {"NO_COLOR": "1"}, clear=False):
-            yield None
+            yield
 
 
-SINGLE_QUOTE = re.compile(r"[']+(.+?)[']+")
-DOUBLE_QUOTE = re.compile(r'["]+(.+?)["]+')
-CURLY_BRACES = re.compile(r"[{](.+?)[}]")
+def make_id_lower(key: str) -> str:
+    return re.sub("[A-Z]", lambda m: f"_{m.group(0).lower()}", make_id(key))
+
+
+def make_id(key: str) -> str:
+    return "-".join(key.split()).rstrip("-")
+
+
+_HELP_SUBSTITUTIONS: Final[list[tuple[re.Pattern[str], str]]] = [
+    (re.compile(r"[']+(.+?)[']+"), "``'\\1'``"),
+    (re.compile(r'["]+(.+?)["]+'), '``"\\1"``'),
+    (re.compile(r"[{](.+?)[}]"), "``{\\1}``"),
+]
 
 
 def load_help_text(help_text: str) -> str:
-    single_quote = SINGLE_QUOTE.sub("``'\\1'``", help_text)
-    double_quote = DOUBLE_QUOTE.sub('``"\\1"``', single_quote)
-    return CURLY_BRACES.sub("``{\\1}``", double_quote)
+    for pattern, replacement in _HELP_SUBSTITUTIONS:
+        help_text = pattern.sub(replacement, help_text)
+    return help_text
 
 
-_OPTION_TOKEN = re.compile(r"((?<!\w)--[a-zA-Z0-9][\w-]*)")
+_OPTION_TOKEN: Final[re.Pattern[str]] = re.compile(r"((?<!\w)--[a-zA-Z0-9][\w-]*)")
 
 
 def _protect_option_dashes(node: Element) -> None:
-    """
-    Wrap ``--option`` tokens so smart quotes can't rewrite their ``--`` to an en dash.
-
-    Each token becomes an inline exempted via ``support_smartquotes``; surrounding text is
-    left untouched. The node is modified in place.
-    """
+    """Wrap each ``--option`` in a smartquotes-exempt inline so its ``--`` survives Sphinx's en-dash transform."""
     for text in list(node.findall(Text)):
-        parent = text.parent
-        if isinstance(parent, (literal, FixedTextElement)):
+        if isinstance(text.parent, (literal, FixedTextElement)):
             continue
-        # Capturing group => split() yields the option tokens at odd indices,
-        # interleaved with the surrounding text.
+        # A capturing group makes split() interleave the option tokens (odd indices) with the surrounding text.
         parts = _OPTION_TOKEN.split(text)
         if len(parts) == 1:
             continue
-        replacement: list[Node] = []
-        for i, part in enumerate(parts):
-            if not part:
-                continue
-            if i % 2:
-                inline_node = inline("", part)
-                inline_node["support_smartquotes"] = False
-                replacement.append(inline_node)
-            else:
-                replacement.append(Text(part))
-        parent.replace(text, replacement)
+        text.parent.replace(
+            text,
+            [
+                inline("", part, support_smartquotes=False) if index % 2 else Text(part)
+                for index, part in enumerate(parts)
+                if part
+            ],
+        )
 
 
 class HookError(Exception):
@@ -491,7 +461,7 @@ def _parse_known_args_hook(self: ArgumentParser, *args: Any, **kwargs: Any) -> N
     raise HookError(self)
 
 
-_ANSI_COLOR_RE = re.compile(r"\x1b\[[0-9;]*m")
+_ANSI_COLOR_RE: Final[re.Pattern[str]] = re.compile(r"\x1b\[[0-9;]*m")
 
 
 def _strip_ansi_colors(text: str) -> str:  # pragma: >=3.14 cover

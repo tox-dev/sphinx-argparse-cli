@@ -7,8 +7,7 @@ All notable changes to this project will be documented in this file.
 - Allow to add content to directive.
 - Fix Sphinx warnings about parallel reads.
 - Add `force_args_lower` to enable `:ref:` links with mixed-case program names and arguments.
-- `--option` names mentioned in descriptions, epilogs, and help text keep their double hyphen instead of being rewritten
-  to an en dash by Sphinx's smart quotes transform; the surrounding text keeps normal typography.
+- Fix Sphinx smart quotes rewriting `--` to an en dash in `--option` names within descriptions, epilogs, and help text.
 
 ## 1.13.1
 
