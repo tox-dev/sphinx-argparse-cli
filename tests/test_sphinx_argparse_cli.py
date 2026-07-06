@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import sphinx_argparse_cli
+
 
 def test_version() -> None:
-    import sphinx_argparse_cli  # noqa: PLC0415
-
     assert sphinx_argparse_cli.__version__
