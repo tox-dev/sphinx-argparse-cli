@@ -202,7 +202,7 @@ class SphinxArgparseCli(SphinxDirective):
 
         return [home_section]
 
-    def _pre_format(self, block: None | str) -> None | paragraph | literal_block:
+    def _pre_format(self, block: str | None) -> paragraph | literal_block | None:
         if block is None:
             return None
         if self._raw_format and "\n" in block:
