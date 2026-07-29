@@ -16,6 +16,7 @@ from argparse import (
 )
 from collections import defaultdict
 from contextlib import contextmanager
+from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Final, cast
 from unittest.mock import patch
@@ -46,9 +47,8 @@ from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
 
-    from docutils.parsers.rst.states import RSTState, RSTStateMachine
     from sphinx.domains.std import StandardDomain
     from sphinx.util.logging import SphinxLoggerAdapter
 
@@ -77,66 +77,56 @@ class SphinxArgparseCli(SphinxDirective):
         "force_refs_lower": flag,
     }
 
-    def __init__(  # noqa: PLR0913
-        self,
-        name: str,
-        arguments: list[str],
-        options: dict[str, str | None],
-        content: StringList,
-        lineno: int,
-        content_offset: int,
-        block_text: str,
-        state: RSTState,
-        state_machine: RSTStateMachine,
-    ) -> None:
-        options.setdefault("group_title_prefix", None)
-        options.setdefault("group_sub_title_prefix", None)
-        super().__init__(name, arguments, options, content, lineno, content_offset, block_text, state, state_machine)
-        self._parser: ArgumentParser | None = None
-        self._std_domain: StandardDomain = cast("StandardDomain", self.env.get_domain("std"))
-        self._raw_format: bool = False
-        self._make_id = make_id_lower if "force_refs_lower" in self.options else make_id
+    @cached_property
+    def parser(self) -> ArgumentParser:
+        module_name, attr_name = self.options["module"], self.options["func"]
+        try:
+            module = __import__(module_name, fromlist=[attr_name])
+        except ImportError:
+            msg = f"Failed to import module {module_name!r}"
+            raise self.error(msg)  # noqa: B904
+        try:
+            parser_creator = getattr(module, attr_name)
+        except AttributeError:
+            del sys.modules[module_name]
+            msg = f"Module {module_name!r} has no attribute {attr_name!r}"
+            raise self.error(msg)  # noqa: B904
+        parser: ArgumentParser | None = None
+        if "hook" in self.options:
+            original_parse_known_args = ArgumentParser.parse_known_args
+            ArgumentParser.parse_known_args = _parse_known_args_hook  # type: ignore[method-assign,assignment]
+            try:
+                parser_creator()
+            except HookError as hooked:
+                parser = hooked.parser
+            finally:
+                ArgumentParser.parse_known_args = original_parse_known_args
+        else:
+            parser = parser_creator()
+
+        del sys.modules[module_name]
+        if parser is None:
+            msg = "Failed to hook argparse to get ArgumentParser"
+            raise self.error(msg)
+
+        if "prog" in self.options:
+            old_prog, new_prog = parser.prog, self.options["prog"]
+            parser.prog = new_prog
+            _update_sub_parser_prog(parser, old_prog, new_prog)
+        return parser
+
+    @cached_property
+    def _std_domain(self) -> StandardDomain:
+        return cast("StandardDomain", self.env.get_domain("std"))
+
+    @cached_property
+    def _make_id(self) -> Callable[[str], str]:
+        return make_id_lower if "force_refs_lower" in self.options else make_id
 
     @property
-    def parser(self) -> ArgumentParser:
-        if self._parser is None:
-            module_name, attr_name = self.options["module"], self.options["func"]
-            try:
-                module = __import__(module_name, fromlist=[attr_name])
-            except ImportError:
-                msg = f"Failed to import module {module_name!r}"
-                raise self.error(msg)  # noqa: B904
-            try:
-                parser_creator = getattr(module, attr_name)
-            except AttributeError:
-                del sys.modules[module_name]
-                msg = f"Module {module_name!r} has no attribute {attr_name!r}"
-                raise self.error(msg)  # noqa: B904
-            if "hook" in self.options:
-                original_parse_known_args = ArgumentParser.parse_known_args
-                ArgumentParser.parse_known_args = _parse_known_args_hook  # type: ignore[method-assign,assignment]
-                try:
-                    parser_creator()
-                except HookError as hooked:
-                    self._parser = hooked.parser
-                finally:
-                    ArgumentParser.parse_known_args = original_parse_known_args
-            else:
-                self._parser = parser_creator()
-
-            del sys.modules[module_name]
-            if self._parser is None:
-                msg = "Failed to hook argparse to get ArgumentParser"
-                raise self.error(msg)
-
-            if "prog" in self.options:
-                old_prog, new_prog = self._parser.prog, self.options["prog"]
-                self._parser.prog = new_prog
-                _update_sub_parser_prog(self._parser, old_prog, new_prog)
-
-            formatter = self._parser.formatter_class
-            self._raw_format = isinstance(formatter, type) and issubclass(formatter, RawDescriptionHelpFormatter)
-        return self._parser
+    def _raw_format(self) -> bool:
+        formatter = self.parser.formatter_class
+        return isinstance(formatter, type) and issubclass(formatter, RawDescriptionHelpFormatter)
 
     def _load_sub_parsers(
         self, sub_parser: _SubParsersAction[ArgumentParser]
@@ -214,8 +204,8 @@ class SphinxArgparseCli(SphinxDirective):
         return para
 
     def _mk_option_group(self, group: _ArgumentGroup, prefix: str, prog: str) -> section:
-        sub_title_prefix: str = self.options["group_sub_title_prefix"]
-        title_prefix = self.options["group_title_prefix"]
+        sub_title_prefix: str = self.options.get("group_sub_title_prefix")
+        title_prefix = self.options.get("group_title_prefix")
         title_text = self._build_opt_grp_title(group, prefix, prog, sub_title_prefix, title_prefix)
         title_ref: str = f"{prefix}{' ' if prefix else ''}{group.title}"
         ref_id = self._make_id(title_ref)
@@ -318,8 +308,8 @@ class SphinxArgparseCli(SphinxDirective):
         self._std_domain.labels[name] = doc_name, ref_name, ref_title
 
     def _mk_sub_command(self, aliases: list[str], help_msg: str, parser: ArgumentParser) -> section:
-        sub_title_prefix: str = self.options["group_sub_title_prefix"]
-        title_prefix: str = self.options["group_title_prefix"]
+        sub_title_prefix: str = self.options.get("group_sub_title_prefix")
+        title_prefix: str = self.options.get("group_title_prefix")
 
         if sys.version_info >= (3, 14):  # pragma: >=3.14 cover
             # https://github.com/python/cpython/issues/139809
