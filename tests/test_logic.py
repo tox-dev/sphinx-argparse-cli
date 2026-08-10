@@ -369,6 +369,13 @@ def test_subparsers(build_outcome: str) -> None:
     assert '<section id="test-no_child-options">' in build_outcome
 
 
+@pytest.mark.sphinx(buildername="html", testroot="subparsers-storeaction")
+def test_subparsers_stoeaction(build_outcome: str) -> None:
+    assert '<section id="test-options">' in build_outcome
+    assert '<section id="test-subparser">' in build_outcome
+    assert '<section id="test-subparser-positional-arguments">' in build_outcome
+
+
 @pytest.mark.sphinx(buildername="text", testroot="bad-module")
 def test_bad_module(app: SphinxTestApp, warning: StringIO) -> None:
     app.build()
