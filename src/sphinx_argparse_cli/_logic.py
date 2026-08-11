@@ -149,7 +149,8 @@ class SphinxArgparseCli(SphinxDirective):
 
             if parser._subparsers:  # noqa: SLF001
                 sub_sub_parser: _SubParsersAction[ArgumentParser] = parser._subparsers._group_actions[0]  # type: ignore[assignment]  # noqa: SLF001
-                yield from self._load_sub_parsers(sub_sub_parser)
+                if isinstance(sub_sub_parser, _SubParsersAction):
+                    yield from self._load_sub_parsers(sub_sub_parser)
 
     def _iter_sub_commands(self) -> Iterator[tuple[list[str], str, ArgumentParser]]:
         top_sub_parser = self.parser._subparsers  # noqa: SLF001
