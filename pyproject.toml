@@ -136,10 +136,10 @@ environment.python-version = "3.14"
 
 [tool.coverage]
 run.parallel = true
+run.relative_files = true
 run.plugins = [
   "covdefaults",
 ]
-run.relative_files = true
 paths.source = [
   "src",
   "**/site-packages",
