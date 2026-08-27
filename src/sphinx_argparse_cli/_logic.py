@@ -48,7 +48,7 @@ from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Iterator, Sequence
 
     from sphinx.domains.std import StandardDomain
     from sphinx.util.logging import SphinxLoggerAdapter
@@ -198,7 +198,7 @@ class SphinxArgparseCli(SphinxDirective):
         return [home_section]
 
     def _pre_format(self, block: str | None) -> paragraph | literal_block | None:
-        if block is None:
+        if block is None or not block.strip():
             return None
         if self._raw_format and "\n" in block:
             lit = literal_block("", Text(block), classes=["sphinx-argparse-cli-wrap"])
@@ -258,13 +258,17 @@ class SphinxArgparseCli(SphinxDirective):
         else:
             self._mk_option_name(line, prefix, as_key)
 
+        extra: Sequence[Node] = ()
         if action.help:
-            help_text = load_help_text(action.help)
             temp = paragraph()
-            self.state.nested_parse(StringList(help_text.split("\n")), 0, temp)
-            line += Text(" - ")
-            for content in cast("paragraph", temp.children[0]).children:
-                line += content
+            self.state.nested_parse(StringList(load_help_text(action.help).split("\n")), 0, temp)
+            # only a leading paragraph can share the option's line; anything else becomes a block under it
+            if temp.children and isinstance(temp.children[0], paragraph):
+                line += Text(" - ")
+                line += temp.children[0].children
+                extra = temp.children[1:]
+            else:
+                extra = temp.children
         if (
             "no_default_values" not in self.options
             and action.default is not None
@@ -275,8 +279,9 @@ class SphinxArgparseCli(SphinxDirective):
             line += Text(" (default: ")
             line += literal(text=str(action.default).replace(str(Path.cwd()), "{cwd}"))
             line += Text(")")
-        _protect_option_dashes(line)
-        return list_item("", line, ids=[])
+        item = list_item("", line, *extra, ids=[])
+        _protect_option_dashes(item)
+        return item
 
     def _mk_option_name(self, line: paragraph, prefix: str, opt: str) -> None:
         ref_id = self._make_id(f"{prefix}-{opt}")

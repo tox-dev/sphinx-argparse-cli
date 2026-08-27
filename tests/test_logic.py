@@ -118,7 +118,7 @@ def test_set_description_as_text(build_outcome: str) -> None:
 
 @pytest.mark.sphinx(buildername="text", testroot="description-empty")
 def test_empty_description_as_text(build_outcome: str) -> None:
-    assert build_outcome == "foo - CLI interface\n*******************\n\n\n   foo\n"
+    assert build_outcome == "foo - CLI interface\n*******************\n\n   foo\n"
 
 
 @pytest.mark.sphinx(buildername="html", testroot="description-multiline")
@@ -140,7 +140,7 @@ def test_set_epilog_as_text(build_outcome: str) -> None:
 
 @pytest.mark.sphinx(buildername="text", testroot="epilog-empty")
 def test_empty_epilog_as_text(build_outcome: str) -> None:
-    assert build_outcome == "foo - CLI interface\n*******************\n\n   foo\n\n"
+    assert build_outcome == "foo - CLI interface\n*******************\n\n   foo\n"
 
 
 @pytest.mark.sphinx(buildername="html", testroot="epilog-multiline")
@@ -321,6 +321,40 @@ prog run options
 * **"--magic"** "MAGIC" - magic
 """
     )
+
+
+@pytest.mark.sphinx(buildername="text", testroot="help-nodes")
+def test_help_nodes_as_text(build_outcome: str) -> None:
+    assert (
+        build_outcome
+        == """prog - CLI interface
+********************
+
+   prog [--blank BLANK] [--list LIST] [--two TWO]
+
+
+prog options
+============
+
+* **"--blank"** "BLANK"
+
+* **"--list"** "LIST"
+
+  * item one
+
+  * item two
+
+* **"--two"** "TWO" - first paragraph
+
+  second paragraph
+"""
+    )
+
+
+@pytest.mark.sphinx(buildername="html", testroot="help-nodes")
+def test_help_nodes_as_html(build_outcome: str, warning: StringIO) -> None:
+    assert "<p></p>" not in build_outcome
+    assert not warning.getvalue()
 
 
 @pytest.mark.sphinx(buildername="html", testroot="group-untitled")
