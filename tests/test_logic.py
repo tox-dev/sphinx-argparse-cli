@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -213,6 +214,20 @@ def test_ref_prefix_doc(build_outcome: str) -> None:
         "</p>"
     )
     assert ref in build_outcome
+
+
+@pytest.mark.sphinx(buildername="html", testroot="option")
+def test_option_role_as_html(build_outcome: str, warning: StringIO) -> None:
+    hrefs = re.findall(r'<a class="reference internal" href="(#[^"]+)"><code class="xref std std-option', build_outcome)
+    assert hrefs == [
+        "#prog---root",
+        "#prog--r",
+        "#prog-run---magic",
+        "#prog-run-target",
+        "#prog-run---magic",
+        "#prog-run---magic",
+    ]
+    assert not warning.getvalue()
 
 
 @pytest.mark.sphinx(buildername="text", testroot="ref-duplicate-label")

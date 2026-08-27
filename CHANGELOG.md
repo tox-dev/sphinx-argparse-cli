@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - Fix Sphinx warnings about parallel reads.
 - Add `force_args_lower` to enable `:ref:` links with mixed-case program names and arguments.
 - Fix Sphinx smart quotes rewriting `--` to an en dash in `--option` names within descriptions, epilogs, and help text.
+- Register flags and positional arguments as Sphinx program options so the `:option:` role links to them.
 
 ## 1.13.1
 

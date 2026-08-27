@@ -132,6 +132,23 @@ With `sphinx_argparse_cli_prefix_document = True` (anchors prefixed by document 
 
 The anchor text is visible after the `#` in the URL when you click a heading.
 
+Flags and positional arguments are also registered as Sphinx program options, so the `:option:` role works with the
+program (and sub-command) name followed by the argument, or scoped through a `.. program::` directive:
+
+```rst
+:option:`tox --magic`
+:option:`tox run --magic`
+
+.. program:: tox run
+
+:option:`--magic`
+:option:`--magic=value`
+```
+
+`:option:` targets keep their original case, so they do not need `:force_refs_lower:`. They ignore
+`sphinx_argparse_cli_prefix_document`; when two documents render the same program, the role links to the first one
+Sphinx reads.
+
 ### Handle mixed-case references
 
 Sphinx `:ref:` only supports lower-case targets. When your program name or flags contain capital letters, set
