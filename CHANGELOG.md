@@ -24,6 +24,8 @@ All notable changes to this project will be documented in this file.
   render sub-command epilogs.
 - Render the argument spec after an option with argparse's formatter, so `nargs`, `choices` and tuple metavars show as
   in the usage line; user-supplied metavars keep their case instead of being upper-cased.
+- Expand argparse format specifiers such as `%(prog)s`, `%(default)s` and `%(choices)s` in help, descriptions and
+  epilogs, and skip the generated `(default: ...)` when the help already mentions a default in any case.
 
 ## 1.13.1
 

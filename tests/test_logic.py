@@ -575,6 +575,59 @@ def test_ref_cases(build_outcome: str, warning: StringIO) -> None:
     assert not warning.getvalue()
 
 
+@pytest.mark.sphinx(buildername="text", testroot="help-format-specifiers")
+def test_help_format_specifiers(build_outcome: str) -> None:
+    assert (
+        build_outcome
+        == """tool - CLI interface
+********************
+
+tool does things
+
+   tool [--n N] [--mode {a,b}] [--pct PCT] [--capital CAPITAL] [--kind KIND] [--level LEVEL]
+        {run} ...
+
+
+tool options
+============
+
+* **"--n"** "N" - count (default: 3)
+
+* **"--mode"** "{a,b}" - pick one of a, b (default: "a")
+
+* **"--pct"** "PCT" - 100% of tool (default: "5")
+
+* **"--capital"** "CAPITAL" - Default: 3
+
+* **"--kind"** "KIND" - parsed with float
+
+
+tool tuning
+===========
+
+tune tool
+
+* **"--level"** "LEVEL" - level (default: "1")
+
+
+tool run
+========
+
+tool run runs
+
+   tool run [--target TARGET]
+
+
+tool run options
+----------------
+
+* **"--target"** "TARGET" - target for tool run
+
+run tool --help
+"""
+    )
+
+
 @pytest.mark.sphinx(buildername="text", testroot="default-handling")
 def test_with_default(build_outcome: str) -> None:
     assert (
