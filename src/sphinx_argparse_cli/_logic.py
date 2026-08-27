@@ -399,7 +399,8 @@ class SphinxArgparseCli(SphinxDirective):
 
     @contextmanager
     def _no_color(self) -> Iterator[None]:
-        with patch.dict(os.environ, {"NO_COLOR": "1"}, clear=False):
+        # PYTHON_COLORS=1 outranks NO_COLOR in argparse, so both must be set to get plain text
+        with patch.dict(os.environ, {"NO_COLOR": "1", "PYTHON_COLORS": "0"}, clear=False):
             yield
 
 

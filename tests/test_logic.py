@@ -273,6 +273,36 @@ def test_option_role_as_html(build_outcome: str, warning: StringIO) -> None:
     assert not warning.getvalue()
 
 
+@pytest.mark.sphinx(buildername="text", testroot="python-colors")
+def test_usage_ignores_python_colors(build_outcome: str) -> None:
+    assert (
+        build_outcome
+        == """prog - CLI interface
+********************
+
+   prog [--flag FLAG] {run} ...
+
+
+prog options
+============
+
+* **"--flag"** "FLAG" - a flag
+
+
+prog run
+========
+
+   prog run [--magic MAGIC]
+
+
+prog run options
+----------------
+
+* **"--magic"** "MAGIC" - magic
+"""
+    )
+
+
 @pytest.mark.sphinx(buildername="text", testroot="ref-duplicate-label")
 def test_ref_duplicate_label(build_outcome: tuple[str, str], warning: StringIO) -> None:
     assert build_outcome
