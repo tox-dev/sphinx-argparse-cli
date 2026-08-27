@@ -126,8 +126,8 @@ class SphinxArgparseCli(SphinxDirective):
         return make_id_lower if "force_refs_lower" in self.options else make_id
 
     def _load_sub_parsers(
-        self, sub_parser: _SubParsersAction[ArgumentParser]
-    ) -> Iterator[tuple[list[str], str, ArgumentParser]]:
+        self, sub_parser: _SubParsersAction[ArgumentParser], parent_cmd: str = ""
+    ) -> Iterator[tuple[list[str], str, ArgumentParser, str]]:
         parser_to_args: dict[int, list[str]] = defaultdict(list)
         for key, parser in sub_parser._name_parser_map.items():  # noqa: SLF001
             parser_to_args[id(parser)].append(key)
@@ -144,12 +144,13 @@ class SphinxArgparseCli(SphinxDirective):
             help_msg = next((a.help for a in sub_parser._choices_actions if a.dest == name), None)  # noqa: SLF001
             if help_msg == SUPPRESS:
                 continue
-            yield aliases, help_msg or "", parser
+            sub_cmd = f"{parent_cmd} {name}".strip()
+            yield aliases, help_msg or "", parser, sub_cmd
 
             if (sub_sub_parser := _sub_parser_action(parser)) is not None:
-                yield from self._load_sub_parsers(sub_sub_parser)
+                yield from self._load_sub_parsers(sub_sub_parser, sub_cmd)
 
-    def _iter_sub_commands(self) -> Iterator[tuple[list[str], str, ArgumentParser]]:
+    def _iter_sub_commands(self) -> Iterator[tuple[list[str], str, ArgumentParser, str]]:
         if (sub_parser := _sub_parser_action(self.parser)) is not None:
             yield from self._load_sub_parsers(sub_parser)
 
@@ -177,10 +178,9 @@ class SphinxArgparseCli(SphinxDirective):
                     actions,
                     self.parser,
                     prefix=self.parser.prog.split("/")[-1],
-                    prog=self.parser.prog.split("/")[-1],
                 )
-        for aliases, help_msg, parser in self._iter_sub_commands():
-            home_section += self._mk_sub_command(aliases, help_msg, parser)
+        for aliases, help_msg, parser, sub_cmd in self._iter_sub_commands():
+            home_section += self._mk_sub_command(aliases, help_msg, parser, sub_cmd)
 
         if epilog := self._pre_format(self.options.get("epilog", self.parser.epilog), self.parser):
             home_section += epilog
@@ -204,13 +204,19 @@ class SphinxArgparseCli(SphinxDirective):
         return para
 
     def _mk_option_group(
-        self, group: _ArgumentGroup, actions: list[Action], parser: ArgumentParser, prefix: str, prog: str
+        self,
+        group: _ArgumentGroup,
+        actions: list[Action],
+        parser: ArgumentParser,
+        prefix: str,
+        sub_cmd: str | None = None,
     ) -> section:
+        prog = self.parser.prog.split("/")[-1]
         sub_title_prefix: str = self.options.get("group_sub_title_prefix")
         title_prefix = self.options.get("group_title_prefix")
         # an untitled group borrows its description as heading so its anchor stays unique
         group_title = group.title or group.description or "arguments"
-        title_text = self._build_opt_grp_title(group_title, prefix, prog, sub_title_prefix, title_prefix)
+        title_text = self._resolve_prefix(prog, sub_cmd, prefix, title_prefix, sub_title_prefix) + group_title
         title_ref: str = f"{prefix}{' ' if prefix else ''}{group_title}"
         ref_id = self._make_id(title_ref)
         # the text sadly needs to be prefixed, because otherwise the autosectionlabel will conflict
@@ -224,12 +230,6 @@ class SphinxArgparseCli(SphinxDirective):
             opt_group += self._mk_option_line(parser, action, prefix)
         group_section += opt_group
         return group_section
-
-    def _build_opt_grp_title(
-        self, group_title: str, prefix: str, prog: str, sub_title_prefix: str, title_prefix: str
-    ) -> str:
-        sub_cmd = prefix[len(prog) :].strip() or None if prefix != prog else None
-        return self._resolve_prefix(prog, sub_cmd, prefix, title_prefix, sub_title_prefix) + group_title
 
     def _mk_option_line(self, parser: ArgumentParser, action: Action, prefix: str) -> list_item:
         line = paragraph()
@@ -308,7 +308,7 @@ class SphinxArgparseCli(SphinxDirective):
         self._std_domain.anonlabels[name] = doc_name, ref_name
         self._std_domain.labels[name] = doc_name, ref_name, ref_title
 
-    def _mk_sub_command(self, aliases: list[str], help_msg: str, parser: ArgumentParser) -> section:
+    def _mk_sub_command(self, aliases: list[str], help_msg: str, parser: ArgumentParser, sub_cmd: str) -> section:
         sub_title_prefix: str = self.options.get("group_sub_title_prefix")
         title_prefix: str = self.options.get("group_title_prefix")
 
@@ -316,7 +316,8 @@ class SphinxArgparseCli(SphinxDirective):
             # https://github.com/python/cpython/issues/139809
             parser.prog = _strip_ansi_colors(parser.prog)
 
-        title_text = self._build_sub_cmd_title(parser, sub_title_prefix, title_prefix)
+        root_prog = self.parser.prog.split("/")[-1]
+        title_text = self._resolve_prefix(root_prog, sub_cmd, parser.prog, title_prefix, sub_title_prefix).rstrip()
         title_ref: str = parser.prog
         if aliases:
             aliases_text: str = f" ({', '.join(aliases)})"
@@ -338,17 +339,10 @@ class SphinxArgparseCli(SphinxDirective):
 
         for group in parser._action_groups:  # noqa: SLF001
             if actions := _visible_actions(group):
-                group_section += self._mk_option_group(
-                    group, actions, parser, prefix=parser.prog, prog=self.parser.prog.split("/")[-1]
-                )
+                group_section += self._mk_option_group(group, actions, parser, prefix=parser.prog, sub_cmd=sub_cmd)
         if epilog := self._pre_format(parser.epilog, parser):
             group_section += epilog
         return group_section
-
-    def _build_sub_cmd_title(self, parser: ArgumentParser, sub_title_prefix: str, title_prefix: str) -> str:
-        root_prog = self.parser.prog.split("/")[-1]
-        sub_cmd = parser.prog[len(root_prog) :].strip().split(" ", maxsplit=1)[0]
-        return self._resolve_prefix(root_prog, sub_cmd, parser.prog, title_prefix, sub_title_prefix).rstrip()
 
     def _resolve_prefix(
         self,

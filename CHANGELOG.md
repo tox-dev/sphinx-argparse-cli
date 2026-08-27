@@ -26,6 +26,8 @@ All notable changes to this project will be documented in this file.
   in the usage line; user-supplied metavars keep their case instead of being upper-cased.
 - Expand argparse format specifiers such as `%(prog)s`, `%(default)s` and `%(choices)s` in help, descriptions and
   epilogs, and skip the generated `(default: ...)` when the help already mentions a default in any case.
+- Make `{subcommand}` in `:group_sub_title_prefix:` expand to the sub-command names (`first nested`) instead of the
+  first word after the program name, which was a positional argument or only the outermost command.
 
 ## 1.13.1
 

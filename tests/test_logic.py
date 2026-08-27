@@ -420,6 +420,18 @@ prog run options
     )
 
 
+@pytest.mark.sphinx(buildername="html", testroot="subcommand-placeholder")
+def test_sub_command_placeholder_nested(build_outcome: str) -> None:
+    headings = re.findall(r'<h[23]>([^<]*)<a class="headerlink" href="(#[^"]*)"', build_outcome)
+    assert headings == [
+        ("prog positional arguments", "#prog-positional-arguments"),
+        ("prog first (f)", "#prog-root-first-(f)"),
+        ("prog first options", "#prog-root-first-options"),
+        ("prog first nested", "#prog-root-first-nested"),
+        ("prog first nested options", "#prog-root-first-nested-options"),
+    ]
+
+
 @pytest.mark.sphinx(buildername="text", testroot="help-nodes")
 def test_help_nodes_as_text(build_outcome: str) -> None:
     assert (
@@ -538,8 +550,8 @@ def test_group_title_prefix_sub_command_replacement(build_outcome: str, opt_grp_
     grp, anchor = opt_grp_name
     assert f'<h2>bar {grp}<a class="headerlink" href="#bar-{anchor}"' in build_outcome
     assert '<h2>bar Exclusive<a class="headerlink" href="#bar-Exclusive"' in build_outcome
-    assert '<h2>bar baronlyroot (f)<a class="headerlink" href="#bar-root-first-(f)"' in build_outcome
-    assert '<h3>bar baronlyroot first positional arguments<a class="headerlink"' in build_outcome
+    assert '<h2>bar baronlyfirst (f)<a class="headerlink" href="#bar-root-first-(f)"' in build_outcome
+    assert '<h3>bar baronlyfirst positional arguments<a class="headerlink"' in build_outcome
 
 
 @pytest.mark.sphinx(buildername="html", testroot="store-true-false")
