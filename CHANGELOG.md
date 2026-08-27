@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
 - Add `force_refs_lower` to enable `:ref:` links with mixed-case program names and arguments.
 - Fix Sphinx smart quotes rewriting `--` to an en dash in `--option` names within descriptions, epilogs, and help text.
 - Register flags and positional arguments as Sphinx program options so the `:option:` role links to them.
+- Leave apostrophes inside words (`don't`, `it's`) alone in help text instead of turning them into broken inline
+  literals.
 
 ## 1.13.1
 
