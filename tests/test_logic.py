@@ -323,6 +323,19 @@ prog run options
     )
 
 
+@pytest.mark.sphinx(buildername="html", testroot="group-untitled")
+def test_group_untitled(build_outcome: str, warning: StringIO) -> None:
+    headings = re.findall(r'<h2>(.*?)<a class="headerlink" href="(#[^"]+)"', build_outcome)
+    assert headings == [
+        ("tool options", "#tool-options"),
+        ("tool only a description", "#tool-only-a-description"),
+        ("tool another", "#tool-another"),
+        ("tool arguments", "#tool-arguments"),
+    ]
+    assert "<p>only a description</p>" not in build_outcome
+    assert not warning.getvalue()
+
+
 @pytest.mark.sphinx(buildername="text", testroot="ref-duplicate-label")
 def test_ref_duplicate_label(build_outcome: tuple[str, str], warning: StringIO) -> None:
     assert build_outcome
