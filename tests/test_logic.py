@@ -124,12 +124,12 @@ def test_empty_description_as_text(build_outcome: str) -> None:
 @pytest.mark.sphinx(buildername="html", testroot="description-multiline")
 def test_multiline_description_as_html(build_outcome: str) -> None:
     ref = (
-        "This description\nspans multiple lines.\n\n  this line is indented.\n    and also this.\n\nNow this should be"
-        " a separate paragraph.\n"
+        "<pre><span></span>This description\nspans multiple lines.\n\n  this line is indented.\n    and also this.\n\n"
+        "Now this should be a separate paragraph.\n</pre>"
     )
     assert ref in build_outcome
 
-    ref = "This group description\n\nspans multiple lines.\n"
+    ref = "<pre><span></span>This group description\n\nspans multiple lines.\n</pre>"
     assert ref in build_outcome
 
 
@@ -146,8 +146,8 @@ def test_empty_epilog_as_text(build_outcome: str) -> None:
 @pytest.mark.sphinx(buildername="html", testroot="epilog-multiline")
 def test_multiline_epilog_as_html(build_outcome: str) -> None:
     ref = (
-        "This epilog\nspans multiple lines.\n\n  this line is indented.\n    and also this.\n\nNow this should be"
-        " a separate paragraph.\n"
+        "<pre><span></span>This epilog\nspans multiple lines.\n\n  this line is indented.\n    and also this.\n\n"
+        "Now this should be a separate paragraph.\n</pre>"
     )
     assert ref in build_outcome
 
@@ -155,10 +155,56 @@ def test_multiline_epilog_as_html(build_outcome: str) -> None:
 @pytest.mark.sphinx(buildername="html", testroot="epilog-multiline-subclass")
 def test_multiline_epilog_subclass_formatter_as_html(build_outcome: str) -> None:
     ref = (
-        "This epilog\nspans multiple lines.\n\n  this line is indented.\n    and also this.\n\nNow this should be"
-        " a separate paragraph.\n"
+        "<pre><span></span>This epilog\nspans multiple lines.\n\n  this line is indented.\n    and also this.\n\n"
+        "Now this should be a separate paragraph.\n</pre>"
     )
     assert ref in build_outcome
+
+
+@pytest.mark.sphinx(buildername="text", testroot="subcommand-epilog-raw")
+def test_sub_command_description_epilog_as_text(build_outcome: str) -> None:
+    assert (
+        build_outcome
+        == """prog - CLI interface
+********************
+
+   prog {raw,plain} ...
+
+   root description
+     kept as is
+
+
+prog raw
+========
+
+   prog raw [--flag FLAG]
+
+   raw description
+     kept as is
+
+
+prog raw options
+----------------
+
+* **"--flag"** "FLAG" - raw flag
+
+   raw epilog
+     kept as is
+
+
+prog plain
+==========
+
+   prog plain
+
+plain description   reflowed
+
+plain epilog   reflowed
+
+   root epilog
+     kept as is
+"""
+    )
 
 
 @pytest.mark.sphinx(buildername="html", testroot="smartquotes")

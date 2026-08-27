@@ -18,10 +18,11 @@ Now this should be a separate paragraph.
         add_help=False,
     )
     group = parser.add_argument_group(
+        "group",
         description="""This group description
 
 spans multiple lines.
-"""
+""",
     )
     group.add_argument("--dummy")
     return parser

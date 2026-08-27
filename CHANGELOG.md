@@ -20,6 +20,8 @@ All notable changes to this project will be documented in this file.
   argument instead of inside its paragraph, and drop the empty paragraph an empty `:description:` produced.
 - Fix a crash and render positional arguments when they are added before `add_subparsers()`; skip headings for groups
   whose arguments are all suppressed.
+- Keep `RawDescriptionHelpFormatter` line breaks in epilogs and in descriptions rendered after the usage block, and
+  render sub-command epilogs.
 
 ## 1.13.1
 
