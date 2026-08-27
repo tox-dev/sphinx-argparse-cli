@@ -155,6 +155,14 @@ For a program named `SampleProgram`:
 If you do not need Sphinx `:ref:` cross-references you can leave this off to keep mixed-case anchors in the HTML output,
 but enabling it later will change existing anchor URLs.
 
+### Write help text as reStructuredText
+
+The directive parses every argument's `help` string as reStructuredText, so inline markup such as a `:ref:` role or
+`**bold**` works. The same applies to characters that carry meaning in reStructuredText: a lone `*` (`match *.py`), a
+trailing `_` (`name_`), backticks, or a trailing `::` produce docutils warnings and fail a build run with `-W`. Escape
+them with a backslash (`match \*.py`) or wrap them in inline literals. Text between matching single quotes, double
+quotes, or braces becomes an inline literal for you, so `pick 'fast' or "slow"` shows `'fast'` and `"slow"` as code.
+
 ### Add extra content after generated docs
 
 Any content nested inside the directive is appended after the generated CLI documentation:
