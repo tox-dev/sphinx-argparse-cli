@@ -151,17 +151,12 @@ class SphinxArgparseCli(SphinxDirective):
                 continue
             yield aliases, help_msg or "", parser
 
-            if parser._subparsers:  # noqa: SLF001
-                sub_sub_parser: _SubParsersAction[ArgumentParser] = parser._subparsers._group_actions[0]  # type: ignore[assignment]  # noqa: SLF001
-                if isinstance(sub_sub_parser, _SubParsersAction):
-                    yield from self._load_sub_parsers(sub_sub_parser)
+            if (sub_sub_parser := _sub_parser_action(parser)) is not None:
+                yield from self._load_sub_parsers(sub_sub_parser)
 
     def _iter_sub_commands(self) -> Iterator[tuple[list[str], str, ArgumentParser]]:
-        top_sub_parser = self.parser._subparsers  # noqa: SLF001
-        if not top_sub_parser:
-            return
-        sub_parser: _SubParsersAction[ArgumentParser] = top_sub_parser._group_actions[0]  # type: ignore[assignment]  # noqa: SLF001
-        yield from self._load_sub_parsers(sub_parser)
+        if (sub_parser := _sub_parser_action(self.parser)) is not None:
+            yield from self._load_sub_parsers(sub_parser)
 
     def run(self) -> list[Node]:
         self.env.note_reread()  # this document needs to always be rebuilt
@@ -181,11 +176,10 @@ class SphinxArgparseCli(SphinxDirective):
             home_section += self._mk_usage(self.parser)
 
         for group in self.parser._action_groups:  # noqa: SLF001
-            if not group._group_actions or group is self.parser._subparsers:  # noqa: SLF001
-                continue
-            home_section += self._mk_option_group(
-                group, prefix=self.parser.prog.split("/")[-1], prog=self.parser.prog.split("/")[-1]
-            )
+            if actions := _visible_actions(group):
+                home_section += self._mk_option_group(
+                    group, actions, prefix=self.parser.prog.split("/")[-1], prog=self.parser.prog.split("/")[-1]
+                )
         for aliases, help_msg, parser in self._iter_sub_commands():
             home_section += self._mk_sub_command(aliases, help_msg, parser)
 
@@ -208,7 +202,7 @@ class SphinxArgparseCli(SphinxDirective):
         _protect_option_dashes(para)
         return para
 
-    def _mk_option_group(self, group: _ArgumentGroup, prefix: str, prog: str) -> section:
+    def _mk_option_group(self, group: _ArgumentGroup, actions: list[Action], prefix: str, prog: str) -> section:
         sub_title_prefix: str = self.options.get("group_sub_title_prefix")
         title_prefix = self.options.get("group_title_prefix")
         # an untitled group borrows its description as heading so its anchor stays unique
@@ -223,11 +217,8 @@ class SphinxArgparseCli(SphinxDirective):
             group_section += description
         self._register_ref(ref_id, title_text, group_section)
         opt_group = bullet_list()
-        for action in group._group_actions:  # noqa: SLF001
-            if action.help == SUPPRESS:
-                continue
-            point = self._mk_option_line(action, prefix)
-            opt_group += point
+        for action in actions:
+            opt_group += self._mk_option_line(action, prefix)
         group_section += opt_group
         return group_section
 
@@ -350,11 +341,10 @@ class SphinxArgparseCli(SphinxDirective):
             group_section += self._mk_usage(parser)
 
         for group in parser._action_groups:  # noqa: SLF001
-            if not group._group_actions:  # noqa: SLF001
-                continue
-            if isinstance(group._group_actions[0], _SubParsersAction):  # noqa: SLF001
-                continue
-            group_section += self._mk_option_group(group, prefix=parser.prog, prog=self.parser.prog.split("/")[-1])
+            if actions := _visible_actions(group):
+                group_section += self._mk_option_group(
+                    group, actions, prefix=parser.prog, prog=self.parser.prog.split("/")[-1]
+                )
         return group_section
 
     def _build_sub_cmd_title(self, parser: ArgumentParser, sub_title_prefix: str, title_prefix: str) -> str:
@@ -419,6 +409,22 @@ def make_id(key: str) -> str:
     return "-".join(key.split()).rstrip("-")
 
 
+def _sub_parser_action(parser: ArgumentParser) -> _SubParsersAction[ArgumentParser] | None:
+    # add_subparsers reuses the positional group, so the action may sit after positional arguments;
+    # isinstance cannot recover the type parameter, hence the cast
+    found = next((action for action in parser._actions if isinstance(action, _SubParsersAction)), None)  # noqa: SLF001
+    return cast("_SubParsersAction[ArgumentParser] | None", found)
+
+
+def _visible_actions(group: _ArgumentGroup) -> list[Action]:
+    # sub-commands get their own sections, and a heading over an empty list helps nobody
+    return [
+        action
+        for action in group._group_actions  # noqa: SLF001
+        if action.help != SUPPRESS and not isinstance(action, _SubParsersAction)
+    ]
+
+
 _HELP_SUBSTITUTIONS: Final[list[tuple[re.Pattern[str], str]]] = [
     # a quote glued to a word character is an apostrophe (don't, it's), not the edge of a quoted span
     (re.compile(r"(?<!\w)'([^']+?)'(?!\w)"), "``'\\1'``"),
@@ -473,9 +479,8 @@ def _strip_ansi_colors(text: str) -> str:  # pragma: >=3.14 cover
 
 
 def _update_sub_parser_prog(parser: ArgumentParser, old_prog: str, new_prog: str) -> None:
-    if not (sub_parsers := parser._subparsers):  # noqa: SLF001
+    if (sub_action := _sub_parser_action(parser)) is None:
         return
-    sub_action: _SubParsersAction[ArgumentParser] = sub_parsers._group_actions[0]  # type: ignore[assignment]  # noqa: SLF001
     for sub_parser in sub_action.choices.values():
         sub_parser.prog = sub_parser.prog.replace(old_prog, new_prog, 1)
         _update_sub_parser_prog(sub_parser, old_prog, new_prog)
