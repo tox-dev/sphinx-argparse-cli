@@ -16,7 +16,7 @@ complex optional arguments
 
 * **"--no-help"**
 
-* **"--outdir"** "OUT_DIR", **"-o"** "OUT_DIR" - output directory
+* **"--outdir"** "out_dir", **"-o"** "out_dir" - output directory
 
 * **"--in-dir"** "IN_DIR", **"-i"** "IN_DIR" - input directory
 

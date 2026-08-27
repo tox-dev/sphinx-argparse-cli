@@ -22,6 +22,8 @@ All notable changes to this project will be documented in this file.
   whose arguments are all suppressed.
 - Keep `RawDescriptionHelpFormatter` line breaks in epilogs and in descriptions rendered after the usage block, and
   render sub-command epilogs.
+- Render the argument spec after an option with argparse's formatter, so `nargs`, `choices` and tuple metavars show as
+  in the usage line; user-supplied metavars keep their case instead of being upper-cased.
 
 ## 1.13.1
 
