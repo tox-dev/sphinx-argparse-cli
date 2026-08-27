@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Leave apostrophes inside words (`don't`, `it's`) alone in help text instead of turning them into broken inline
   literals.
 - Make `:hook:` intercept `parse_intermixed_args()` as well as `parse_args()`.
+- Keep ANSI color codes out of usage blocks when `PYTHON_COLORS=1` is set on Python 3.14 or newer.
 
 ## 1.13.1
 
