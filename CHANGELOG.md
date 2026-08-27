@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
   literals.
 - Make `:hook:` intercept `parse_intermixed_args()` as well as `parse_args()`.
 - Keep ANSI color codes out of usage blocks when `PYTHON_COLORS=1` is set on Python 3.14 or newer.
+- Skip sub-commands added with `help=argparse.SUPPRESS` instead of rendering them with a `==SUPPRESS==` description.
 
 ## 1.13.1
 

@@ -273,6 +273,26 @@ def test_option_role_as_html(build_outcome: str, warning: StringIO) -> None:
     assert not warning.getvalue()
 
 
+@pytest.mark.sphinx(buildername="text", testroot="subparsers-suppressed")
+def test_suppressed_sub_command(build_outcome: str) -> None:
+    assert (
+        build_outcome
+        == """prog - CLI interface
+********************
+
+   prog {run,secret} ...
+
+
+prog run
+========
+
+run it
+
+   prog run
+"""
+    )
+
+
 @pytest.mark.sphinx(buildername="text", testroot="python-colors")
 def test_usage_ignores_python_colors(build_outcome: str) -> None:
     assert (

@@ -146,8 +146,10 @@ class SphinxArgparseCli(SphinxDirective):
             aliases = parser_to_args[id(parser)]
             aliases.remove(name)
             # help is stored in a pseudo action
-            help_msg = next((a.help for a in sub_parser._choices_actions if a.dest == name), None) or ""  # noqa: SLF001
-            yield aliases, help_msg, parser
+            help_msg = next((a.help for a in sub_parser._choices_actions if a.dest == name), None)  # noqa: SLF001
+            if help_msg == SUPPRESS:
+                continue
+            yield aliases, help_msg or "", parser
 
             if parser._subparsers:  # noqa: SLF001
                 sub_sub_parser: _SubParsersAction[ArgumentParser] = parser._subparsers._group_actions[0]  # type: ignore[assignment]  # noqa: SLF001
