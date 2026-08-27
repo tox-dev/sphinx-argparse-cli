@@ -43,6 +43,7 @@ from docutils.nodes import (
 from docutils.parsers.rst.directives import flag, positive_int, unchanged, unchanged_required
 from docutils.statemachine import StringList
 from sphinx.locale import __
+from sphinx.util import ws_re
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
 
@@ -281,6 +282,7 @@ class SphinxArgparseCli(SphinxDirective):
         line.attributes["ids"].append(ref_id)
         ref += strong("", "", literal(text=opt))
         self._register_ref(ref_id, ref_title, ref, is_cli_option=True)
+        self._std_domain.add_program_option(ws_re.sub("-", prefix), opt, self.env.docname, ref_id)
         line += ref
 
     def _register_ref(
