@@ -175,6 +175,27 @@ def test_set_usage_first(build_outcome: str) -> None:
     assert "complex first [-h]" in build_outcome.split("a-first-desc", maxsplit=1)[0]
 
 
+@pytest.mark.sphinx(buildername="text", testroot="help-apostrophe")
+def test_help_apostrophe(build_outcome: str, warning: StringIO) -> None:
+    assert (
+        build_outcome
+        == """prog - CLI interface
+********************
+
+   prog [--a A] [--b B]
+
+
+prog options
+============
+
+* **"--a"** "A" - don't use it's value
+
+* **"--b"** "B" - it's a "'thing'" to see
+"""
+    )
+    assert not warning.getvalue()
+
+
 @pytest.mark.sphinx(buildername="text", testroot="suppressed-action")
 def test_suppressed_action(build_outcome: str) -> None:
     assert "--activities-since" not in build_outcome
@@ -183,13 +204,17 @@ def test_suppressed_action(build_outcome: str) -> None:
 @pytest.mark.parametrize(
     ("example", "output"),
     [
-        ("", ""),
-        ("{", "{"),
-        ('"', '"'),
-        ("'", "'"),
-        ("{a}", "``{a}``"),
-        ('"a"', '``"a"``'),
-        ("'a'", "``'a'``"),
+        pytest.param("", "", id="empty"),
+        pytest.param("{", "{", id="lone-brace"),
+        pytest.param('"', '"', id="lone-double-quote"),
+        pytest.param("'", "'", id="lone-single-quote"),
+        pytest.param("{a}", "``{a}``", id="braces"),
+        pytest.param('"a"', '``"a"``', id="double-quoted"),
+        pytest.param("'a'", "``'a'``", id="single-quoted"),
+        pytest.param("don't use it's value", "don't use it's value", id="apostrophes"),
+        pytest.param("it's a 'thing' to see", "it's a ``'thing'`` to see", id="apostrophe-and-quoted"),
+        pytest.param("'a' and 'b'", "``'a'`` and ``'b'``", id="two-quoted"),
+        pytest.param('say "hi" or "bye"', 'say ``"hi"`` or ``"bye"``', id="two-double-quoted"),
     ],
 )
 def test_help_loader(example: str, output: str) -> None:

@@ -411,8 +411,9 @@ def make_id(key: str) -> str:
 
 
 _HELP_SUBSTITUTIONS: Final[list[tuple[re.Pattern[str], str]]] = [
-    (re.compile(r"[']+(.+?)[']+"), "``'\\1'``"),
-    (re.compile(r'["]+(.+?)["]+'), '``"\\1"``'),
+    # a quote glued to a word character is an apostrophe (don't, it's), not the edge of a quoted span
+    (re.compile(r"(?<!\w)'([^']+?)'(?!\w)"), "``'\\1'``"),
+    (re.compile(r'(?<!\w)"([^"]+?)"(?!\w)'), '``"\\1"``'),
     (re.compile(r"[{](.+?)[}]"), "``{\\1}``"),
 ]
 
