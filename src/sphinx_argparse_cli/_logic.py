@@ -125,11 +125,6 @@ class SphinxArgparseCli(SphinxDirective):
     def _make_id(self) -> Callable[[str], str]:
         return make_id_lower if "force_refs_lower" in self.options else make_id
 
-    @property
-    def _raw_format(self) -> bool:
-        formatter = self.parser.formatter_class
-        return isinstance(formatter, type) and issubclass(formatter, RawDescriptionHelpFormatter)
-
     def _load_sub_parsers(
         self, sub_parser: _SubParsersAction[ArgumentParser]
     ) -> Iterator[tuple[list[str], str, ArgumentParser]]:
@@ -169,7 +164,7 @@ class SphinxArgparseCli(SphinxDirective):
         if "usage_first" in self.options:
             home_section += self._mk_usage(self.parser)
 
-        if description := self._pre_format(self.options.get("description", self.parser.description)):
+        if description := self._pre_format(self.options.get("description", self.parser.description), self.parser):
             home_section += description
 
         if "usage_first" not in self.options:
@@ -178,12 +173,16 @@ class SphinxArgparseCli(SphinxDirective):
         for group in self.parser._action_groups:  # noqa: SLF001
             if actions := _visible_actions(group):
                 home_section += self._mk_option_group(
-                    group, actions, prefix=self.parser.prog.split("/")[-1], prog=self.parser.prog.split("/")[-1]
+                    group,
+                    actions,
+                    self.parser,
+                    prefix=self.parser.prog.split("/")[-1],
+                    prog=self.parser.prog.split("/")[-1],
                 )
         for aliases, help_msg, parser in self._iter_sub_commands():
             home_section += self._mk_sub_command(aliases, help_msg, parser)
 
-        if epilog := self._pre_format(self.options.get("epilog", self.parser.epilog)):
+        if epilog := self._pre_format(self.options.get("epilog", self.parser.epilog), self.parser):
             home_section += epilog
 
         if self.content:
@@ -191,10 +190,11 @@ class SphinxArgparseCli(SphinxDirective):
 
         return [home_section]
 
-    def _pre_format(self, block: str | None) -> paragraph | literal_block | None:
+    def _pre_format(self, block: str | None, parser: ArgumentParser) -> paragraph | literal_block | None:
         if block is None or not block.strip():
             return None
-        if self._raw_format and "\n" in block:
+        formatter = parser.formatter_class
+        if "\n" in block and isinstance(formatter, type) and issubclass(formatter, RawDescriptionHelpFormatter):
             lit = literal_block("", Text(block), classes=["sphinx-argparse-cli-wrap"])
             lit["language"] = "none"
             return lit
@@ -202,7 +202,9 @@ class SphinxArgparseCli(SphinxDirective):
         _protect_option_dashes(para)
         return para
 
-    def _mk_option_group(self, group: _ArgumentGroup, actions: list[Action], prefix: str, prog: str) -> section:
+    def _mk_option_group(
+        self, group: _ArgumentGroup, actions: list[Action], parser: ArgumentParser, prefix: str, prog: str
+    ) -> section:
         sub_title_prefix: str = self.options.get("group_sub_title_prefix")
         title_prefix = self.options.get("group_title_prefix")
         # an untitled group borrows its description as heading so its anchor stays unique
@@ -213,7 +215,7 @@ class SphinxArgparseCli(SphinxDirective):
         # the text sadly needs to be prefixed, because otherwise the autosectionlabel will conflict
         header = title("", Text(title_text))
         group_section = section("", header, ids=[ref_id], names=[ref_id])
-        if group.title and (description := self._pre_format(group.description)):
+        if group.title and (description := self._pre_format(group.description, parser)):
             group_section += description
         self._register_ref(ref_id, title_text, group_section)
         opt_group = bullet_list()
@@ -331,11 +333,8 @@ class SphinxArgparseCli(SphinxDirective):
         if "usage_first" in self.options:
             group_section += self._mk_usage(parser)
 
-        command_desc = (parser.description or help_msg or "").strip()
-        if command_desc:
-            desc_paragraph = paragraph("", Text(command_desc))
-            _protect_option_dashes(desc_paragraph)
-            group_section += desc_paragraph
+        if command_desc := (parser.description or help_msg).strip():
+            group_section += self._pre_format(command_desc, parser)
 
         if "usage_first" not in self.options:
             group_section += self._mk_usage(parser)
@@ -343,8 +342,10 @@ class SphinxArgparseCli(SphinxDirective):
         for group in parser._action_groups:  # noqa: SLF001
             if actions := _visible_actions(group):
                 group_section += self._mk_option_group(
-                    group, actions, prefix=parser.prog, prog=self.parser.prog.split("/")[-1]
+                    group, actions, parser, prefix=parser.prog, prog=self.parser.prog.split("/")[-1]
                 )
+        if epilog := self._pre_format(parser.epilog, parser):
+            group_section += epilog
         return group_section
 
     def _build_sub_cmd_title(self, parser: ArgumentParser, sub_title_prefix: str, title_prefix: str) -> str:
@@ -388,8 +389,8 @@ class SphinxArgparseCli(SphinxDirective):
         return title_text
 
     def _mk_usage(self, parser: ArgumentParser) -> literal_block:
-        parser.formatter_class = lambda prog: HelpFormatter(prog, width=self.options.get("usage_width", 100))
-        with self._no_color():
+        width = self.options.get("usage_width", 100)
+        with patch.object(parser, "formatter_class", lambda prog: HelpFormatter(prog, width=width)), self._no_color():
             texts = parser.format_usage()[len("usage: ") :].splitlines()
         texts = [line if at == 0 else f"{' ' * (len(parser.prog) + 1)}{line.lstrip()}" for at, line in enumerate(texts)]
         return literal_block("", Text("\n".join(texts)), classes=["sphinx-argparse-cli-wrap"])
