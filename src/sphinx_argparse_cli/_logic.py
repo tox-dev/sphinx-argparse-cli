@@ -94,14 +94,15 @@ class SphinxArgparseCli(SphinxDirective):
             raise self.error(msg)  # noqa: B904
         parser: ArgumentParser | None = None
         if "hook" in self.options:
-            original_parse_known_args = ArgumentParser.parse_known_args
-            ArgumentParser.parse_known_args = _parse_known_args_hook  # type: ignore[method-assign,assignment]
-            try:
-                parser_creator()
-            except HookError as hooked:
-                parser = hooked.parser
-            finally:
-                ArgumentParser.parse_known_args = original_parse_known_args
+            # parse_intermixed_args bypasses parse_known_args since Python 3.12, so both entry points need the hook
+            with (
+                patch.object(ArgumentParser, "parse_known_args", _parse_known_args_hook),
+                patch.object(ArgumentParser, "parse_known_intermixed_args", _parse_known_args_hook),
+            ):
+                try:
+                    parser_creator()
+                except HookError as hooked:
+                    parser = hooked.parser
         else:
             parser = parser_creator()
 
