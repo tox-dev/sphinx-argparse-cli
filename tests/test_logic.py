@@ -650,6 +650,44 @@ def test_nargs(build_outcome: str) -> None:
     assert 'default: "None"' not in build_outcome
 
 
+@pytest.mark.sphinx(buildername="text", testroot="nargs-metavar")
+def test_nargs_metavar(build_outcome: str) -> None:
+    assert (
+        build_outcome
+        == """tool - CLI interface
+********************
+
+   tool [--opt [OPT]] [--many [MANY ...]] [--two TWO TWO] [--rest ...] [--out <file>]
+        [--dir path/to/dir] [--format {json,xml}]
+        SRC DST
+
+
+tool positional arguments
+=========================
+
+* **"SRC DST"** - copy pair
+
+
+tool options
+============
+
+* **"--opt"** "[OPT]" - optional value
+
+* **"--many"** "[MANY ...]" - zero or more
+
+* **"--two"** "TWO TWO" - exactly two
+
+* **"--rest"** "..." - the rest
+
+* **"--out"** "<file>" - output
+
+* **"--dir"** "path/to/dir" - dir
+
+* **"--format"** "{json,xml}" - output format
+"""
+    )
+
+
 @pytest.mark.sphinx(buildername="text", testroot="choices")
 def test_choices(build_outcome: str) -> None:
     assert "output format" in build_outcome

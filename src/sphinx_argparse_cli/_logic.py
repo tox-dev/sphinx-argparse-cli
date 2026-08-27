@@ -220,7 +220,7 @@ class SphinxArgparseCli(SphinxDirective):
         self._register_ref(ref_id, title_text, group_section)
         opt_group = bullet_list()
         for action in actions:
-            opt_group += self._mk_option_line(action, prefix)
+            opt_group += self._mk_option_line(parser, action, prefix)
         group_section += opt_group
         return group_section
 
@@ -230,26 +230,22 @@ class SphinxArgparseCli(SphinxDirective):
         sub_cmd = prefix[len(prog) :].strip() or None if prefix != prog else None
         return self._resolve_prefix(prog, sub_cmd, prefix, title_prefix, sub_title_prefix) + group_title
 
-    def _mk_option_line(self, action: Action, prefix: str) -> list_item:
+    def _mk_option_line(self, parser: ArgumentParser, action: Action, prefix: str) -> list_item:
         line = paragraph()
-        as_key = action.dest
-        if action.metavar:
-            as_key = action.metavar if isinstance(action.metavar, str) else action.metavar[0]
         if action.option_strings:
+            args_text = _format_args(parser, action) if action.nargs != 0 else None
             for at, opt in enumerate(action.option_strings):
                 if at:
                     line += Text(", ")
                 self._mk_option_name(line, prefix, opt)
-                if action.nargs != 0:
+                if args_text is not None:
                     line += Text(" ")
-                    metavar_text = (
-                        " ".join(meta.upper() for meta in action.metavar)
-                        if isinstance(action.metavar, tuple)
-                        else as_key.upper()
-                    )
-                    line += literal(text=metavar_text)
+                    line += literal(text=args_text)
         else:
-            self._mk_option_name(line, prefix, as_key)
+            metavar = action.metavar
+            self._mk_option_name(
+                line, prefix, " ".join(metavar) if isinstance(metavar, tuple) else metavar or action.dest
+            )
 
         extra: Sequence[Node] = ()
         if action.help:
@@ -400,6 +396,12 @@ class SphinxArgparseCli(SphinxDirective):
         # PYTHON_COLORS=1 outranks NO_COLOR in argparse, so both must be set to get plain text
         with patch.dict(os.environ, {"NO_COLOR": "1", "PYTHON_COLORS": "0"}, clear=False):
             yield
+
+
+def _format_args(parser: ArgumentParser, action: Action) -> str:
+    # argparse's formatter keeps the text in step with the usage line: nargs, choices and user metavars included
+    formatter = parser._get_formatter()  # noqa: SLF001
+    return formatter._format_args(action, formatter._get_default_metavar_for_optional(action))  # noqa: SLF001
 
 
 def make_id_lower(key: str) -> str:
