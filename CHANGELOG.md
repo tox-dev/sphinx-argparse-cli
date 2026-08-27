@@ -16,6 +16,8 @@ All notable changes to this project will be documented in this file.
 - Skip sub-commands added with `help=argparse.SUPPRESS` instead of rendering them with a `==SUPPRESS==` description.
 - Use the description, or `arguments`, as the heading of an argument group without a title instead of rendering `None`
   and emitting duplicate label warnings.
+- Fix a crash on whitespace-only help text, render help that parses to lists or several paragraphs as blocks under the
+  argument instead of inside its paragraph, and drop the empty paragraph an empty `:description:` produced.
 
 ## 1.13.1
 
