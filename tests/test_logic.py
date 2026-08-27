@@ -216,7 +216,58 @@ prog options
 
 @pytest.mark.sphinx(buildername="text", testroot="suppressed-action")
 def test_suppressed_action(build_outcome: str) -> None:
-    assert "--activities-since" not in build_outcome
+    assert (
+        build_outcome
+        == """foo - CLI interface
+*******************
+
+desc
+
+   foo
+"""
+    )
+
+
+@pytest.mark.sphinx(buildername="text", testroot="subparsers-positional")
+def test_subparsers_after_positional(build_outcome: str) -> None:
+    assert (
+        build_outcome
+        == """prog - CLI interface
+********************
+
+   prog root {run} ...
+
+
+prog positional arguments
+=========================
+
+* **"root"** - root positional
+
+
+prog root run
+=============
+
+   prog root run target {go} ...
+
+
+prog root run positional arguments
+----------------------------------
+
+* **"target"** - run positional
+
+
+prog root run target go
+=======================
+
+   prog root run target go [--flag FLAG]
+
+
+prog root run target go options
+-------------------------------
+
+* **"--flag"** "FLAG" - go flag
+"""
+    )
 
 
 @pytest.mark.parametrize(

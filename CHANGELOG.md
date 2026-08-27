@@ -18,6 +18,8 @@ All notable changes to this project will be documented in this file.
   and emitting duplicate label warnings.
 - Fix a crash on whitespace-only help text, render help that parses to lists or several paragraphs as blocks under the
   argument instead of inside its paragraph, and drop the empty paragraph an empty `:description:` produced.
+- Fix a crash and render positional arguments when they are added before `add_subparsers()`; skip headings for groups
+  whose arguments are all suppressed.
 
 ## 1.13.1
 
