@@ -70,6 +70,24 @@ def test_hook(build_outcome: str) -> None:
     assert build_outcome
 
 
+@pytest.mark.sphinx(buildername="text", testroot="hook-intermixed")
+def test_hook_intermixed(build_outcome: str) -> None:
+    assert (
+        build_outcome
+        == """foo - CLI interface
+*******************
+
+   foo [--flag FLAG]
+
+
+foo options
+===========
+
+* **"--flag"** "FLAG" - a flag
+"""
+    )
+
+
 @pytest.mark.sphinx(buildername="text", testroot="hook-fail")
 def test_hook_fail(app: SphinxTestApp, warning: StringIO) -> None:
     app.build()

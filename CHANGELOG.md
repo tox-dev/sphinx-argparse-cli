@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Register flags and positional arguments as Sphinx program options so the `:option:` role links to them.
 - Leave apostrophes inside words (`don't`, `it's`) alone in help text instead of turning them into broken inline
   literals.
+- Make `:hook:` intercept `parse_intermixed_args()` as well as `parse_args()`.
 
 ## 1.13.1
 
