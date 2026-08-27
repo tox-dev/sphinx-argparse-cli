@@ -211,13 +211,15 @@ class SphinxArgparseCli(SphinxDirective):
     def _mk_option_group(self, group: _ArgumentGroup, prefix: str, prog: str) -> section:
         sub_title_prefix: str = self.options.get("group_sub_title_prefix")
         title_prefix = self.options.get("group_title_prefix")
-        title_text = self._build_opt_grp_title(group, prefix, prog, sub_title_prefix, title_prefix)
-        title_ref: str = f"{prefix}{' ' if prefix else ''}{group.title}"
+        # an untitled group borrows its description as heading so its anchor stays unique
+        group_title = group.title or group.description or "arguments"
+        title_text = self._build_opt_grp_title(group_title, prefix, prog, sub_title_prefix, title_prefix)
+        title_ref: str = f"{prefix}{' ' if prefix else ''}{group_title}"
         ref_id = self._make_id(title_ref)
         # the text sadly needs to be prefixed, because otherwise the autosectionlabel will conflict
         header = title("", Text(title_text))
         group_section = section("", header, ids=[ref_id], names=[ref_id])
-        if description := self._pre_format(group.description):
+        if group.title and (description := self._pre_format(group.description)):
             group_section += description
         self._register_ref(ref_id, title_text, group_section)
         opt_group = bullet_list()
@@ -230,12 +232,10 @@ class SphinxArgparseCli(SphinxDirective):
         return group_section
 
     def _build_opt_grp_title(
-        self, group: _ArgumentGroup, prefix: str, prog: str, sub_title_prefix: str, title_prefix: str
+        self, group_title: str, prefix: str, prog: str, sub_title_prefix: str, title_prefix: str
     ) -> str:
         sub_cmd = prefix[len(prog) :].strip() or None if prefix != prog else None
-        title_text = self._resolve_prefix(prog, sub_cmd, prefix, title_prefix, sub_title_prefix)
-        title_text += group.title or ""
-        return title_text
+        return self._resolve_prefix(prog, sub_cmd, prefix, title_prefix, sub_title_prefix) + group_title
 
     def _mk_option_line(self, action: Action, prefix: str) -> list_item:
         line = paragraph()
