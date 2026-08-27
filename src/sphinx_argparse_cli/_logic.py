@@ -193,6 +193,7 @@ class SphinxArgparseCli(SphinxDirective):
     def _pre_format(self, block: str | None, parser: ArgumentParser) -> paragraph | literal_block | None:
         if block is None or not block.strip():
             return None
+        block = _expand_prog(block, parser.prog)
         formatter = parser.formatter_class
         if "\n" in block and isinstance(formatter, type) and issubclass(formatter, RawDescriptionHelpFormatter):
             lit = literal_block("", Text(block), classes=["sphinx-argparse-cli-wrap"])
@@ -248,9 +249,9 @@ class SphinxArgparseCli(SphinxDirective):
             )
 
         extra: Sequence[Node] = ()
-        if action.help:
+        if help_text := _expand_help(action, parser.prog):
             temp = paragraph()
-            self.state.nested_parse(StringList(load_help_text(action.help).split("\n")), 0, temp)
+            self.state.nested_parse(StringList(load_help_text(help_text).split("\n")), 0, temp)
             # only a leading paragraph can share the option's line; anything else becomes a block under it
             if temp.children and isinstance(temp.children[0], paragraph):
                 line += Text(" - ")
@@ -262,7 +263,7 @@ class SphinxArgparseCli(SphinxDirective):
             "no_default_values" not in self.options
             and action.default is not None
             and action.default != SUPPRESS
-            and not re.match(r".*[ (]default[s]? .*", (action.help or ""))
+            and not _DEFAULT_IN_HELP.search(help_text)
             and not isinstance(action, _StoreTrueAction | _StoreFalseAction)
         ):
             line += Text(" (default: ")
@@ -427,6 +428,26 @@ def _visible_actions(group: _ArgumentGroup) -> list[Action]:
         if action.help != SUPPRESS and not isinstance(action, _SubParsersAction)
     ]
 
+
+def _expand_prog(text: str, prog: str) -> str:
+    # what argparse.HelpFormatter._format_text does for descriptions and epilogs
+    return text % {"prog": prog} if "%(prog)" in text else text
+
+
+def _expand_help(action: Action, prog: str) -> str:
+    # mirrors argparse.HelpFormatter._expand_help so the help reads as it does under --help
+    help_text = action.help or ""
+    if "%" not in help_text:
+        return help_text
+    params = {
+        key: getattr(value, "__name__", value) for key, value in vars(action).items() if value is not SUPPRESS
+    } | {"prog": prog}
+    if action.choices is not None:
+        params["choices"] = ", ".join(map(str, action.choices))
+    return help_text % params
+
+
+_DEFAULT_IN_HELP: Final[re.Pattern[str]] = re.compile(r"\bdefaults?\b", re.IGNORECASE)
 
 _HELP_SUBSTITUTIONS: Final[list[tuple[re.Pattern[str], str]]] = [
     # a quote glued to a word character is an apostrophe (don't, it's), not the edge of a quoted span
