@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import re
-import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -55,8 +54,7 @@ def test_basic_as_html(build_outcome: str) -> None:
 
 @pytest.mark.sphinx(buildername="text", testroot="complex")
 def test_complex_as_text(build_outcome: str) -> None:
-    name = "complex.txt" if sys.version_info >= (3, 10) else "complex_pre_310.txt"
-    expected = (Path(__file__).parent / name).read_text()
+    expected = (Path(__file__).parent / "complex.txt").read_text()
     assert build_outcome == expected
 
 
