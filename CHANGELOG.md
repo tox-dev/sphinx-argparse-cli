@@ -100,6 +100,11 @@ All notable changes to this project will be documented in this file.
 
 - Support rendering with `argparse.RawDescriptionHelpFormatter`.
 
+## 1.11.1
+
+- Fix broken end-user references ([#95](https://github.com/tox-dev/sphinx-argparse-cli/pull/95)).
+- Declare Python 3.12 support ([#102](https://github.com/tox-dev/sphinx-argparse-cli/pull/102)).
+
 ## 1.11.0
 
 - Hatchling as backend and exclude sphinx 6.1 support.
@@ -113,6 +118,10 @@ All notable changes to this project will be documented in this file.
 - Add the option to override the description using the `description` attribute of the directive
 - Add the option to retrieve the arguments by hooking argparse, in cases where `func` consumes the arguments and does
   not return them
+
+## 1.8.3
+
+- Fix project links after the move to tox-dev.
 
 ## 1.8.2
 
@@ -143,9 +152,13 @@ All notable changes to this project will be documented in this file.
 - The root `prog` name now is prefixed for the root level optional/positional arguments' header (to avoid multiple
   anchors with the same id when multiple commands are documented in the same document)
 
+## 1.5.2
+
+- Prefer a parser's description over its help message for subcommands.
+
 ## 1.5.1 (2021-04-15)
 
-- For sub-commands use the parser description first as description and only then fallback to the help message
+- Update the README and development dependencies.
 
 ## 1.5.0 (2021-02-13)
 
