@@ -2,32 +2,89 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+<!-- towncrier release notes start -->
 
-- Allow to add content to directive.
-- Fix Sphinx warnings about parallel reads.
-- Add `force_refs_lower` to enable `:ref:` links with mixed-case program names and arguments.
-- Fix Sphinx smart quotes rewriting `--` to an en dash in `--option` names within descriptions, epilogs, and help text.
+## 1.24.0 (2026-10-10)
+
+- Require Python 3.11 and use Python 3.15 by default.
+
+## 1.23.0 (2026-08-27)
+
 - Register flags and positional arguments as Sphinx program options so the `:option:` role links to them.
-- Leave apostrophes inside words (`don't`, `it's`) alone in help text instead of turning them into broken inline
-  literals.
-- Make `:hook:` intercept `parse_intermixed_args()` as well as `parse_args()`.
-- Keep ANSI color codes out of usage blocks when `PYTHON_COLORS=1` is set on Python 3.14 or newer.
-- Skip sub-commands added with `help=argparse.SUPPRESS` instead of rendering them with a `==SUPPRESS==` description.
-- Use the description, or `arguments`, as the heading of an argument group without a title instead of rendering `None`
-  and emitting duplicate label warnings.
-- Fix a crash on whitespace-only help text, render help that parses to lists or several paragraphs as blocks under the
-  argument instead of inside its paragraph, and drop the empty paragraph an empty `:description:` produced.
-- Fix a crash and render positional arguments when they are added before `add_subparsers()`; skip headings for groups
-  whose arguments are all suppressed.
-- Keep `RawDescriptionHelpFormatter` line breaks in epilogs and in descriptions rendered after the usage block, and
-  render sub-command epilogs.
-- Render the argument spec after an option with argparse's formatter, so `nargs`, `choices` and tuple metavars show as
-  in the usage line; user-supplied metavars keep their case instead of being upper-cased.
-- Expand argparse format specifiers such as `%(prog)s`, `%(default)s` and `%(choices)s` in help, descriptions and
-  epilogs, and skip the generated `(default: ...)` when the help already mentions a default in any case.
-- Make `{subcommand}` in `:group_sub_title_prefix:` expand to the sub-command names (`first nested`) instead of the
-  first word after the program name, which was a positional argument or only the outermost command.
+- Keep apostrophes in help text and make `:hook:` intercept `parse_intermixed_args()`.
+- Strip ANSI colors from usage blocks and skip subcommands whose help is suppressed.
+- Render untitled argument groups, multi-paragraph help, positional arguments, and subcommand epilogs correctly.
+- Preserve raw formatter line breaks, render metavars and choices as in usage, and expand argparse format specifiers.
+- Expand `{subcommand}` in `:group_sub_title_prefix:` to the subcommand name chain.
+
+## 1.22.1 (2026-08-11)
+
+- Fix type checks for nested subparsers.
+
+## 1.22.0 (2026-07-20)
+
+- Add Python 3.15 to the test matrix and update documentation tooling.
+
+## 1.21.4 (2026-07-06)
+
+- Keep Sphinx smart quotes from rewriting `--option` names in descriptions, epilogs, and help text.
+
+## 1.21.3 (2026-03-19)
+
+- Handle formatter subclasses and wrap preformatted blocks.
+
+## 1.21.2 (2026-03-16)
+
+- Avoid a crash when a toctree title is empty.
+
+## 1.21.1 (2026-03-02)
+
+- Restructure the README around common use cases.
+
+## 1.21.0 (2026-03-02)
+
+- Fix rendering of tuple metavars, subcommand names, group titles, and empty toctree titles.
+- Migrate development tooling to `tox.toml`, dependency groups, and ty.
+
+## 1.20.1 (2025-10-08)
+
+- Disable color codes while parsing a CLI.
+
+## 1.20.0 (2025-10-08)
+
+- Add Python 3.14 support and end support for Python 3.10.
+
+## 1.19.0 (2024-12-10)
+
+- Handle nested subparsers.
+
+## 1.18.2 (2024-09-18)
+
+- Improve CI.
+
+## 1.18.1 (2024-09-08)
+
+- Fix the README.
+
+## 1.18.0 (2024-09-08)
+
+- Add Python 3.13 support and end support for Python 3.9.
+
+## 1.17.0 (2024-08-06)
+
+- Add `force_refs_lower` for `:ref:` links with mixed-case program names and arguments.
+
+## 1.16.0 (2024-06-18)
+
+- Declare the extension safe for parallel reads by Sphinx.
+
+## 1.15.0 (2024-04-17)
+
+- Support Sphinx 7.3 and end support for Python 3.8.
+
+## 1.14.0 (2024-03-22)
+
+- Allow content inside the directive.
 
 ## 1.13.1
 
