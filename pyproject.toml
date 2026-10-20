@@ -8,6 +8,7 @@ requires = [
 
 [project]
 name = "sphinx-argparse-cli"
+import-names = [ "sphinx_argparse_cli" ]
 description = "render CLI arguments (sub-commands friendly) defined by argparse module"
 keywords = [
   "argparse",
@@ -24,7 +25,6 @@ classifiers = [
   "Framework :: Sphinx",
   "Framework :: Sphinx :: Extension",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.11",
@@ -43,6 +43,7 @@ dynamic = [
 dependencies = [
   "sphinx>=9.0.4",
 ]
+urls.Changelog = "https://github.com/tox-dev/sphinx-argparse-cli/blob/main/CHANGELOG.md"
 urls.Documentation = "https://github.com/tox-dev/sphinx-argparse-cli#sphinx-argparse-cli"
 urls.Homepage = "https://github.com/tox-dev/sphinx-argparse-cli"
 urls.Source = "https://github.com/tox-dev/sphinx-argparse-cli"
