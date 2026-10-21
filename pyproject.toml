@@ -75,8 +75,10 @@ pkg-meta = [
   "uv>=0.12.22",
 ]
 release = [
+  "mdformat-gfm>=1",
+  "mdformat-ruff>=0.1.3",
   "prek>=0.5",
-  "release-creator @ git+https://github.com/tox-dev/release-creator@b710d0913a8da770551efaf93c763432c01bec3d",
+  "release-creator @ git+https://github.com/tox-dev/release-creator@cf1d89453fc88887e5cf924f6bc1b83157d3a6ac",
   "towncrier>=26.9",
 ]
 
@@ -87,7 +89,7 @@ metadata.hooks.fancy-pypi-readme.fragments = [ { path = "README.md" } ]
 metadata.hooks.fancy-pypi-readme.substitutions = [
   { pattern = '''(?x)
     (?<!!)\[(?P<label>[^\]]+)\]\( # Link text, excluding images
-    (?P<path>CHANGELOG\.md) # Repository files linked from the README
+    (?P<path>CHANGELOG\.md|CONTRIBUTING\.md) # Repository files linked from the README
     \)
     ''', replacement = '[\g<label>](https://github.com/tox-dev/sphinx-argparse-cli/blob/main/\g<path>)' },
 ]
