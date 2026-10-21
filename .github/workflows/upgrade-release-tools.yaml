@@ -11,9 +11,9 @@ jobs:
   upgrade:
     uses: tox-dev/github-workflows/.github/workflows/upgrade-release-tools.yaml@5e11f2254a4dcb7102747d312ad7db48a2e9b0cb
     permissions:
-      actions: write
-      contents: write
-      pull-requests: write
+      actions: write # Trigger the check workflow on the refreshed lock.
+      contents: write # Push the lock update branch.
+      pull-requests: write # Open or update the lock refresh PR.
     with:
       python-version: "3.15"
       check-workflow: check.yaml
