@@ -14,6 +14,6 @@ jobs:
       issues: write # Apply or remove the skip news label.
       pull-requests: read
     steps:
-      - uses: tox-dev/github-workflows/label-bot-news@144f8e68b7d4c7c44e32258b1305e4402bc4e392
+      - uses: tox-dev/github-workflows/label-bot-news@8db87d4730353b61630d66cbc592d6bed0c85d2b
         with:
           fragments: changelog.d,docs/changelog.d
