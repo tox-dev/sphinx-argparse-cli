@@ -159,6 +159,7 @@ jobs:
         with:
           attestations: true
           packages-dir: dist
+          skip-existing: true
   pypi-verify:
     name: Verify PyPI distributions
     needs:
