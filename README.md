@@ -9,8 +9,8 @@
 
 Render CLI arguments (sub-commands friendly) defined by the argparse module.
 
-See the [changelog](CHANGELOG.md) for released changes. Pull requests need a `changelog.d/<PR>.<type>.md` fragment; use
-the `skip news` label for changes that do not need release notes.
+See the [changelog](CHANGELOG.md) for released changes. The [contribution guide](CONTRIBUTING.md) explains which pull
+requests need a fragment, how to name it, and when to use `skip news`.
 
 ## Getting started
 

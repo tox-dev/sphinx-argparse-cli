@@ -9,3 +9,4 @@ __pycache__
 build
 dist
 src/sphinx_argparse_cli/version.py
+/uv.lock
