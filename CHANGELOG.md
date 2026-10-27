@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 <!-- towncrier release notes start -->
 
+<a name="release-1-24-1"></a>
+
+## 1.24.1 (2026-10-27)
+
+<a name="release-1-24-1-fixed"></a>
+
+### Fixed
+
+- Fix repository links in the PyPI project description ([#376](https://github.com/tox-dev/sphinx-argparse-cli/pull/376))
+  by [@gaborbernat](https://github.com/gaborbernat).
+
 <a name="release-1-24-0"></a>
 
 ## 1.24.0 (2026-10-10)
