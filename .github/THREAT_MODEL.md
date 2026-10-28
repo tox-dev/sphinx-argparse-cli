@@ -7,9 +7,9 @@ two disagree, SECURITY.md wins and we fix this file.
 ## How sphinx-argparse-cli works
 
 The `sphinx_argparse_cli` directive imports the module named by `:module:`, gets the parser either by calling the
-function named by `:func:` or, with `:hook:`, by running that function while `ArgumentParser.parse_known_args` is
-patched to capture the parser. It walks the parser's actions and subcommands and emits docutils nodes for them, which
-Sphinx then renders.
+function named by `:func:` or, with `:hook:`, by running that function while `ArgumentParser.parse_known_args` and
+`parse_known_intermixed_args` are patched to capture the parser. It walks the parser's actions and subcommands and emits
+docutils nodes for them, parsing help text as reStructuredText, and writes its stylesheet into the build output.
 
 ```mermaid
 flowchart LR
@@ -34,7 +34,7 @@ the attacker controls.
 | Project                                                                              | Language   | Where it draws the line                                                                                             |
 | ------------------------------------------------------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------- |
 | [Sphinx autodoc](https://www.sphinx-doc.org/en/stable/usage/extensions/autodoc.html) | Python     | Imports the modules it documents and warns that their import-time side effects run; the documented code is trusted. |
-| [TypeDoc](https://github.com/TypeStrong/typedoc/security/policy)                     | TypeScript | Documentation generator that loads the project's own compiler setup; patches the latest minor version.              |
+| [TypeDoc](https://github.com/TypeStrong/typedoc/security/policy)                     | TypeScript | Documentation generator; patches the latest minor version and accepts community fixes for the one before.           |
 | [Hugo](https://gohugo.io/about/security/)                                            | Go         | Templates and configuration are trusted, content is not, and output is escaped by default.                          |
 
 ## Trusted
@@ -60,8 +60,8 @@ An attacker who controls any of these already has what sphinx-argparse-cli could
 ## Release chain
 
 Releases run on the shared [tox-dev/github-workflows](https://github.com/tox-dev/github-workflows) pipeline. A release
-App, not a person, pushes the release commit and tag; the build installs its tools hash-checked from `pylock.toml` with
-a seven-day upload cooldown; PyPI receives the files through
+App, not a person, pushes the release commit and tag; the build installs its tools from a hash-checked `pylock.toml`
+resolved with a seven-day upload cooldown by default; PyPI receives the files through
 [trusted publishing](https://docs.pypi.org/trusted-publishers/) with attestations, and the GitHub Release is immutable.
 Every workflow pins third-party actions to a commit SHA.
 
@@ -73,6 +73,12 @@ Every workflow pins third-party actions to a commit SHA.
 | A help string with `.. raw:: html` adds a script       | Not a vulnerability | Help text is trusted reStructuredText. |
 | The parser factory deletes files during the docs build | Not a vulnerability | Documented code is trusted.            |
 | Subcommand order differs from `--help`                 | Bug                 | Rendering only.                        |
+
+## Severity
+
+- **High:** the directive imports a module or calls a function other than the ones its options name.
+- **Medium:** the extension reads or writes files beyond the Sphinx build's own outputs.
+- **Low:** a crash on an unusual parser instead of a clean build error.
 
 ## Accepted risks
 
