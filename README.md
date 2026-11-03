@@ -6,6 +6,8 @@
 [![Downloads](https://static.pepy.tech/badge/sphinx-argparse-cli/month)](https://pepy.tech/project/sphinx-argparse-cli)
 [![PyPI - License](https://img.shields.io/pypi/l/sphinx-argparse-cli?style=flat-square)](https://opensource.org/licenses/MIT)
 [![check](https://github.com/tox-dev/sphinx-argparse-cli/actions/workflows/check.yaml/badge.svg)](https://github.com/tox-dev/sphinx-argparse-cli/actions/workflows/check.yaml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/tox-dev/sphinx-argparse-cli/badge)](https://scorecard.dev/viewer/?uri=github.com/tox-dev/sphinx-argparse-cli)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/16261/badge)](https://www.bestpractices.dev/projects/16261)
 
 Render CLI arguments (sub-commands friendly) defined by the argparse module.
 
