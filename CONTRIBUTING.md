@@ -26,3 +26,7 @@ the label when their pull request has no fragment.
 
 Do not write credits in fragments. The release credits come from the commit authors and `Co-authored-by` trailers, and
 the prepare workflow runs `release-creator contributors` to add first-time contributors to the changelog.
+
+## Tests
+
+Add a test for every new feature and bug fix. A change without a test needs a reason in the pull request description.
