@@ -25,11 +25,11 @@ def opt_grp_name() -> tuple[str, str]:
 def build_outcome(app: SphinxTestApp, request: SubRequest, monkeypatch: pytest.MonkeyPatch) -> str:
     if prepare_marker := request.node.get_closest_marker("prepare"):
         directive_args: list[str] | None = prepare_marker.kwargs.get("directive_args")
-        if directive_args:  # pragma: no branch
+        if directive_args:  # pragma: no branch  # every prepare marker passes directive_args
             index = Path(app.confdir) / "index.rst"
-            if not any(i for i in directive_args if i.startswith(":module:")):  # pragma: no branch
+            if not any(i.startswith(":module:") for i in directive_args):  # pragma: no branch  # tests omit :module:
                 directive_args.append(":module: parser")
-            if not any(i for i in directive_args if i.startswith(":func:")):  # pragma: no branch
+            if not any(i.startswith(":func:") for i in directive_args):  # pragma: no branch  # tests omit :func:
                 directive_args.append(":func: make")
             index.write_text(os.linesep.join([".. sphinx_argparse_cli::", *[f"  {i}" for i in directive_args]]))
 

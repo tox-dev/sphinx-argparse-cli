@@ -15,7 +15,7 @@ collect_ignore: Final[list[str]] = ["roots"]
 
 
 def pytest_report_header(
-    config: Config,  # noqa: ARG001
+    config: Config,  # noqa: ARG001  # pytest passes config to every report hook
 ) -> str:  # pragma: no cover  # runs during collection before coverage starts
     return f"libraries: Sphinx-{sphinx_version}, docutils-{docutils_version}"
 
