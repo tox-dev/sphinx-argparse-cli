@@ -276,6 +276,24 @@ class SphinxArgparseCli(SphinxDirective):
 
     def _mk_option_line(self, parser: ArgumentParser, action: Action, prefix: str) -> list_item:
         line = paragraph()
+        self._mk_option_flags(line, action, parser, prefix)
+        help_text = _expand_help(action, parser.prog)
+        extra = self._mk_help_text(line, help_text)
+        if (
+            "no_default_values" not in self.options
+            and action.default is not None
+            and action.default != SUPPRESS
+            and not _DEFAULT_IN_HELP.search(help_text)
+            and not isinstance(action, _StoreTrueAction | _StoreFalseAction)
+        ):
+            line += Text(" (default: ")
+            line += literal(text=str(action.default).replace(str(Path.cwd()), "{cwd}"))
+            line += Text(")")
+        item = list_item("", line, *extra, ids=[])
+        _protect_option_dashes(item)
+        return item
+
+    def _mk_option_flags(self, line: paragraph, action: Action, parser: ArgumentParser, prefix: str) -> None:
         if action.option_strings:
             args_text = None
             if action.nargs != 0:
@@ -296,31 +314,6 @@ class SphinxArgparseCli(SphinxDirective):
                 line, prefix, " ".join(metavar) if isinstance(metavar, tuple) else metavar or action.dest
             )
 
-        extra: Sequence[Node] = ()
-        if help_text := _expand_help(action, parser.prog):
-            temp = paragraph()
-            self.state.nested_parse(StringList(load_help_text(help_text).split("\n")), 0, temp)
-            # only a leading paragraph can share the option's line; anything else becomes a block under it
-            if temp.children and isinstance(temp.children[0], paragraph):
-                line += Text(" - ")
-                line += temp.children[0].children
-                extra = temp.children[1:]
-            else:
-                extra = temp.children
-        if (
-            "no_default_values" not in self.options
-            and action.default is not None
-            and action.default != SUPPRESS
-            and not _DEFAULT_IN_HELP.search(help_text)
-            and not isinstance(action, _StoreTrueAction | _StoreFalseAction)
-        ):
-            line += Text(" (default: ")
-            line += literal(text=str(action.default).replace(str(Path.cwd()), "{cwd}"))
-            line += Text(")")
-        item = list_item("", line, *extra, ids=[])
-        _protect_option_dashes(item)
-        return item
-
     def _mk_option_name(self, line: paragraph, prefix: str, opt: str) -> None:
         ref_id = self._make_id(f"{prefix}-{opt}")
         ref_title = f"{prefix} {opt}"
@@ -330,6 +323,18 @@ class SphinxArgparseCli(SphinxDirective):
         self._register_ref(ref_id, ref_title, ref, is_cli_option=True)
         self._std_domain.add_program_option(ws_re.sub("-", prefix), opt, self.env.docname, ref_id)
         line += ref
+
+    def _mk_help_text(self, line: paragraph, help_text: str) -> Sequence[Node]:
+        if not help_text:
+            return ()
+        temp = paragraph()
+        self.state.nested_parse(StringList(load_help_text(help_text).split("\n")), 0, temp)
+        # only a leading paragraph can share the option's line; anything else becomes a block under it
+        if temp.children and isinstance(temp.children[0], paragraph):
+            line += Text(" - ")
+            line += temp.children[0].children
+            return temp.children[1:]
+        return temp.children
 
     def _iter_sub_commands(self) -> Iterator[tuple[list[str], str, ArgumentParser, str]]:
         if (sub_parser := _sub_parser_action(self.parser)) is not None:
