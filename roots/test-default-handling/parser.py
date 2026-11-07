@@ -6,5 +6,4 @@ from argparse import ArgumentParser
 def main() -> None:
     parser = ArgumentParser(prog="foo", add_help=False)
     parser.add_argument("x", default=1, help="arg (default: True)")
-    args = parser.parse_args()
-    print(args)  # noqa: T201
+    print(parser.parse_args())  # noqa: T201

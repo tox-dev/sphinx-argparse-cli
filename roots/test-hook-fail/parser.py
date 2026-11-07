@@ -4,5 +4,4 @@ from argparse import ArgumentParser
 
 
 def main() -> None:
-    parser = ArgumentParser(prog="foo", add_help=False)
-    print(parser)  # noqa: T201
+    print(ArgumentParser(prog="foo", add_help=False))  # noqa: T201

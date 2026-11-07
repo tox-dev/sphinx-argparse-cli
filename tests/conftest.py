@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 import pytest
 from docutils import __version__ as docutils_version
@@ -10,7 +10,7 @@ from sphinx import __display_version__ as sphinx_version
 if TYPE_CHECKING:
     from _pytest.config import Config
 
-pytest_plugins = "sphinx.testing.fixtures"
+pytest_plugins: Final[str] = "sphinx.testing.fixtures"
 collect_ignore = ["roots"]
 
 

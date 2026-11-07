@@ -23,8 +23,7 @@ def opt_grp_name() -> tuple[str, str]:
 
 @pytest.fixture
 def build_outcome(app: SphinxTestApp, request: SubRequest, monkeypatch: pytest.MonkeyPatch) -> str:
-    prepare_marker = request.node.get_closest_marker("prepare")
-    if prepare_marker:
+    if prepare_marker := request.node.get_closest_marker("prepare"):
         directive_args: list[str] | None = prepare_marker.kwargs.get("directive_args")
         if directive_args:  # pragma: no branch
             index = Path(app.confdir) / "index.rst"
@@ -32,13 +31,11 @@ def build_outcome(app: SphinxTestApp, request: SubRequest, monkeypatch: pytest.M
                 directive_args.append(":module: parser")
             if not any(i for i in directive_args if i.startswith(":func:")):  # pragma: no branch
                 directive_args.append(":func: make")
-            args = [f"  {i}" for i in directive_args]
-            index.write_text(os.linesep.join([".. sphinx_argparse_cli::", *args]))
+            index.write_text(os.linesep.join([".. sphinx_argparse_cli::", *[f"  {i}" for i in directive_args]]))
 
-    ext_mapping = {"html": "html", "text": "txt"}
     sphinx_marker = request.node.get_closest_marker("sphinx")
     assert sphinx_marker is not None
-    ext = ext_mapping[sphinx_marker.kwargs.get("buildername")]
+    ext = {"html": "html", "text": "txt"}[sphinx_marker.kwargs.get("buildername")]
 
     monkeypatch.setenv("FORCE_COLOR", "1")
     monkeypatch.delenv("NO_COLOR", raising=False)
