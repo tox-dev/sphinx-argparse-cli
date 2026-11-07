@@ -435,7 +435,7 @@ def _update_sub_parser_prog(parser: ArgumentParser, old_prog: str, new_prog: str
 
 
 def make_id_lower(key: str) -> str:
-    return re.sub("[A-Z]", lambda m: f"_{m.group(0).lower()}", make_id(key))
+    return re.sub("[A-Z]", lambda match: f"_{match.group(0).lower()}", make_id(key))
 
 
 def make_id(key: str) -> str:
