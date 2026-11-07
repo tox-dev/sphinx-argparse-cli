@@ -95,7 +95,7 @@ class SphinxArgparseCli(SphinxDirective):
         if "usage_first" not in self.options:
             home_section += self._mk_usage(self.parser)
 
-        for group in self.parser._action_groups:  # noqa: SLF001
+        for group in self.parser._action_groups:  # noqa: SLF001  # argparse has no public list of groups
             if actions := _visible_actions(group):
                 home_section += self._mk_option_group(
                     group,
@@ -121,13 +121,13 @@ class SphinxArgparseCli(SphinxDirective):
             module = __import__(module_name, fromlist=[attr_name])
         except ImportError:
             msg = f"Failed to import module {module_name!r}"
-            raise self.error(msg)  # noqa: B904
+            raise self.error(msg)  # noqa: B904  # the message already names the module
         try:
             parser_creator = getattr(module, attr_name)
         except AttributeError:
             del sys.modules[module_name]
             msg = f"Module {module_name!r} has no attribute {attr_name!r}"
-            raise self.error(msg)  # noqa: B904
+            raise self.error(msg)  # noqa: B904  # the message already names the attribute
         parser: ArgumentParser | None = None
         if "hook" in self.options:
             # parse_intermixed_args bypasses parse_known_args since Python 3.12, so both entry points need the hook
@@ -251,7 +251,7 @@ class SphinxArgparseCli(SphinxDirective):
         ref_name: str,
         ref_title: str,
         node: Element,
-        is_cli_option: bool = False,  # noqa: FBT001, FBT002
+        is_cli_option: bool = False,  # noqa: FBT001, FBT002  # option names set it by keyword
     ) -> None:
         doc_name = self.env.docname
         normalize_name = whitespace_normalize_name if is_cli_option else fully_normalize_name
@@ -299,9 +299,9 @@ class SphinxArgparseCli(SphinxDirective):
             args_text = None
             if action.nargs != 0:
                 # the formatter keeps this text in step with the usage line: nargs, choices and metavars
-                formatter = parser._get_formatter()  # noqa: SLF001
-                metavar = formatter._get_default_metavar_for_optional(action)  # noqa: SLF001
-                args_text = formatter._format_args(action, metavar)  # noqa: SLF001
+                formatter = parser._get_formatter()  # noqa: SLF001  # argparse has no public formatter accessor
+                metavar = formatter._get_default_metavar_for_optional(action)  # noqa: SLF001  # argparse's default metavar for the usage line
+                args_text = formatter._format_args(action, metavar)  # noqa: SLF001  # same text as the usage line
             for at, opt in enumerate(action.option_strings):
                 if at:
                     line += Text(", ")
@@ -345,7 +345,7 @@ class SphinxArgparseCli(SphinxDirective):
         self, sub_parser: _SubParsersAction[ArgumentParser], parent_cmd: str = ""
     ) -> Iterator[tuple[list[str], str, ArgumentParser, str]]:
         parser_to_args: dict[int, list[str]] = defaultdict(list)
-        for key, parser in sub_parser._name_parser_map.items():  # noqa: SLF001
+        for key, parser in sub_parser._name_parser_map.items():  # noqa: SLF001  # aliases are kept only in this map
             parser_to_args[id(parser)].append(key)
         done_parser: set[int] = set()
 
@@ -357,7 +357,7 @@ class SphinxArgparseCli(SphinxDirective):
             aliases = parser_to_args[id(parser)]
             aliases.remove(name)
             # help is stored in a pseudo action
-            help_msg = next((a.help for a in sub_parser._choices_actions if a.dest == name), None)  # noqa: SLF001
+            help_msg = next((a.help for a in sub_parser._choices_actions if a.dest == name), None)  # noqa: SLF001  # help is kept only in this list
             if help_msg == SUPPRESS:
                 continue
             sub_cmd = f"{parent_cmd} {name}".strip()
@@ -396,7 +396,7 @@ class SphinxArgparseCli(SphinxDirective):
         if "usage_first" not in self.options:
             group_section += self._mk_usage(parser)
 
-        for group in parser._action_groups:  # noqa: SLF001
+        for group in parser._action_groups:  # noqa: SLF001  # argparse has no public list of groups
             if actions := _visible_actions(group):
                 group_section += self._mk_option_group(group, actions, parser, prefix=parser.prog, sub_cmd=sub_cmd)
         if epilog := self._pre_format(parser.epilog, parser):
@@ -408,7 +408,7 @@ def _visible_actions(group: _ArgumentGroup) -> list[Action]:
     # sub-commands get their own sections, and a heading over an empty list helps nobody
     return [
         action
-        for action in group._group_actions  # noqa: SLF001
+        for action in group._group_actions  # noqa: SLF001  # argparse has no public list of group actions
         if action.help != SUPPRESS and not isinstance(action, _SubParsersAction)
     ]
 
@@ -483,7 +483,7 @@ def load_help_text(help_text: str) -> str:
 def _sub_parser_action(parser: ArgumentParser) -> _SubParsersAction[ArgumentParser] | None:
     # add_subparsers reuses the positional group, so the action may sit after positional arguments;
     # isinstance cannot recover the type parameter, hence the cast
-    found = next((action for action in parser._actions if isinstance(action, _SubParsersAction)), None)  # noqa: SLF001
+    found = next((action for action in parser._actions if isinstance(action, _SubParsersAction)), None)  # noqa: SLF001  # argparse has no public list of actions
     return cast("_SubParsersAction[ArgumentParser] | None", found)
 
 
