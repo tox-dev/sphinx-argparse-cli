@@ -18,7 +18,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from functools import cached_property
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar, Final, cast
+from typing import TYPE_CHECKING, ClassVar, Final, cast
 from unittest.mock import patch
 
 from docutils.nodes import (
@@ -48,6 +48,7 @@ from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
 
 if TYPE_CHECKING:
+    from argparse import Namespace
     from collections.abc import Callable, Iterator, Sequence
 
     from sphinx.domains.std import StandardDomain
@@ -60,7 +61,7 @@ _LOGGER: Final[SphinxLoggerAdapter] = getLogger(__name__)
 class SphinxArgparseCli(SphinxDirective):
     name = "sphinx_argparse_cli"
     has_content = True
-    option_spec: ClassVar[dict[str, Any]] = {
+    option_spec: ClassVar[dict[str, Callable[[str], str | int | None]]] = {
         "module": unchanged_required,
         "func": unchanged_required,
         "hook": flag,
@@ -412,7 +413,11 @@ def _visible_actions(group: _ArgumentGroup) -> list[Action]:
     ]
 
 
-def _parse_known_args_hook(self: ArgumentParser, *args: Any, **kwargs: Any) -> None:  # noqa: ARG001
+def _parse_known_args_hook(
+    self: ArgumentParser,
+    *args: Sequence[str] | Namespace | None,  # noqa: ARG001  # argparse passes these on; the hook stops first
+    **kwargs: Sequence[str] | Namespace | None,  # noqa: ARG001  # the same arguments, passed by keyword
+) -> None:
     raise _HookError(self)
 
 
