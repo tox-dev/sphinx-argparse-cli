@@ -565,9 +565,9 @@ def test_lower_upper_refs(build_outcome: str, warning: StringIO) -> None:
 @pytest.mark.parametrize(
     ("key", "mixed", "lower"),
     [
-        ("ProgramName", "ProgramName", "_program_name"),
-        ("ProgramName -A", "ProgramName--A", "_program_name--_a"),
-        ("ProgramName -a", "ProgramName--a", "_program_name--a"),
+        pytest.param("ProgramName", "ProgramName", "_program_name", id="plain"),
+        pytest.param("ProgramName -A", "ProgramName--A", "_program_name--_a", id="upper-short-option"),
+        pytest.param("ProgramName -a", "ProgramName--a", "_program_name--a", id="lower-short-option"),
     ],
 )
 def test_make_id(key: str, mixed: str, lower: str) -> None:
