@@ -172,7 +172,8 @@ class SphinxArgparseCli(SphinxDirective):
     def _pre_format(self, block: str | None, parser: ArgumentParser) -> paragraph | literal_block | None:
         if block is None or not block.strip():
             return None
-        block = _expand_prog(block, parser.prog)
+        # what argparse.HelpFormatter._format_text does for descriptions and epilogs
+        block = block % {"prog": parser.prog} if "%(prog)" in block else block
         formatter = parser.formatter_class
         if "\n" in block and isinstance(formatter, type) and issubclass(formatter, RawDescriptionHelpFormatter):
             lit = literal_block("", Text(block), classes=["sphinx-argparse-cli-wrap"])
@@ -276,7 +277,12 @@ class SphinxArgparseCli(SphinxDirective):
     def _mk_option_line(self, parser: ArgumentParser, action: Action, prefix: str) -> list_item:
         line = paragraph()
         if action.option_strings:
-            args_text = _format_args(parser, action) if action.nargs != 0 else None
+            args_text = None
+            if action.nargs != 0:
+                # the formatter keeps this text in step with the usage line: nargs, choices and metavars
+                formatter = parser._get_formatter()  # noqa: SLF001
+                metavar = formatter._get_default_metavar_for_optional(action)  # noqa: SLF001
+                args_text = formatter._format_args(action, metavar)  # noqa: SLF001
             for at, opt in enumerate(action.option_strings):
                 if at:
                     line += Text(", ")
@@ -360,7 +366,8 @@ class SphinxArgparseCli(SphinxDirective):
 
         if sys.version_info >= (3, 14):  # pragma: >=3.14 cover
             # https://github.com/python/cpython/issues/139809
-            parser.prog = _strip_ansi_colors(parser.prog)
+            # needed due to https://github.com/python/cpython/issues/139809
+            parser.prog = _ANSI_COLOR_RE.sub("", parser.prog)
 
         root_prog = self.parser.prog.split("/")[-1]
         title_text = self._resolve_prefix(root_prog, sub_cmd, parser.prog, title_prefix, sub_title_prefix).rstrip()
@@ -425,11 +432,6 @@ def make_id(key: str) -> str:
     return "-".join(key.split()).rstrip("-")
 
 
-def _expand_prog(text: str, prog: str) -> str:
-    # what argparse.HelpFormatter._format_text does for descriptions and epilogs
-    return text % {"prog": prog} if "%(prog)" in text else text
-
-
 def _protect_option_dashes(node: Element) -> None:
     # Wrap each ``--option`` in a smartquotes-exempt inline so its ``--`` survives Sphinx's en-dash transform.
     for text in list(node.findall(Text)):
@@ -447,12 +449,6 @@ def _protect_option_dashes(node: Element) -> None:
                 if part
             ],
         )
-
-
-def _format_args(parser: ArgumentParser, action: Action) -> str:
-    # argparse's formatter keeps the text in step with the usage line: nargs, choices and user metavars included
-    formatter = parser._get_formatter()  # noqa: SLF001
-    return formatter._format_args(action, formatter._get_default_metavar_for_optional(action))  # noqa: SLF001
 
 
 def _expand_help(action: Action, prog: str) -> str:
@@ -479,11 +475,6 @@ def _sub_parser_action(parser: ArgumentParser) -> _SubParsersAction[ArgumentPars
     # isinstance cannot recover the type parameter, hence the cast
     found = next((action for action in parser._actions if isinstance(action, _SubParsersAction)), None)  # noqa: SLF001
     return cast("_SubParsersAction[ArgumentParser] | None", found)
-
-
-def _strip_ansi_colors(text: str) -> str:  # pragma: >=3.14 cover
-    # needed due to https://github.com/python/cpython/issues/139809
-    return _ANSI_COLOR_RE.sub("", text)
 
 
 _DEFAULT_IN_HELP: Final[re.Pattern[str]] = re.compile(r"\bdefaults?\b", re.IGNORECASE)
