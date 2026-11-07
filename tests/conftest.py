@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from _pytest.config import Config
 
 pytest_plugins: Final[str] = "sphinx.testing.fixtures"
-collect_ignore = ["roots"]
+collect_ignore: Final[list[str]] = ["roots"]
 
 
 def pytest_report_header(
