@@ -492,13 +492,41 @@ _DEFAULT_IN_HELP: Final[re.Pattern[str]] = re.compile(r"\bdefaults?\b", re.IGNOR
 
 _HELP_SUBSTITUTIONS: Final[list[tuple[re.Pattern[str], str]]] = [
     # a quote glued to a word character is an apostrophe (don't, it's), not the edge of a quoted span
-    (re.compile(r"(?<!\w)'([^']+?)'(?!\w)"), "``'\\1'``"),
-    (re.compile(r'(?<!\w)"([^"]+?)"(?!\w)'), '``"\\1"``'),
+    (
+        re.compile(
+            r"""
+            (?<!\w)  # not glued to a word on the left
+            '([^']+?)'  # shortest quoted span
+            (?!\w)  # not glued to a word on the right
+            """,
+            re.VERBOSE,
+        ),
+        "``'\\1'``",
+    ),
+    (
+        re.compile(
+            r"""
+            (?<!\w)  # not glued to a word on the left
+            "([^"]+?)"  # shortest quoted span
+            (?!\w)  # not glued to a word on the right
+            """,
+            re.VERBOSE,
+        ),
+        '``"\\1"``',
+    ),
     (re.compile(r"[{](.+?)[}]"), "``{\\1}``"),
 ]
 
 
-_OPTION_TOKEN: Final[re.Pattern[str]] = re.compile(r"((?<!\w)--[a-zA-Z0-9][\w-]*)")
+_OPTION_TOKEN: Final[re.Pattern[str]] = re.compile(
+    r"""
+    (  # the whole token, kept by split
+        (?<!\w)  # not glued to a word on the left
+        --[a-zA-Z0-9][\w-]*
+    )
+    """,
+    re.VERBOSE,
+)
 
 
 _ANSI_COLOR_RE: Final[re.Pattern[str]] = re.compile(r"\x1b\[[0-9;]*m")
