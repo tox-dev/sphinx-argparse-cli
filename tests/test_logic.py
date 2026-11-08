@@ -417,7 +417,15 @@ prog run options
 
 @pytest.mark.sphinx(buildername="html", testroot="subcommand-placeholder")
 def test_sub_command_placeholder_nested(build_outcome: str) -> None:
-    headings = re.findall(r'<h[23]>([^<]*)<a class="headerlink" href="(#[^"]*)"', build_outcome)
+    headings = re.findall(
+        r"""
+        <h[23]>
+        (?P<text>[^<]*)  # heading text
+        <a[ ]class="headerlink"[ ]href="(?P<anchor>\#[^"]*)"  # in-page anchor
+        """,
+        build_outcome,
+        re.VERBOSE,
+    )
     assert headings == [
         ("prog positional arguments", "#prog-positional-arguments"),
         ("prog first (f)", "#prog-root-first-(f)"),
@@ -463,7 +471,7 @@ def test_help_nodes_as_html(build_outcome: str, warning: StringIO) -> None:
 
 @pytest.mark.sphinx(buildername="html", testroot="group-untitled")
 def test_group_untitled(build_outcome: str, warning: StringIO) -> None:
-    headings = re.findall(r'<h2>(.*?)<a class="headerlink" href="(#[^"]+)"', build_outcome)
+    headings = re.findall(r'<h2>(?P<text>.*?)<a class="headerlink" href="(?P<anchor>#[^"]+)"', build_outcome)
     assert headings == [
         ("tool options", "#tool-options"),
         ("tool only a description", "#tool-only-a-description"),
