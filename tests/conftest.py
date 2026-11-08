@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 import pytest
 from docutils import __version__ as docutils_version
@@ -10,12 +10,12 @@ from sphinx import __display_version__ as sphinx_version
 if TYPE_CHECKING:
     from _pytest.config import Config
 
-pytest_plugins = "sphinx.testing.fixtures"
-collect_ignore = ["roots"]
+pytest_plugins: Final[str] = "sphinx.testing.fixtures"
+collect_ignore: Final[list[str]] = ["roots"]
 
 
 def pytest_report_header(
-    config: Config,  # noqa: ARG001
+    config: Config,  # noqa: ARG001  # pytest passes config to every report hook
 ) -> str:  # pragma: no cover  # runs during collection before coverage starts
     return f"libraries: Sphinx-{sphinx_version}, docutils-{docutils_version}"
 

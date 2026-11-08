@@ -18,7 +18,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from functools import cached_property
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar, Final, cast
+from typing import TYPE_CHECKING, ClassVar, Final, cast
 from unittest.mock import patch
 
 from docutils.nodes import (
@@ -48,6 +48,7 @@ from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
 
 if TYPE_CHECKING:
+    from argparse import Namespace
     from collections.abc import Callable, Iterator, Sequence
 
     from sphinx.domains.std import StandardDomain
@@ -60,7 +61,7 @@ _LOGGER: Final[SphinxLoggerAdapter] = getLogger(__name__)
 class SphinxArgparseCli(SphinxDirective):
     name = "sphinx_argparse_cli"
     has_content = True
-    option_spec: ClassVar[dict[str, Any]] = {
+    option_spec: ClassVar[dict[str, Callable[[str], str | int | None]]] = {
         "module": unchanged_required,
         "func": unchanged_required,
         "hook": flag,
@@ -78,86 +79,9 @@ class SphinxArgparseCli(SphinxDirective):
         "force_refs_lower": flag,
     }
 
-    @cached_property
-    def parser(self) -> ArgumentParser:
-        module_name, attr_name = self.options["module"], self.options["func"]
-        try:
-            module = __import__(module_name, fromlist=[attr_name])
-        except ImportError:
-            msg = f"Failed to import module {module_name!r}"
-            raise self.error(msg)  # noqa: B904
-        try:
-            parser_creator = getattr(module, attr_name)
-        except AttributeError:
-            del sys.modules[module_name]
-            msg = f"Module {module_name!r} has no attribute {attr_name!r}"
-            raise self.error(msg)  # noqa: B904
-        parser: ArgumentParser | None = None
-        if "hook" in self.options:
-            # parse_intermixed_args bypasses parse_known_args since Python 3.12, so both entry points need the hook
-            with (
-                patch.object(ArgumentParser, "parse_known_args", _parse_known_args_hook),
-                patch.object(ArgumentParser, "parse_known_intermixed_args", _parse_known_args_hook),
-            ):
-                try:
-                    parser_creator()
-                except HookError as hooked:
-                    parser = hooked.parser
-        else:
-            parser = parser_creator()
-
-        del sys.modules[module_name]
-        if parser is None:
-            msg = "Failed to hook argparse to get ArgumentParser"
-            raise self.error(msg)
-
-        if "prog" in self.options:
-            old_prog, new_prog = parser.prog, self.options["prog"]
-            parser.prog = new_prog
-            _update_sub_parser_prog(parser, old_prog, new_prog)
-        return parser
-
-    @cached_property
-    def _std_domain(self) -> StandardDomain:
-        return cast("StandardDomain", self.env.get_domain("std"))
-
-    @cached_property
-    def _make_id(self) -> Callable[[str], str]:
-        return make_id_lower if "force_refs_lower" in self.options else make_id
-
-    def _load_sub_parsers(
-        self, sub_parser: _SubParsersAction[ArgumentParser], parent_cmd: str = ""
-    ) -> Iterator[tuple[list[str], str, ArgumentParser, str]]:
-        parser_to_args: dict[int, list[str]] = defaultdict(list)
-        for key, parser in sub_parser._name_parser_map.items():  # noqa: SLF001
-            parser_to_args[id(parser)].append(key)
-        done_parser: set[int] = set()
-
-        for name, parser in sub_parser.choices.items():
-            parser_id = id(parser)
-            if parser_id in done_parser:
-                continue
-            done_parser.add(parser_id)
-            aliases = parser_to_args[id(parser)]
-            aliases.remove(name)
-            # help is stored in a pseudo action
-            help_msg = next((a.help for a in sub_parser._choices_actions if a.dest == name), None)  # noqa: SLF001
-            if help_msg == SUPPRESS:
-                continue
-            sub_cmd = f"{parent_cmd} {name}".strip()
-            yield aliases, help_msg or "", parser, sub_cmd
-
-            if (sub_sub_parser := _sub_parser_action(parser)) is not None:
-                yield from self._load_sub_parsers(sub_sub_parser, sub_cmd)
-
-    def _iter_sub_commands(self) -> Iterator[tuple[list[str], str, ArgumentParser, str]]:
-        if (sub_parser := _sub_parser_action(self.parser)) is not None:
-            yield from self._load_sub_parsers(sub_parser)
-
     def run(self) -> list[Node]:
         self.env.note_reread()  # this document needs to always be rebuilt
-        title_text = self.options.get("title", f"{self.parser.prog} - CLI interface").strip()
-        if not title_text:
+        if not (title_text := self.options.get("title", f"{self.parser.prog} - CLI interface").strip()):
             home_section: Element = container("")
         else:
             home_section = section("", title("", Text(title_text)), ids=[self._make_id(title_text)], names=[title_text])
@@ -171,7 +95,7 @@ class SphinxArgparseCli(SphinxDirective):
         if "usage_first" not in self.options:
             home_section += self._mk_usage(self.parser)
 
-        for group in self.parser._action_groups:  # noqa: SLF001
+        for group in self.parser._action_groups:  # noqa: SLF001  # argparse has no public list of groups
             if actions := _visible_actions(group):
                 home_section += self._mk_option_group(
                     group,
@@ -190,10 +114,67 @@ class SphinxArgparseCli(SphinxDirective):
 
         return [home_section]
 
+    @cached_property
+    def parser(self) -> ArgumentParser:
+        module_name, attr_name = self.options["module"], self.options["func"]
+        try:
+            module = __import__(module_name, fromlist=[attr_name])
+        except ImportError:
+            msg = f"Failed to import module {module_name!r}"
+            raise self.error(msg)  # noqa: B904  # the message already names the module
+        try:
+            parser_creator = getattr(module, attr_name)
+        except AttributeError:
+            del sys.modules[module_name]
+            msg = f"Module {module_name!r} has no attribute {attr_name!r}"
+            raise self.error(msg)  # noqa: B904  # the message already names the attribute
+        parser: ArgumentParser | None = None
+        if "hook" in self.options:
+            # parse_intermixed_args bypasses parse_known_args since Python 3.12, so both entry points need the hook
+            with (
+                patch.object(ArgumentParser, "parse_known_args", _parse_known_args_hook),
+                patch.object(ArgumentParser, "parse_known_intermixed_args", _parse_known_args_hook),
+            ):
+                try:
+                    parser_creator()
+                except _HookError as hooked:
+                    parser = hooked.parser
+        else:
+            parser = parser_creator()
+
+        del sys.modules[module_name]
+        if parser is None:
+            msg = "Failed to hook argparse to get ArgumentParser"
+            raise self.error(msg)
+
+        if "prog" in self.options:
+            old_prog, new_prog = parser.prog, self.options["prog"]
+            parser.prog = new_prog
+            _update_sub_parser_prog(parser, old_prog, new_prog)
+        return parser
+
+    @cached_property
+    def _make_id(self) -> Callable[[str], str]:
+        return make_id_lower if "force_refs_lower" in self.options else make_id
+
+    def _mk_usage(self, parser: ArgumentParser) -> literal_block:
+        width = self.options.get("usage_width", 100)
+        with patch.object(parser, "formatter_class", lambda prog: HelpFormatter(prog, width=width)), self._no_color():
+            texts = parser.format_usage()[len("usage: ") :].splitlines()
+        texts = [line if at == 0 else f"{' ' * (len(parser.prog) + 1)}{line.lstrip()}" for at, line in enumerate(texts)]
+        return literal_block("", Text("\n".join(texts)), classes=["sphinx-argparse-cli-wrap"])
+
+    @contextmanager
+    def _no_color(self) -> Iterator[None]:
+        # PYTHON_COLORS=1 outranks NO_COLOR in argparse, so both must be set to get plain text
+        with patch.dict(os.environ, {"NO_COLOR": "1", "PYTHON_COLORS": "0"}, clear=False):
+            yield
+
     def _pre_format(self, block: str | None, parser: ArgumentParser) -> paragraph | literal_block | None:
         if block is None or not block.strip():
             return None
-        block = _expand_prog(block, parser.prog)
+        # what argparse.HelpFormatter._format_text does for descriptions and epilogs
+        block = block % {"prog": parser.prog} if "%(prog)" in block else block
         formatter = parser.formatter_class
         if "\n" in block and isinstance(formatter, type) and issubclass(formatter, RawDescriptionHelpFormatter):
             lit = literal_block("", Text(block), classes=["sphinx-argparse-cli-wrap"])
@@ -220,8 +201,7 @@ class SphinxArgparseCli(SphinxDirective):
         title_ref: str = f"{prefix}{' ' if prefix else ''}{group_title}"
         ref_id = self._make_id(title_ref)
         # the text sadly needs to be prefixed, because otherwise the autosectionlabel will conflict
-        header = title("", Text(title_text))
-        group_section = section("", header, ids=[ref_id], names=[ref_id])
+        group_section = section("", title("", Text(title_text)), ids=[ref_id], names=[ref_id])
         if group.title and (description := self._pre_format(group.description, parser)):
             group_section += description
         self._register_ref(ref_id, title_text, group_section)
@@ -229,119 +209,6 @@ class SphinxArgparseCli(SphinxDirective):
         for action in actions:
             opt_group += self._mk_option_line(parser, action, prefix)
         group_section += opt_group
-        return group_section
-
-    def _mk_option_line(self, parser: ArgumentParser, action: Action, prefix: str) -> list_item:
-        line = paragraph()
-        if action.option_strings:
-            args_text = _format_args(parser, action) if action.nargs != 0 else None
-            for at, opt in enumerate(action.option_strings):
-                if at:
-                    line += Text(", ")
-                self._mk_option_name(line, prefix, opt)
-                if args_text is not None:
-                    line += Text(" ")
-                    line += literal(text=args_text)
-        else:
-            metavar = action.metavar
-            self._mk_option_name(
-                line, prefix, " ".join(metavar) if isinstance(metavar, tuple) else metavar or action.dest
-            )
-
-        extra: Sequence[Node] = ()
-        if help_text := _expand_help(action, parser.prog):
-            temp = paragraph()
-            self.state.nested_parse(StringList(load_help_text(help_text).split("\n")), 0, temp)
-            # only a leading paragraph can share the option's line; anything else becomes a block under it
-            if temp.children and isinstance(temp.children[0], paragraph):
-                line += Text(" - ")
-                line += temp.children[0].children
-                extra = temp.children[1:]
-            else:
-                extra = temp.children
-        if (
-            "no_default_values" not in self.options
-            and action.default is not None
-            and action.default != SUPPRESS
-            and not _DEFAULT_IN_HELP.search(help_text)
-            and not isinstance(action, _StoreTrueAction | _StoreFalseAction)
-        ):
-            line += Text(" (default: ")
-            line += literal(text=str(action.default).replace(str(Path.cwd()), "{cwd}"))
-            line += Text(")")
-        item = list_item("", line, *extra, ids=[])
-        _protect_option_dashes(item)
-        return item
-
-    def _mk_option_name(self, line: paragraph, prefix: str, opt: str) -> None:
-        ref_id = self._make_id(f"{prefix}-{opt}")
-        ref_title = f"{prefix} {opt}"
-        ref = reference("", refid=ref_id, reftitle=ref_title)
-        line.attributes["ids"].append(ref_id)
-        ref += strong("", "", literal(text=opt))
-        self._register_ref(ref_id, ref_title, ref, is_cli_option=True)
-        self._std_domain.add_program_option(ws_re.sub("-", prefix), opt, self.env.docname, ref_id)
-        line += ref
-
-    def _register_ref(
-        self,
-        ref_name: str,
-        ref_title: str,
-        node: Element,
-        is_cli_option: bool = False,  # noqa: FBT001, FBT002
-    ) -> None:
-        doc_name = self.env.docname
-        normalize_name = whitespace_normalize_name if is_cli_option else fully_normalize_name
-        if self.env.config.sphinx_argparse_cli_prefix_document:
-            name = normalize_name(f"{doc_name}:{ref_name}")
-        else:
-            name = normalize_name(ref_name)
-        if name in self._std_domain.labels:
-            _LOGGER.warning(
-                __("duplicate label %s, other instance in %s"),
-                name,
-                self.env.doc2path(self._std_domain.labels[name][0]),
-                location=node,
-                type="sphinx-argparse-cli",
-                subtype=self.env.docname,
-            )
-        self._std_domain.anonlabels[name] = doc_name, ref_name
-        self._std_domain.labels[name] = doc_name, ref_name, ref_title
-
-    def _mk_sub_command(self, aliases: list[str], help_msg: str, parser: ArgumentParser, sub_cmd: str) -> section:
-        sub_title_prefix: str = self.options.get("group_sub_title_prefix")
-        title_prefix: str = self.options.get("group_title_prefix")
-
-        if sys.version_info >= (3, 14):  # pragma: >=3.14 cover
-            # https://github.com/python/cpython/issues/139809
-            parser.prog = _strip_ansi_colors(parser.prog)
-
-        root_prog = self.parser.prog.split("/")[-1]
-        title_text = self._resolve_prefix(root_prog, sub_cmd, parser.prog, title_prefix, sub_title_prefix).rstrip()
-        title_ref: str = parser.prog
-        if aliases:
-            aliases_text: str = f" ({', '.join(aliases)})"
-            title_text += aliases_text
-            title_ref += aliases_text
-        title_text = title_text.strip()
-        ref_id = self._make_id(title_ref)
-        group_section = section("", title("", Text(title_text)), ids=[ref_id], names=[title_ref])
-        self._register_ref(ref_id, title_ref, group_section)
-
-        if "usage_first" in self.options:
-            group_section += self._mk_usage(parser)
-
-        if command_desc := (parser.description or help_msg).strip():
-            group_section += self._pre_format(command_desc, parser)
-
-        if "usage_first" not in self.options:
-            group_section += self._mk_usage(parser)
-
-        for group in parser._action_groups:  # noqa: SLF001
-            if actions := _visible_actions(group):
-                group_section += self._mk_option_group(group, actions, parser, prefix=parser.prog, sub_cmd=sub_cmd)
-        if epilog := self._pre_format(parser.epilog, parser):
-            group_section += epilog
         return group_section
 
     def _resolve_prefix(
@@ -379,89 +246,204 @@ class SphinxArgparseCli(SphinxDirective):
             title_text += f"{sub_title_prefix} "
         return title_text
 
-    def _mk_usage(self, parser: ArgumentParser) -> literal_block:
-        width = self.options.get("usage_width", 100)
-        with patch.object(parser, "formatter_class", lambda prog: HelpFormatter(prog, width=width)), self._no_color():
-            texts = parser.format_usage()[len("usage: ") :].splitlines()
-        texts = [line if at == 0 else f"{' ' * (len(parser.prog) + 1)}{line.lstrip()}" for at, line in enumerate(texts)]
-        return literal_block("", Text("\n".join(texts)), classes=["sphinx-argparse-cli-wrap"])
+    def _register_ref(
+        self,
+        ref_name: str,
+        ref_title: str,
+        node: Element,
+        is_cli_option: bool = False,  # noqa: FBT001, FBT002  # option names set it by keyword
+    ) -> None:
+        doc_name = self.env.docname
+        normalize_name = whitespace_normalize_name if is_cli_option else fully_normalize_name
+        if self.env.config.sphinx_argparse_cli_prefix_document:
+            name = normalize_name(f"{doc_name}:{ref_name}")
+        else:
+            name = normalize_name(ref_name)
+        if name in self._std_domain.labels:
+            _LOGGER.warning(
+                __("duplicate label %s, other instance in %s"),
+                name,
+                self.env.doc2path(self._std_domain.labels[name][0]),
+                location=node,
+                type="sphinx-argparse-cli",
+                subtype=self.env.docname,
+            )
+        self._std_domain.anonlabels[name] = doc_name, ref_name
+        self._std_domain.labels[name] = doc_name, ref_name, ref_title
 
-    @contextmanager
-    def _no_color(self) -> Iterator[None]:
-        # PYTHON_COLORS=1 outranks NO_COLOR in argparse, so both must be set to get plain text
-        with patch.dict(os.environ, {"NO_COLOR": "1", "PYTHON_COLORS": "0"}, clear=False):
-            yield
+    @cached_property
+    def _std_domain(self) -> StandardDomain:
+        return cast("StandardDomain", self.env.get_domain("std"))
 
+    def _mk_option_line(self, parser: ArgumentParser, action: Action, prefix: str) -> list_item:
+        line = paragraph()
+        self._mk_option_flags(line, action, parser, prefix)
+        help_text = _expand_help(action, parser.prog)
+        extra = self._mk_help_text(line, help_text)
+        if (
+            "no_default_values" not in self.options
+            and action.default is not None
+            and action.default != SUPPRESS
+            and not _DEFAULT_IN_HELP.search(help_text)
+            and not isinstance(action, _StoreTrueAction | _StoreFalseAction)
+        ):
+            line += Text(" (default: ")
+            line += literal(text=str(action.default).replace(str(Path.cwd()), "{cwd}"))
+            line += Text(")")
+        item = list_item("", line, *extra, ids=[])
+        _protect_option_dashes(item)
+        return item
 
-def _format_args(parser: ArgumentParser, action: Action) -> str:
-    # argparse's formatter keeps the text in step with the usage line: nargs, choices and user metavars included
-    formatter = parser._get_formatter()  # noqa: SLF001
-    return formatter._format_args(action, formatter._get_default_metavar_for_optional(action))  # noqa: SLF001
+    def _mk_option_flags(self, line: paragraph, action: Action, parser: ArgumentParser, prefix: str) -> None:
+        if action.option_strings:
+            args_text = None
+            if action.nargs != 0:
+                # the formatter keeps this text in step with the usage line: nargs, choices and metavars
+                formatter = parser._get_formatter()  # noqa: SLF001  # argparse has no public formatter accessor
+                metavar = formatter._get_default_metavar_for_optional(action)  # noqa: SLF001  # argparse's default metavar for the usage line
+                args_text = formatter._format_args(action, metavar)  # noqa: SLF001  # same text as the usage line
+            for at, opt in enumerate(action.option_strings):
+                if at:
+                    line += Text(", ")
+                self._mk_option_name(line, prefix, opt)
+                if args_text is not None:
+                    line += Text(" ")
+                    line += literal(text=args_text)
+        else:
+            metavar = action.metavar
+            self._mk_option_name(
+                line, prefix, " ".join(metavar) if isinstance(metavar, tuple) else metavar or action.dest
+            )
 
+    def _mk_option_name(self, line: paragraph, prefix: str, opt: str) -> None:
+        ref_id = self._make_id(f"{prefix}-{opt}")
+        ref_title = f"{prefix} {opt}"
+        ref = reference("", refid=ref_id, reftitle=ref_title)
+        line.attributes["ids"].append(ref_id)
+        ref += strong("", "", literal(text=opt))
+        self._register_ref(ref_id, ref_title, ref, is_cli_option=True)
+        self._std_domain.add_program_option(ws_re.sub("-", prefix), opt, self.env.docname, ref_id)
+        line += ref
 
-def make_id_lower(key: str) -> str:
-    return re.sub("[A-Z]", lambda m: f"_{m.group(0).lower()}", make_id(key))
+    def _mk_help_text(self, line: paragraph, help_text: str) -> Sequence[Node]:
+        if not help_text:
+            return ()
+        temp = paragraph()
+        self.state.nested_parse(StringList(load_help_text(help_text).split("\n")), 0, temp)
+        # only a leading paragraph can share the option's line; anything else becomes a block under it
+        if temp.children and isinstance(temp.children[0], paragraph):
+            line += Text(" - ")
+            line += temp.children[0].children
+            return temp.children[1:]
+        return temp.children
 
+    def _iter_sub_commands(self) -> Iterator[tuple[list[str], str, ArgumentParser, str]]:
+        if (sub_parser := _sub_parser_action(self.parser)) is not None:
+            yield from self._load_sub_parsers(sub_parser)
 
-def make_id(key: str) -> str:
-    return "-".join(key.split()).rstrip("-")
+    def _load_sub_parsers(
+        self, sub_parser: _SubParsersAction[ArgumentParser], parent_cmd: str = ""
+    ) -> Iterator[tuple[list[str], str, ArgumentParser, str]]:
+        parser_to_args: dict[int, list[str]] = defaultdict(list)
+        for key, parser in sub_parser._name_parser_map.items():  # noqa: SLF001  # aliases are kept only in this map
+            parser_to_args[id(parser)].append(key)
+        done_parser: set[int] = set()
 
+        for name, parser in sub_parser.choices.items():
+            parser_id = id(parser)
+            if parser_id in done_parser:
+                continue
+            done_parser.add(parser_id)
+            aliases = parser_to_args[id(parser)]
+            aliases.remove(name)
+            # help is stored in a pseudo action
+            help_msg = next((a.help for a in sub_parser._choices_actions if a.dest == name), None)  # noqa: SLF001  # help is kept only in this list
+            if help_msg == SUPPRESS:
+                continue
+            sub_cmd = f"{parent_cmd} {name}".strip()
+            yield aliases, help_msg or "", parser, sub_cmd
 
-def _sub_parser_action(parser: ArgumentParser) -> _SubParsersAction[ArgumentParser] | None:
-    # add_subparsers reuses the positional group, so the action may sit after positional arguments;
-    # isinstance cannot recover the type parameter, hence the cast
-    found = next((action for action in parser._actions if isinstance(action, _SubParsersAction)), None)  # noqa: SLF001
-    return cast("_SubParsersAction[ArgumentParser] | None", found)
+            if (sub_sub_parser := _sub_parser_action(parser)) is not None:
+                yield from self._load_sub_parsers(sub_sub_parser, sub_cmd)
+
+    def _mk_sub_command(self, aliases: list[str], help_msg: str, parser: ArgumentParser, sub_cmd: str) -> section:
+        sub_title_prefix: str = self.options.get("group_sub_title_prefix")
+        title_prefix: str = self.options.get("group_title_prefix")
+
+        if sys.version_info >= (3, 14):  # pragma: >=3.14 cover
+            # https://github.com/python/cpython/issues/139809
+            # needed due to https://github.com/python/cpython/issues/139809
+            parser.prog = _ANSI_COLOR_RE.sub("", parser.prog)
+
+        root_prog = self.parser.prog.split("/")[-1]
+        title_text = self._resolve_prefix(root_prog, sub_cmd, parser.prog, title_prefix, sub_title_prefix).rstrip()
+        title_ref: str = parser.prog
+        if aliases:
+            aliases_text: str = f" ({', '.join(aliases)})"
+            title_text += aliases_text
+            title_ref += aliases_text
+        title_text = title_text.strip()
+        ref_id = self._make_id(title_ref)
+        group_section = section("", title("", Text(title_text)), ids=[ref_id], names=[title_ref])
+        self._register_ref(ref_id, title_ref, group_section)
+
+        if "usage_first" in self.options:
+            group_section += self._mk_usage(parser)
+
+        if command_desc := (parser.description or help_msg).strip():
+            group_section += self._pre_format(command_desc, parser)
+
+        if "usage_first" not in self.options:
+            group_section += self._mk_usage(parser)
+
+        for group in parser._action_groups:  # noqa: SLF001  # argparse has no public list of groups
+            if actions := _visible_actions(group):
+                group_section += self._mk_option_group(group, actions, parser, prefix=parser.prog, sub_cmd=sub_cmd)
+        if epilog := self._pre_format(parser.epilog, parser):
+            group_section += epilog
+        return group_section
 
 
 def _visible_actions(group: _ArgumentGroup) -> list[Action]:
     # sub-commands get their own sections, and a heading over an empty list helps nobody
     return [
         action
-        for action in group._group_actions  # noqa: SLF001
+        for action in group._group_actions  # noqa: SLF001  # argparse has no public list of group actions
         if action.help != SUPPRESS and not isinstance(action, _SubParsersAction)
     ]
 
 
-def _expand_prog(text: str, prog: str) -> str:
-    # what argparse.HelpFormatter._format_text does for descriptions and epilogs
-    return text % {"prog": prog} if "%(prog)" in text else text
+def _parse_known_args_hook(
+    self: ArgumentParser,
+    *args: Sequence[str] | Namespace | None,  # noqa: ARG001  # argparse passes these on; the hook stops first
+    **kwargs: Sequence[str] | Namespace | None,  # noqa: ARG001  # the same arguments, passed by keyword
+) -> None:
+    raise _HookError(self)
 
 
-def _expand_help(action: Action, prog: str) -> str:
-    # mirrors argparse.HelpFormatter._expand_help so the help reads as it does under --help
-    help_text = action.help or ""
-    if "%" not in help_text:
-        return help_text
-    params = {
-        key: getattr(value, "__name__", value) for key, value in vars(action).items() if value is not SUPPRESS
-    } | {"prog": prog}
-    if action.choices is not None:
-        params["choices"] = ", ".join(map(str, action.choices))
-    return help_text % params
+class _HookError(Exception):
+    def __init__(self, parser: ArgumentParser) -> None:
+        self.parser = parser
 
 
-_DEFAULT_IN_HELP: Final[re.Pattern[str]] = re.compile(r"\bdefaults?\b", re.IGNORECASE)
-
-_HELP_SUBSTITUTIONS: Final[list[tuple[re.Pattern[str], str]]] = [
-    # a quote glued to a word character is an apostrophe (don't, it's), not the edge of a quoted span
-    (re.compile(r"(?<!\w)'([^']+?)'(?!\w)"), "``'\\1'``"),
-    (re.compile(r'(?<!\w)"([^"]+?)"(?!\w)'), '``"\\1"``'),
-    (re.compile(r"[{](.+?)[}]"), "``{\\1}``"),
-]
+def _update_sub_parser_prog(parser: ArgumentParser, old_prog: str, new_prog: str) -> None:
+    if (sub_action := _sub_parser_action(parser)) is None:
+        return
+    for sub_parser in sub_action.choices.values():
+        sub_parser.prog = sub_parser.prog.replace(old_prog, new_prog, 1)
+        _update_sub_parser_prog(sub_parser, old_prog, new_prog)
 
 
-def load_help_text(help_text: str) -> str:
-    for pattern, replacement in _HELP_SUBSTITUTIONS:
-        help_text = pattern.sub(replacement, help_text)
-    return help_text
+def make_id_lower(key: str) -> str:
+    return re.sub("[A-Z]", lambda match: f"_{match.group(0).lower()}", make_id(key))
 
 
-_OPTION_TOKEN: Final[re.Pattern[str]] = re.compile(r"((?<!\w)--[a-zA-Z0-9][\w-]*)")
+def make_id(key: str) -> str:
+    return "-".join(key.split()).rstrip("-")
 
 
 def _protect_option_dashes(node: Element) -> None:
-    """Wrap each ``--option`` in a smartquotes-exempt inline so its ``--`` survives Sphinx's en-dash transform."""
+    # Wrap each ``--option`` in a smartquotes-exempt inline so its ``--`` survives Sphinx's en-dash transform.
     for text in list(node.findall(Text)):
         if isinstance(text.parent, (literal, FixedTextElement)):
             continue
@@ -479,31 +461,80 @@ def _protect_option_dashes(node: Element) -> None:
         )
 
 
-class HookError(Exception):
-    def __init__(self, parser: ArgumentParser) -> None:
-        self.parser = parser
+def _expand_help(action: Action, prog: str) -> str:
+    # mirrors argparse.HelpFormatter._expand_help so the help reads as it does under --help
+    help_text = action.help or ""
+    if "%" not in help_text:
+        return help_text
+    params = {
+        key: getattr(value, "__name__", value) for key, value in vars(action).items() if value is not SUPPRESS
+    } | {"prog": prog}
+    if action.choices is not None:
+        params["choices"] = ", ".join(map(str, action.choices))
+    return help_text % params
 
 
-def _parse_known_args_hook(self: ArgumentParser, *args: Any, **kwargs: Any) -> None:  # noqa: ARG001
-    raise HookError(self)
+def load_help_text(help_text: str) -> str:
+    for pattern, replacement in _HELP_SUBSTITUTIONS:
+        help_text = pattern.sub(replacement, help_text)
+    return help_text
+
+
+def _sub_parser_action(parser: ArgumentParser) -> _SubParsersAction[ArgumentParser] | None:
+    # add_subparsers reuses the positional group, so the action may sit after positional arguments;
+    # isinstance cannot recover the type parameter, hence the cast
+    found = next((action for action in parser._actions if isinstance(action, _SubParsersAction)), None)  # noqa: SLF001  # argparse has no public list of actions
+    return cast("_SubParsersAction[ArgumentParser] | None", found)
+
+
+_DEFAULT_IN_HELP: Final[re.Pattern[str]] = re.compile(r"\bdefaults?\b", re.IGNORECASE)
+
+
+_HELP_SUBSTITUTIONS: Final[list[tuple[re.Pattern[str], str]]] = [
+    # a quote glued to a word character is an apostrophe (don't, it's), not the edge of a quoted span
+    (
+        re.compile(
+            r"""
+            (?<!\w)  # not glued to a word on the left
+            '([^']+?)'  # shortest quoted span
+            (?!\w)  # not glued to a word on the right
+            """,
+            re.VERBOSE,
+        ),
+        "``'\\1'``",
+    ),
+    (
+        re.compile(
+            r"""
+            (?<!\w)  # not glued to a word on the left
+            "([^"]+?)"  # shortest quoted span
+            (?!\w)  # not glued to a word on the right
+            """,
+            re.VERBOSE,
+        ),
+        '``"\\1"``',
+    ),
+    (re.compile(r"[{](.+?)[}]"), "``{\\1}``"),
+]
+
+
+_OPTION_TOKEN: Final[re.Pattern[str]] = re.compile(
+    r"""
+    (  # the whole token, kept by split
+        (?<!\w)  # not glued to a word on the left
+        --[a-zA-Z0-9][\w-]*
+    )
+    """,
+    re.VERBOSE,
+)
 
 
 _ANSI_COLOR_RE: Final[re.Pattern[str]] = re.compile(r"\x1b\[[0-9;]*m")
 
 
-def _strip_ansi_colors(text: str) -> str:  # pragma: >=3.14 cover
-    # needed due to https://github.com/python/cpython/issues/139809
-    return _ANSI_COLOR_RE.sub("", text)
-
-
-def _update_sub_parser_prog(parser: ArgumentParser, old_prog: str, new_prog: str) -> None:
-    if (sub_action := _sub_parser_action(parser)) is None:
-        return
-    for sub_parser in sub_action.choices.values():
-        sub_parser.prog = sub_parser.prog.replace(old_prog, new_prog, 1)
-        _update_sub_parser_prog(sub_parser, old_prog, new_prog)
-
-
 __all__ = [
     "SphinxArgparseCli",
+    "load_help_text",
+    "make_id",
+    "make_id_lower",
 ]

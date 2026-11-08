@@ -23,22 +23,19 @@ def opt_grp_name() -> tuple[str, str]:
 
 @pytest.fixture
 def build_outcome(app: SphinxTestApp, request: SubRequest, monkeypatch: pytest.MonkeyPatch) -> str:
-    prepare_marker = request.node.get_closest_marker("prepare")
-    if prepare_marker:
+    if prepare_marker := request.node.get_closest_marker("prepare"):
         directive_args: list[str] | None = prepare_marker.kwargs.get("directive_args")
-        if directive_args:  # pragma: no branch
+        if directive_args:  # pragma: no branch  # every prepare marker passes directive_args
             index = Path(app.confdir) / "index.rst"
-            if not any(i for i in directive_args if i.startswith(":module:")):  # pragma: no branch
+            if not any(i.startswith(":module:") for i in directive_args):  # pragma: no branch  # tests omit :module:
                 directive_args.append(":module: parser")
-            if not any(i for i in directive_args if i.startswith(":func:")):  # pragma: no branch
+            if not any(i.startswith(":func:") for i in directive_args):  # pragma: no branch  # tests omit :func:
                 directive_args.append(":func: make")
-            args = [f"  {i}" for i in directive_args]
-            index.write_text(os.linesep.join([".. sphinx_argparse_cli::", *args]))
+            index.write_text(os.linesep.join([".. sphinx_argparse_cli::", *[f"  {i}" for i in directive_args]]))
 
-    ext_mapping = {"html": "html", "text": "txt"}
     sphinx_marker = request.node.get_closest_marker("sphinx")
     assert sphinx_marker is not None
-    ext = ext_mapping[sphinx_marker.kwargs.get("buildername")]
+    ext = {"html": "html", "text": "txt"}[sphinx_marker.kwargs.get("buildername")]
 
     monkeypatch.setenv("FORCE_COLOR", "1")
     monkeypatch.delenv("NO_COLOR", raising=False)
@@ -420,7 +417,15 @@ prog run options
 
 @pytest.mark.sphinx(buildername="html", testroot="subcommand-placeholder")
 def test_sub_command_placeholder_nested(build_outcome: str) -> None:
-    headings = re.findall(r'<h[23]>([^<]*)<a class="headerlink" href="(#[^"]*)"', build_outcome)
+    headings = re.findall(
+        r"""
+        <h[23]>
+        (?P<text>[^<]*)  # heading text
+        <a[ ]class="headerlink"[ ]href="(?P<anchor>\#[^"]*)"  # in-page anchor
+        """,
+        build_outcome,
+        re.VERBOSE,
+    )
     assert headings == [
         ("prog positional arguments", "#prog-positional-arguments"),
         ("prog first (f)", "#prog-root-first-(f)"),
@@ -466,7 +471,7 @@ def test_help_nodes_as_html(build_outcome: str, warning: StringIO) -> None:
 
 @pytest.mark.sphinx(buildername="html", testroot="group-untitled")
 def test_group_untitled(build_outcome: str, warning: StringIO) -> None:
-    headings = re.findall(r'<h2>(.*?)<a class="headerlink" href="(#[^"]+)"', build_outcome)
+    headings = re.findall(r'<h2>(?P<text>.*?)<a class="headerlink" href="(?P<anchor>#[^"]+)"', build_outcome)
     assert headings == [
         ("tool options", "#tool-options"),
         ("tool only a description", "#tool-only-a-description"),
@@ -568,9 +573,9 @@ def test_lower_upper_refs(build_outcome: str, warning: StringIO) -> None:
 @pytest.mark.parametrize(
     ("key", "mixed", "lower"),
     [
-        ("ProgramName", "ProgramName", "_program_name"),
-        ("ProgramName -A", "ProgramName--A", "_program_name--_a"),
-        ("ProgramName -a", "ProgramName--a", "_program_name--a"),
+        pytest.param("ProgramName", "ProgramName", "_program_name", id="plain"),
+        pytest.param("ProgramName -A", "ProgramName--A", "_program_name--_a", id="upper-short-option"),
+        pytest.param("ProgramName -a", "ProgramName--a", "_program_name--a", id="lower-short-option"),
     ],
 )
 def test_make_id(key: str, mixed: str, lower: str) -> None:

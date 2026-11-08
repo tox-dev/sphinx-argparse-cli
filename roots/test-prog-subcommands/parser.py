@@ -5,6 +5,5 @@ from argparse import ArgumentParser
 
 def make() -> ArgumentParser:
     parser = ArgumentParser(prog="original-name")
-    sub = parser.add_subparsers()
-    sub.add_parser("foo", help="foo help")
+    parser.add_subparsers().add_parser("foo", help="foo help")
     return parser
