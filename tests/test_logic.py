@@ -599,7 +599,8 @@ def test_help_format_specifiers(build_outcome: str) -> None:
 
 tool does things
 
-   tool [--n N] [--mode {a,b}] [--pct PCT] [--capital CAPITAL] [--kind KIND] [--level LEVEL]
+   tool [--n N] [--mode {a,b}] [--pct PCT] [--capital CAPITAL] [--fmt FMT] [--kind KIND]
+        [--level LEVEL]
         {run} ...
 
 
@@ -613,6 +614,8 @@ tool options
 * **"--pct"** "PCT" - 100% of tool (default: "5")
 
 * **"--capital"** "CAPITAL" - Default: 3
+
+* **"--fmt"** "FMT" - format [text]
 
 * **"--kind"** "KIND" - parsed with float
 
