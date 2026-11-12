@@ -9,10 +9,10 @@ from argparse import (
     ArgumentParser,
     HelpFormatter,
     RawDescriptionHelpFormatter,
-    _ArgumentGroup,
-    _StoreFalseAction,
-    _StoreTrueAction,
-    _SubParsersAction,
+    _ArgumentGroup,  # simplint: ignore[private-import-path]  # no public type
+    _StoreFalseAction,  # ruff:ignore[import-private-name]  # simplint: ignore[private-import-path]  # no public type
+    _StoreTrueAction,  # ruff:ignore[import-private-name]  # simplint: ignore[private-import-path]  # no public type
+    _SubParsersAction,  # ruff:ignore[import-private-name]  # simplint: ignore[private-import-path]  # no public type
 )
 from collections import defaultdict
 from contextlib import contextmanager
@@ -49,7 +49,7 @@ from sphinx.util.logging import getLogger
 
 if TYPE_CHECKING:
     from argparse import Namespace
-    from collections.abc import Callable, Iterator, Sequence
+    from collections.abc import Callable, Generator, Iterator, Sequence
 
     from sphinx.domains.std import StandardDomain
     from sphinx.util.logging import SphinxLoggerAdapter
@@ -95,7 +95,7 @@ class SphinxArgparseCli(SphinxDirective):
         if "usage_first" not in self.options:
             home_section += self._mk_usage(self.parser)
 
-        for group in self.parser._action_groups:  # noqa: SLF001  # argparse has no public list of groups
+        for group in self.parser._action_groups:  # ruff:ignore[private-member-access]  # argparse has no public list of groups
             if actions := _visible_actions(group):
                 home_section += self._mk_option_group(
                     group,
@@ -119,15 +119,15 @@ class SphinxArgparseCli(SphinxDirective):
         module_name, attr_name = self.options["module"], self.options["func"]
         try:
             module = __import__(module_name, fromlist=[attr_name])
-        except ImportError:
+        except ImportError as exc:
             msg = f"Failed to import module {module_name!r}"
-            raise self.error(msg)  # noqa: B904  # the message already names the module
+            raise self.error(msg) from exc
         try:
             parser_creator = getattr(module, attr_name)
-        except AttributeError:
+        except AttributeError as exc:
             del sys.modules[module_name]
             msg = f"Module {module_name!r} has no attribute {attr_name!r}"
-            raise self.error(msg)  # noqa: B904  # the message already names the attribute
+            raise self.error(msg) from exc
         parser: ArgumentParser | None = None
         if "hook" in self.options:
             # parse_intermixed_args bypasses parse_known_args since Python 3.12, so both entry points need the hook
@@ -164,13 +164,15 @@ class SphinxArgparseCli(SphinxDirective):
         texts = [line if at == 0 else f"{' ' * (len(parser.prog) + 1)}{line.lstrip()}" for at, line in enumerate(texts)]
         return literal_block("", Text("\n".join(texts)), classes=["sphinx-argparse-cli-wrap"])
 
+    @staticmethod
     @contextmanager
-    def _no_color(self) -> Iterator[None]:
+    def _no_color() -> Generator[None, None, None]:
         # PYTHON_COLORS=1 outranks NO_COLOR in argparse, so both must be set to get plain text
         with patch.dict(os.environ, {"NO_COLOR": "1", "PYTHON_COLORS": "0"}, clear=False):
             yield
 
-    def _pre_format(self, block: str | None, parser: ArgumentParser) -> paragraph | literal_block | None:
+    @staticmethod
+    def _pre_format(block: str | None, parser: ArgumentParser) -> paragraph | literal_block | None:
         if block is None or not block.strip():
             return None
         # what argparse.HelpFormatter._format_text does for descriptions and epilogs
@@ -251,7 +253,8 @@ class SphinxArgparseCli(SphinxDirective):
         ref_name: str,
         ref_title: str,
         node: Element,
-        is_cli_option: bool = False,  # noqa: FBT001, FBT002  # option names set it by keyword
+        *,
+        is_cli_option: bool = False,
     ) -> None:
         doc_name = self.env.docname
         normalize_name = whitespace_normalize_name if is_cli_option else fully_normalize_name
@@ -299,9 +302,9 @@ class SphinxArgparseCli(SphinxDirective):
             args_text = None
             if action.nargs != 0:
                 # the formatter keeps this text in step with the usage line: nargs, choices and metavars
-                formatter = parser._get_formatter()  # noqa: SLF001  # argparse has no public formatter accessor
-                metavar = formatter._get_default_metavar_for_optional(action)  # noqa: SLF001  # argparse's default metavar for the usage line
-                args_text = formatter._format_args(action, metavar)  # noqa: SLF001  # same text as the usage line
+                formatter = parser._get_formatter()  # ruff:ignore[private-member-access]  # argparse has no public formatter accessor
+                metavar = formatter._get_default_metavar_for_optional(action)  # ruff:ignore[private-member-access]  # argparse's default metavar for the usage line
+                args_text = formatter._format_args(action, metavar)  # ruff:ignore[private-member-access]  # same text as the usage line
             for at, opt in enumerate(action.option_strings):
                 if at:
                     line += Text(", ")
@@ -345,7 +348,7 @@ class SphinxArgparseCli(SphinxDirective):
         self, sub_parser: _SubParsersAction[ArgumentParser], parent_cmd: str = ""
     ) -> Iterator[tuple[list[str], str, ArgumentParser, str]]:
         parser_to_args: dict[int, list[str]] = defaultdict(list)
-        for key, parser in sub_parser._name_parser_map.items():  # noqa: SLF001  # aliases are kept only in this map
+        for key, parser in sub_parser._name_parser_map.items():  # ruff:ignore[private-member-access]  # aliases are kept only in this map
             parser_to_args[id(parser)].append(key)
         done_parser: set[int] = set()
 
@@ -357,7 +360,7 @@ class SphinxArgparseCli(SphinxDirective):
             aliases = parser_to_args[id(parser)]
             aliases.remove(name)
             # help is stored in a pseudo action
-            help_msg = next((a.help for a in sub_parser._choices_actions if a.dest == name), None)  # noqa: SLF001  # help is kept only in this list
+            help_msg = next((a.help for a in sub_parser._choices_actions if a.dest == name), None)  # ruff:ignore[private-member-access]  # help is kept only in this list
             if help_msg == SUPPRESS:
                 continue
             sub_cmd = f"{parent_cmd} {name}".strip()
@@ -396,7 +399,7 @@ class SphinxArgparseCli(SphinxDirective):
         if "usage_first" not in self.options:
             group_section += self._mk_usage(parser)
 
-        for group in parser._action_groups:  # noqa: SLF001  # argparse has no public list of groups
+        for group in parser._action_groups:  # ruff:ignore[private-member-access]  # argparse has no public list of groups
             if actions := _visible_actions(group):
                 group_section += self._mk_option_group(group, actions, parser, prefix=parser.prog, sub_cmd=sub_cmd)
         if epilog := self._pre_format(parser.epilog, parser):
@@ -408,15 +411,15 @@ def _visible_actions(group: _ArgumentGroup) -> list[Action]:
     # sub-commands get their own sections, and a heading over an empty list helps nobody
     return [
         action
-        for action in group._group_actions  # noqa: SLF001  # argparse has no public list of group actions
+        for action in group._group_actions  # ruff:ignore[private-member-access]  # argparse has no public list of group actions
         if action.help != SUPPRESS and not isinstance(action, _SubParsersAction)
     ]
 
 
 def _parse_known_args_hook(
     self: ArgumentParser,
-    *args: Sequence[str] | Namespace | None,  # noqa: ARG001  # argparse passes these on; the hook stops first
-    **kwargs: Sequence[str] | Namespace | None,  # noqa: ARG001  # the same arguments, passed by keyword
+    *_args: Sequence[str] | Namespace | None,
+    **_kwargs: Sequence[str] | Namespace | None,
 ) -> None:
     raise _HookError(self)
 
@@ -435,7 +438,7 @@ def _update_sub_parser_prog(parser: ArgumentParser, old_prog: str, new_prog: str
 
 
 def make_id_lower(key: str) -> str:
-    return re.sub("[A-Z]", lambda match: f"_{match.group(0).lower()}", make_id(key))
+    return _MAKE_ID_LOWER_PATTERN.sub(lambda match: f"_{match.group(0).lower()}", make_id(key))
 
 
 def make_id(key: str) -> str:
@@ -483,8 +486,11 @@ def load_help_text(help_text: str) -> str:
 def _sub_parser_action(parser: ArgumentParser) -> _SubParsersAction[ArgumentParser] | None:
     # add_subparsers reuses the positional group, so the action may sit after positional arguments;
     # isinstance cannot recover the type parameter, hence the cast
-    found = next((action for action in parser._actions if isinstance(action, _SubParsersAction)), None)  # noqa: SLF001  # argparse has no public list of actions
+    found = next((action for action in parser._actions if isinstance(action, _SubParsersAction)), None)  # ruff:ignore[private-member-access]  # argparse has no public list of actions
     return cast("_SubParsersAction[ArgumentParser] | None", found)
+
+
+_MAKE_ID_LOWER_PATTERN: Final[re.Pattern[str]] = re.compile(r"[A-Z]")
 
 
 _DEFAULT_IN_HELP: Final[re.Pattern[str]] = re.compile(r"\bdefaults?\b", re.IGNORECASE)

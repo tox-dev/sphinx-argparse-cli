@@ -4,4 +4,4 @@ from argparse import ArgumentParser
 
 
 def main() -> None:
-    print(ArgumentParser(prog="foo", add_help=False))  # noqa: T201  # no parse call, so the hook finds no parser
+    print(ArgumentParser(prog="foo", add_help=False))  # ruff:ignore[print]  # no parse call, so the hook finds no parser

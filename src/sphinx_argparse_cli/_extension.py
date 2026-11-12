@@ -8,11 +8,15 @@ if TYPE_CHECKING:
 
 
 def setup(app: Sphinx) -> dict[str, bool]:
-    """Register the ``sphinx_argparse_cli`` directive, its config value and its stylesheet with Sphinx."""
-    from ._logic import SphinxArgparseCli  # noqa: PLC0415  # keeps docutils out of the package import
+    """
+    Register the ``sphinx_argparse_cli`` directive, its config value and its stylesheet with Sphinx.
+
+    :returns: Sphinx extension metadata.
+    """
+    from ._logic import SphinxArgparseCli  # ruff:ignore[import-outside-top-level]  # keeps docutils out of the package import
 
     app.add_directive(SphinxArgparseCli.name, SphinxArgparseCli)
-    app.add_config_value("sphinx_argparse_cli_prefix_document", False, "env")  # noqa: FBT003  # positional default
+    app.add_config_value("sphinx_argparse_cli_prefix_document", default=False, rebuild="env")
     app.add_css_file("sphinx_argparse_cli.css")
     app.connect("build-finished", _write_css)
 

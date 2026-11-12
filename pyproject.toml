@@ -132,41 +132,35 @@ lint.select = [
   "ALL",
 ]
 lint.ignore = [
-  "ANN401", # allow Any as type annotation
-  "COM812", # Conflict with formatter
-  "CPY",    # No copyright statements
-  "D101",   # undocumented-public-api (simplint SMP903) covers the public API instead
-  "D102",   # undocumented-public-api (simplint SMP903) covers the public API instead
-  "D103",   # undocumented-public-api (simplint SMP903) covers the public API instead
-  "D105",   # undocumented-public-api (simplint SMP903) covers the public API instead
-  "D106",   # undocumented-public-api (simplint SMP903) covers the public API instead
-  "D107",   # undocumented-public-api (simplint SMP903) covers the public API instead
-  "D203",   # `one-blank-line-before-class` (D203) and `no-blank-line-before-class` (D211) are incompatible
-  "D212",   # `multi-line-summary-first-line` (D212) and `multi-line-summary-second-line` (D213) are incompatible
-  "DOC",    # not yet supported
-  "ISC001", # Conflict with formatter
-  "S104",   # Possible binding to all interface
+  "CPY",                                       # No copyright statements
+  "docstring-missing-returns",                 # simplint rst-returns reads reST fields instead
+  "incorrect-blank-line-before-class",         # Conflicts with `blank-line-before-class`
+  "missing-trailing-comma",                    # Conflict with formatter
+  "multi-line-summary-first-line",             # Conflicts with `multi-line-summary-second-line`
+  "single-line-implicit-string-concatenation", # Conflict with formatter
+  "undocumented-magic-method",                 # undocumented-public-api (simplint) covers the public API instead
+  "undocumented-public-class",                 # undocumented-public-api (simplint) covers the public API instead
+  "undocumented-public-function",              # undocumented-public-api (simplint) covers the public API instead
+  "undocumented-public-init",                  # undocumented-public-api (simplint) covers the public API instead
+  "undocumented-public-method",                # undocumented-public-api (simplint) covers the public API instead
+  "undocumented-public-nested-class",          # undocumented-public-api (simplint) covers the public API instead
+  "unnecessary-regular-expression-compile",    # conflicts with simplint inline-regex
 ]
 lint.per-file-ignores."roots/**/*.py" = [
-  "D",      # no docs
-  "INP001", # no namespace
+  "D",                          # no docs
+  "implicit-namespace-package", # no namespace
 ]
 lint.per-file-ignores."tests/**/*.py" = [
-  "D",       # don't care about documentation in tests
-  "FBT",     # don't care about booleans as positional arguments in tests
-  "INP001",  # no implicit namespace
-  "PLC2701", # private import
-  "PLR0913", # any number of arguments in tests
-  "PLR0917", # any number of arguments in tests
-  "PLR2004", # Magic value used in comparison, consider replacing with a constant variable
-  "S101",    # asserts allowed in tests
-  "S603",    # `subprocess` call: check for execution of untrusted input
+  "assert",                     # asserts allowed in tests
+  "D",                          # don't care about documentation in tests
+  "implicit-namespace-package", # no implicit namespace
 ]
 lint.isort = { known-first-party = [
   "sphinx_argparse_cli",
 ], required-imports = [
   "from __future__ import annotations",
 ] }
+lint.preview = true
 
 [tool.codespell]
 builtin = "clear,usage,en-GB_to_en-US"
