@@ -15,6 +15,10 @@ def test_version() -> None:
     assert sphinx_argparse_cli.__version__
 
 
+def test_setup_definition_location() -> None:
+    assert sphinx_argparse_cli.setup.__module__ == "sphinx_argparse_cli"
+
+
 def test_report_header(request: pytest.FixtureRequest) -> None:
     assert (
         f"libraries: Sphinx-{sphinx_version}, docutils-{docutils_version}"

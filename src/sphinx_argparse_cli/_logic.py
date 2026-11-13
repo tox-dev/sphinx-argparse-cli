@@ -437,11 +437,11 @@ def _update_sub_parser_prog(parser: ArgumentParser, old_prog: str, new_prog: str
         _update_sub_parser_prog(sub_parser, old_prog, new_prog)
 
 
-def make_id_lower(key: str) -> str:
+def make_id_lower(key: str) -> str:  # simplint: ignore[missing-from-all]  # paired tests only
     return _MAKE_ID_LOWER_PATTERN.sub(lambda match: f"_{match.group(0).lower()}", make_id(key))
 
 
-def make_id(key: str) -> str:
+def make_id(key: str) -> str:  # simplint: ignore[missing-from-all]  # paired tests only
     return "-".join(key.split()).rstrip("-")
 
 
@@ -477,7 +477,7 @@ def _expand_help(action: Action, prog: str) -> str:
     return help_text % params
 
 
-def load_help_text(help_text: str) -> str:
+def load_help_text(help_text: str) -> str:  # simplint: ignore[missing-from-all]  # paired tests only
     for pattern, replacement in _HELP_SUBSTITUTIONS:
         help_text = pattern.sub(replacement, help_text)
     return help_text
@@ -540,7 +540,4 @@ _ANSI_COLOR_RE: Final[re.Pattern[str]] = re.compile(r"\x1b\[[0-9;]*m")
 
 __all__ = [
     "SphinxArgparseCli",
-    "load_help_text",
-    "make_id",
-    "make_id_lower",
 ]
