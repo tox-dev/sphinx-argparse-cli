@@ -496,7 +496,7 @@ _MAKE_ID_LOWER_PATTERN: Final[re.Pattern[str]] = re.compile(r"[A-Z]")
 _DEFAULT_IN_HELP: Final[re.Pattern[str]] = re.compile(r"\bdefaults?\b", re.IGNORECASE)
 
 
-_HELP_SUBSTITUTIONS: Final[list[tuple[re.Pattern[str], str]]] = [
+_HELP_SUBSTITUTIONS: Final[tuple[tuple[re.Pattern[str], str], ...]] = (
     # a quote glued to a word character is an apostrophe (don't, it's), not the edge of a quoted span
     (
         re.compile(
@@ -521,7 +521,7 @@ _HELP_SUBSTITUTIONS: Final[list[tuple[re.Pattern[str], str]]] = [
         '``"\\1"``',
     ),
     (re.compile(r"[{](.+?)[}]"), "``{\\1}``"),
-]
+)
 
 
 _OPTION_TOKEN: Final[re.Pattern[str]] = re.compile(
