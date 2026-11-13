@@ -3,16 +3,19 @@ from __future__ import annotations
 import os
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 import pytest
 
-from sphinx_argparse_cli._logic import load_help_text, make_id, make_id_lower
+from sphinx_argparse_cli._logic import (  # ruff:ignore[import-private-name]  # paired module test
+    load_help_text,
+    make_id,
+    make_id_lower,
+)
 
 if TYPE_CHECKING:
     from io import StringIO
 
-    from _pytest.fixtures import SubRequest
     from sphinx.testing.util import SphinxTestApp
 
 
@@ -22,14 +25,14 @@ def opt_grp_name() -> tuple[str, str]:
 
 
 @pytest.fixture
-def build_outcome(app: SphinxTestApp, request: SubRequest, monkeypatch: pytest.MonkeyPatch) -> str:
+def build_outcome(app: SphinxTestApp, request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> str:
     if prepare_marker := request.node.get_closest_marker("prepare"):
         directive_args: list[str] | None = prepare_marker.kwargs.get("directive_args")
         if directive_args:  # pragma: no branch  # every prepare marker passes directive_args
             index = Path(app.confdir) / "index.rst"
-            if not any(i.startswith(":module:") for i in directive_args):  # pragma: no branch  # tests omit :module:
+            if not any(i.startswith(":module:") for i in directive_args):
                 directive_args.append(":module: parser")
-            if not any(i.startswith(":func:") for i in directive_args):  # pragma: no branch  # tests omit :func:
+            if not any(i.startswith(":func:") for i in directive_args):
                 directive_args.append(":func: make")
             index.write_text(os.linesep.join([".. sphinx_argparse_cli::", *[f"  {i}" for i in directive_args]]))
 
@@ -51,7 +54,7 @@ def test_basic_as_html(build_outcome: str) -> None:
 
 @pytest.mark.sphinx(buildername="text", testroot="complex")
 def test_complex_as_text(build_outcome: str) -> None:
-    expected = (Path(__file__).parent / "complex.txt").read_text()
+    expected = (Path(__file__).parents[1] / "complex.txt").read_text()
     assert build_outcome == expected
 
 
@@ -222,7 +225,7 @@ def test_usage_width_default(build_outcome: str) -> None:
 
 
 @pytest.mark.sphinx(buildername="text", testroot="complex")
-@pytest.mark.prepare(directive_args=[":usage_width: 50"])
+@pytest.mark.prepare(directive_args=[":module: parser", ":func: make", ":usage_width: 50"])
 def test_usage_width_custom(build_outcome: str) -> None:
     assert "complex second [-h] [--flag] [--root]\n" in build_outcome
 
@@ -351,9 +354,14 @@ def test_ref_prefix_doc(build_outcome: str) -> None:
     assert ref in build_outcome
 
 
+_HREFS_PATTERN: Final[re.Pattern[str]] = re.compile(
+    r'<a class="reference internal" href="(#[^"]+)"><code class="xref std std-option'
+)
+
+
 @pytest.mark.sphinx(buildername="html", testroot="option")
 def test_option_role_as_html(build_outcome: str, warning: StringIO) -> None:
-    hrefs = re.findall(r'<a class="reference internal" href="(#[^"]+)"><code class="xref std std-option', build_outcome)
+    hrefs = _HREFS_PATTERN.findall(build_outcome)
     assert hrefs == [
         "#prog---root",
         "#prog--r",
@@ -415,17 +423,19 @@ prog run options
     )
 
 
-@pytest.mark.sphinx(buildername="html", testroot="subcommand-placeholder")
-def test_sub_command_placeholder_nested(build_outcome: str) -> None:
-    headings = re.findall(
-        r"""
+_HEADINGS_PATTERN: Final[re.Pattern[str]] = re.compile(
+    r"""
         <h[23]>
         (?P<text>[^<]*)  # heading text
         <a[ ]class="headerlink"[ ]href="(?P<anchor>\#[^"]*)"  # in-page anchor
         """,
-        build_outcome,
-        re.VERBOSE,
-    )
+    re.VERBOSE,
+)
+
+
+@pytest.mark.sphinx(buildername="html", testroot="subcommand-placeholder")
+def test_sub_command_placeholder_nested(build_outcome: str) -> None:
+    headings = _HEADINGS_PATTERN.findall(build_outcome)
     assert headings == [
         ("prog positional arguments", "#prog-positional-arguments"),
         ("prog first (f)", "#prog-root-first-(f)"),
@@ -469,9 +479,14 @@ def test_help_nodes_as_html(build_outcome: str, warning: StringIO) -> None:
     assert not warning.getvalue()
 
 
+_UNTITLED_GROUP_PATTERN: Final[re.Pattern[str]] = re.compile(
+    r'<h2>(?P<text>.*?)<a class="headerlink" href="(?P<anchor>#[^"]+)"'
+)
+
+
 @pytest.mark.sphinx(buildername="html", testroot="group-untitled")
 def test_group_untitled(build_outcome: str, warning: StringIO) -> None:
-    headings = re.findall(r'<h2>(?P<text>.*?)<a class="headerlink" href="(?P<anchor>#[^"]+)"', build_outcome)
+    headings = _UNTITLED_GROUP_PATTERN.findall(build_outcome)
     assert headings == [
         ("tool options", "#tool-options"),
         ("tool only a description", "#tool-only-a-description"),
