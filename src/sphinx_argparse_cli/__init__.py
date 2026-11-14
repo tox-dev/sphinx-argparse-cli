@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING  # simplint: ignore[init-module-content]  # keep setup at the public entry point
+from typing import TYPE_CHECKING
 
 from .version import __version__
 
