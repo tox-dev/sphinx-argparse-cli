@@ -328,6 +328,10 @@ prog root run target go options
         pytest.param("it's a 'thing' to see", "it's a ``'thing'`` to see", id="apostrophe-and-quoted"),
         pytest.param("'a' and 'b'", "``'a'`` and ``'b'``", id="two-quoted"),
         pytest.param('say "hi" or "bye"', 'say ``"hi"`` or ``"bye"``', id="two-double-quoted"),
+        pytest.param("e.g. '{name}-{version}'", "e.g. ``'{name}-{version}'``", id="braces-in-single-quotes"),
+        pytest.param('e.g. "{name}"', 'e.g. ``"{name}"``', id="braces-in-double-quotes"),
+        pytest.param("one of {'fast', 'best'}", "one of ``{'fast', 'best'}``", id="quotes-in-braces"),
+        pytest.param('"it\'s" and {a}', '``"it\'s"`` and ``{a}``', id="apostrophe-in-double-quotes"),
     ],
 )
 def test_help_loader(example: str, output: str) -> None:

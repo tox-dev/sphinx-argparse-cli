@@ -478,9 +478,8 @@ def _expand_help(action: Action, prog: str) -> str:
 
 
 def load_help_text(help_text: str) -> str:  # simplint: ignore[missing-from-all]  # paired tests only
-    for pattern, replacement in _HELP_SUBSTITUTIONS:
-        help_text = pattern.sub(replacement, help_text)
-    return help_text
+    # one pass, so a span nested in another (such as '{name}') stays inside the outer literal instead of splitting it
+    return _HELP_LITERAL_SPAN.sub(r"``\g<0>``", help_text)
 
 
 def _sub_parser_action(parser: ArgumentParser) -> _SubParsersAction[ArgumentParser] | None:
@@ -496,31 +495,14 @@ _MAKE_ID_LOWER_PATTERN: Final[re.Pattern[str]] = re.compile(r"[A-Z]")
 _DEFAULT_IN_HELP: Final[re.Pattern[str]] = re.compile(r"\bdefaults?\b", re.IGNORECASE)
 
 
-_HELP_SUBSTITUTIONS: Final[tuple[tuple[re.Pattern[str], str], ...]] = (
-    # a quote glued to a word character is an apostrophe (don't, it's), not the edge of a quoted span
-    (
-        re.compile(
-            r"""
-            (?<!\w)  # not glued to a word on the left
-            '([^']+?)'  # shortest quoted span
-            (?!\w)  # not glued to a word on the right
-            """,
-            re.VERBOSE,
-        ),
-        "``'\\1'``",
-    ),
-    (
-        re.compile(
-            r"""
-            (?<!\w)  # not glued to a word on the left
-            "([^"]+?)"  # shortest quoted span
-            (?!\w)  # not glued to a word on the right
-            """,
-            re.VERBOSE,
-        ),
-        '``"\\1"``',
-    ),
-    (re.compile(r"[{](.+?)[}]"), "``{\\1}``"),
+# a quote glued to a word character is an apostrophe (don't, it's), not the edge of a quoted span
+_HELP_LITERAL_SPAN: Final[re.Pattern[str]] = re.compile(
+    r"""
+    (?<!\w)'[^']+?'(?!\w)  # shortest single-quoted span, not glued to a word
+    | (?<!\w)"[^"]+?"(?!\w)  # shortest double-quoted span, not glued to a word
+    | [{].+?[}]  # shortest braced span
+    """,
+    re.VERBOSE,
 )
 
 
