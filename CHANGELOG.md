@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 <!-- towncrier release notes start -->
 
+<a name="release-1-24-3"></a>
+
+## 1.24.3 (2026-11-18)
+
+<a name="release-1-24-3-fixed"></a>
+
+### Fixed
+
+- A help string that uses `%(default)s` no longer gets a second `(default: ...)` appended after the placeholder is
+  expanded ([#405](https://github.com/tox-dev/sphinx-argparse-cli/pull/405)) by
+  [@abhishekcpp007](https://github.com/abhishekcpp007) and [@gaborbernat](https://github.com/gaborbernat).
+- Keep a quoted or braced span in help text inside one inline literal when it holds the other kind, so
+  `'{name}-{version}'` and `{'fast', 'best'}` no longer render as broken markup with stray backticks
+  ([#416](https://github.com/tox-dev/sphinx-argparse-cli/pull/416)) by
+  [@HarshJamgaonkar05](https://github.com/HarshJamgaonkar05) and [@gaborbernat](https://github.com/gaborbernat).
+
+<a name="release-1-24-3-packaging"></a>
+
+### Packaging
+
+- Every wheel now carries a [PEP 770](https://peps.python.org/pep-0770/) CycloneDX SBOM in its `.dist-info/sboms`
+  directory, written at build time by [python-sbom](https://github.com/tox-dev/python-sbom)
+  ([#401](https://github.com/tox-dev/sphinx-argparse-cli/pull/401)) by [@gaborbernat](https://github.com/gaborbernat).
+
 <a name="release-1-24-2"></a>
 
 ## 1.24.2 (2026-11-04)
