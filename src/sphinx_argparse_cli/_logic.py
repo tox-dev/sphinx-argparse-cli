@@ -287,8 +287,8 @@ class SphinxArgparseCli(SphinxDirective):
             "no_default_values" not in self.options
             and action.default is not None
             and action.default != SUPPRESS
-            and "%(default)" not in (action.help or "")
-            and not _DEFAULT_IN_HELP.search(help_text)
+            # the help as written may hold a %(default)s placeholder that expansion turned into the value
+            and not any(_DEFAULT_IN_HELP.search(text) for text in (action.help or "", help_text))
             and not isinstance(action, _StoreTrueAction | _StoreFalseAction)
         ):
             line += Text(" (default: ")
