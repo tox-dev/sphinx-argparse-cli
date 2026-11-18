@@ -15,6 +15,7 @@ def make() -> ArgumentParser:
     parser.add_argument("--mode", choices=["a", "b"], default="a", help="pick one of %(choices)s")
     parser.add_argument("--pct", default=5, help="100%% of %(prog)s")
     parser.add_argument("--capital", default=3, help="Default: 3")
+    parser.add_argument("--fmt", default="text", help="format [%(default)s]")
     parser.add_argument("--kind", type=float, help="parsed with %(type)s")
     parser.add_argument_group("tuning", description="tune %(prog)s").add_argument("--level", default=1, help="level")
     run = parser.add_subparsers().add_parser("run", description="%(prog)s runs", add_help=False)
