@@ -1,5 +1,16 @@
 from __future__ import annotations
 
+__lazy_modules__ = [
+    "argparse",
+    "collections",
+    "docutils.nodes",
+    "docutils.statemachine",
+    "pathlib",
+    "sphinx.locale",
+    "sphinx.util",
+    "unittest.mock",
+]
+
 import os
 import re
 import sys

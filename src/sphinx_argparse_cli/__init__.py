@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+__lazy_modules__ = [
+    f"{__spec__.parent}.version",  # ty: ignore[unresolved-attribute]  # package imports always have a spec
+]
+
 from typing import TYPE_CHECKING
 
 from .version import __version__
