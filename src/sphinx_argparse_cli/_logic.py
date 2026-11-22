@@ -444,7 +444,7 @@ class _HookError(Exception):
 def _update_sub_parser_prog(parser: ArgumentParser, old_prog: str, new_prog: str) -> None:
     if (sub_action := _sub_parser_action(parser)) is None:
         return
-    for sub_parser in sub_action.choices.values():
+    for sub_parser in {id(choice): choice for choice in sub_action.choices.values()}.values():
         sub_parser.prog = sub_parser.prog.replace(old_prog, new_prog, 1)
         _update_sub_parser_prog(sub_parser, old_prog, new_prog)
 

@@ -806,6 +806,12 @@ def test_prog_subcommands(build_outcome: str) -> None:
     assert "my-tool foo" in build_outcome
 
 
+@pytest.mark.sphinx(buildername="text", testroot="prog-subcommand-aliases")
+def test_prog_subcommand_aliases(build_outcome: str) -> None:
+    assert "python -m tool run (r, go)" in build_outcome
+    assert "python -m python -m" not in build_outcome
+
+
 @pytest.mark.sphinx(buildername="text", testroot="multiword-prog")
 def test_multiword_prog(build_outcome: str) -> None:
     assert "python -m build positional arguments" in build_outcome
