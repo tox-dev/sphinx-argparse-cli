@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 <!-- towncrier release notes start -->
 
+<a name="release-1-24-4"></a>
+
+## 1.24.4 (2026-11-23)
+
+<a name="release-1-24-4-fixed"></a>
+
+### Fixed
+
+- Apply the `:prog:` override once per sub-command when the sub-command has aliases, instead of prefixing the new name
+  repeatedly when it contains the original program name
+  ([#420](https://github.com/tox-dev/sphinx-argparse-cli/pull/420)) by [@anubhavlal07](https://github.com/anubhavlal07)
+  and [@gaborbernat](https://github.com/gaborbernat).
+
+<a name="release-1-24-4-performance"></a>
+
+### Performance
+
+- Reduce import time and memory use when loading the Sphinx directive on Python 3.15
+  ([#417](https://github.com/tox-dev/sphinx-argparse-cli/pull/417)) by [@gaborbernat](https://github.com/gaborbernat).
+
 <a name="release-1-24-3"></a>
 
 ## 1.24.3 (2026-11-18)
