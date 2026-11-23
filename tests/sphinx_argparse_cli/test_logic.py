@@ -808,8 +808,11 @@ def test_prog_subcommands(build_outcome: str) -> None:
 
 @pytest.mark.sphinx(buildername="text", testroot="prog-subcommand-aliases")
 def test_prog_subcommand_aliases(build_outcome: str) -> None:
-    assert "python -m tool run (r, go)" in build_outcome
-    assert "python -m python -m" not in build_outcome
+    assert [line.strip() for line in build_outcome.splitlines() if line.startswith("   ") and "[-h]" in line] == [
+        "python -m tool [-h] {run,r,go} ...",
+        "python -m tool run [-h] {local,l} ...",
+        "python -m tool run local [-h]",
+    ]
 
 
 @pytest.mark.sphinx(buildername="text", testroot="multiword-prog")
