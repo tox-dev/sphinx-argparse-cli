@@ -806,6 +806,15 @@ def test_prog_subcommands(build_outcome: str) -> None:
     assert "my-tool foo" in build_outcome
 
 
+@pytest.mark.sphinx(buildername="text", testroot="prog-subcommand-aliases")
+def test_prog_subcommand_aliases(build_outcome: str) -> None:
+    assert [line.strip() for line in build_outcome.splitlines() if line.startswith("   ") and "[-h]" in line] == [
+        "python -m tool [-h] {run,r,go} ...",
+        "python -m tool run [-h] {local,l} ...",
+        "python -m tool run local [-h]",
+    ]
+
+
 @pytest.mark.sphinx(buildername="text", testroot="multiword-prog")
 def test_multiword_prog(build_outcome: str) -> None:
     assert "python -m build positional arguments" in build_outcome
